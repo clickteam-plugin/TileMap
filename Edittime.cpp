@@ -15,6 +15,11 @@
 
 PROPS_IDS_START()
 	
+	PROPID_GRP_FILES,
+	PROPID_BLOCKMAP,
+	PROPID_BLOCKTILE,
+	PROPID_BLOCKLAYER,
+
 	//PROPID_GRP_DISPLAY,
 	//PROPID_AUTOSCROLL,
 	//PROPID_TRANSPARENT,
@@ -48,6 +53,11 @@ PROPS_DATA_START()
 	//PropData_Group(PROPID_GRP_DISPLAY, (int)"Display", (int)""),
 	//PropData_CheckBox(PROPID_TRANSPARENT, (int)"Transparent", (int)"Use with caution - a background may greatly increase the FPS, especially in HWA."),
 	//PropData_CheckBox(PROPID_AUTOSCROLL, (int)"Follow MMF camera", (int)"If checked, the Tile Map automatically follows the MMF camera."),
+
+	PropData_Group(PROPID_GRP_FILES, (int)"File blocks", (int)"Set up what kind of data should be loaded from and saved to files."),
+	PropData_CheckBox(PROPID_BLOCKMAP, (int)"Map", (int)"Stores general map information. Right now, this is only includes tile size."),
+	PropData_CheckBox(PROPID_BLOCKLAYER, (int)"Layers", (int)"Stores each layer including its tiles and settings."),
+	PropData_CheckBox(PROPID_BLOCKTILE, (int)"Tilesets", (int)"Stores every tileset with settings and path, but not the image itself."),
 
 	PropData_Group(PROPID_GRP_MAP, (int)"Map", (int)""),
 	PropData_Size(PROPID_TILESIZE, (int)"Tile size", (int)"Size of each tile in pixels.", tileSize),
@@ -204,6 +214,16 @@ BOOL WINAPI DLLExport GetPropCheck(LPMV mV, LPEDATA edPtr, UINT nPropID)
 	// Example
 	// -------
 
+	switch(nPropID)
+	{
+	case PROPID_BLOCKLAYER:
+		return edPtr->blockLayers;
+	case PROPID_BLOCKMAP:
+		return edPtr->blockMap;
+	case PROPID_BLOCKTILE:
+		return edPtr->blockTilesets;
+	}
+
 #endif // !RUN_ONLY
 	return 0;		// Unchecked
 }
@@ -261,6 +281,19 @@ void WINAPI DLLExport SetPropCheck(LPMV mV, LPEDATA edPtr, UINT nPropID, BOOL nC
 #ifndef RUN_ONLY
 	// Example
 	// -------
+
+	switch(nPropID)
+	{
+	case PROPID_BLOCKLAYER:
+		edPtr->blockLayers = nCheck != 0;
+		break;
+	case PROPID_BLOCKMAP:
+		edPtr->blockMap = nCheck != 0;
+		break;
+	case PROPID_BLOCKTILE:
+		edPtr->blockTilesets = nCheck != 0;
+		break;
+	}
 
 #endif // !RUN_ONLY
 }
@@ -573,6 +606,10 @@ int WINAPI DLLExport CreateObject(mv _far *mV, fpLevObj loPtr, LPEDATA edPtr)
 	for(int i = 0; i < TILESETCOUNT; ++i)
 		edPtr->tilesets[i] = 0;
 	edPtr->tilesetCount = 0;
+
+	edPtr->blockMap = false;
+	edPtr->blockLayers = true;
+	edPtr->blockTilesets = false;
 
 	return 0;	// No error
 

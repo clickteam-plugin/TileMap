@@ -108,7 +108,10 @@ typedef struct tagEDATA_V1
 	unsigned short	tileHeight;
 
 	WORD			tilesets[TILESETCOUNT];
-	char			tilesetCount;
+	char			tilesetCount : 5;
+	bool			blockMap : 1;
+	bool			blockLayers : 1;
+	bool			blockTilesets : 1;
 
 } EDITDATA;
 typedef EDITDATA * LPEDATA;

@@ -15,14 +15,42 @@
 // 
 // ============================================================================
 
-//CONDITION(
-//	/* ID */			0,
-//	/* Name */			"%o: On tile",
-//	/* Flags */			0,
-//	/* Params */		(0)
-//) {
-//	return true;
-//}
+CONDITION(
+	/* ID */			0,
+	/* Name */			"%o: File loaded",
+	/* Flags */			0,
+	/* Params */		(0)
+) {
+	return true;
+}
+
+CONDITION(
+	/* ID */			1,
+	/* Name */			"%o: File saved",
+	/* Flags */			0,
+	/* Params */		(0)
+) {
+	return true;
+}
+
+CONDITION(
+	/* ID */			2,
+	/* Name */			"%o: Loading file failed",
+	/* Flags */			0,
+	/* Params */		(0)
+) {
+	return true;
+}
+
+CONDITION(
+	/* ID */			3,
+	/* Name */			"%o: Saving file failed",
+	/* Flags */			0,
+	/* Params */		(0)
+) {
+	return true;
+}
+
 
 
 // ============================================================================
@@ -166,7 +194,7 @@ ACTION(
 	/* Name */			"Set layer tile at (%0, %1) to (%2, %3)",
 	/* Flags */			0,
 	/* Params */		(4, PARAM_NUMBER,"Tile X", PARAM_NUMBER,"Tile Y", /*PARAM_NUMBER,"Tileset index (0-99, -1: Empty)",*/
-						PARAM_NUMBER,"Tileset X", PARAM_NUMBER,"Tileset Y")
+	PARAM_NUMBER,"Tileset X (-1: Empty)", PARAM_NUMBER,"Tileset Y (-1: Empty)")
 ) {
 	if(rdPtr->currentLayer)
 	{
@@ -181,7 +209,6 @@ ACTION(
 			Tile* tile = layer->get(x, y);
 			tile->x = tileX;
 			tile->y = tileY;
-			
 		}
 
 		rdPtr->redraw = true;
@@ -564,7 +591,9 @@ const int LAYR = 'RYAL';
 const int MAIN = 'NIAM'; /* LAYR sub-block: Main (tile data) */
 const int TSID = 'DIST'; /* LAYR sub-block: Tileset IDs */
 const int VALS = 'SLAV'; /* LAYR sub-block: Alterable values */
-const short VER = 1<<8;
+const short VER_11 = (1<<8) | 1;
+const short VER_10 = (1<<8) | 0;
+#define VER VER_11
 
 ACTION(
 	/* ID */			21,
@@ -576,9 +605,14 @@ ACTION(
 	
 	/* Start reading file */
 	FILE* file = fopen(path, "rb");
-	if(!file) return;
+	if(!file)
+	{
+		rdPtr->rRd->GenerateEvent(2);
+		return;
+	}
 
 	/* Keep reading file, allow exit */
+	bool error = true;
 	do
 	{
 		/* Check magic number */
@@ -590,11 +624,11 @@ ACTION(
 		/* Check version */
 		short version;
 		fread(&version, sizeof(short), 1, file);
-		if(version != VER)
+		if(version < VER_10 || version > VER)
 			break;
 		
 		/* Read blocks */
-		bool error = false;
+		error = false;
 		while(!error && !feof(file))
 		{
 			/* Read block identifier + size */
@@ -632,10 +666,11 @@ ACTION(
 					{
 						rdPtr->tilesets->clear();
 
-						unsigned char tilesetCount;
+						unsigned char tilesetCount = 0;
 						fread(&tilesetCount, sizeof(char), 1, file);
 						rdPtr->tilesets->reserve(tilesetCount);
 
+						Tileset* oldTileset = rdPtr->currentTileset;
 						for(int i = 0; i < tilesetCount; ++i)
 						{
 							rdPtr->tilesets->push_back(Tileset());
@@ -657,6 +692,8 @@ ACTION(
 								ActionFunc6(rdPtr, (long)&tileset->path[0], 0);
 							}
 						}
+						
+						rdPtr->currentTileset = oldTileset;
 					}
 					else
 					{
@@ -670,8 +707,8 @@ ACTION(
 					{
 						rdPtr->layers->clear();
 
-						unsigned char layerCount;
-						fread(&layerCount, sizeof(char), 1, file);
+						unsigned int layerCount = 0;
+						fread(&layerCount, (version < VER_11) ? sizeof(char) : sizeof(short), 1, file);
 						rdPtr->layers->reserve(layerCount);
 
 						/* Load them layers */
@@ -682,6 +719,7 @@ ACTION(
 
 							/* Read settings */
 							fread(&layer->width, sizeof(int), 1, file);
+							if(feof(file)) { error = true; break; }
 							fread(&layer->height, sizeof(int), 1, file);
 							fread(&layer->tileset, sizeof(char), 1, file);
 							fread(&layer->collision, sizeof(char), 1, file);
@@ -733,7 +771,7 @@ ACTION(
 									fread(temp, dataSize, 1, file);
 
 									/* Uncompress data */
-									mz_ulong dataAlloc;
+									mz_ulong dataAlloc = sizeof(Tile) * layer->width * layer->height;
 									mz_uncompress(destination, &dataAlloc, temp, dataSize);
 
 									/* Delete temporary compression buffer */
@@ -755,8 +793,11 @@ ACTION(
 				break;
 
 				default:
-					/* Error occured */
-					error = true;
+					if(!feof(file))
+					{
+						/* Error occured */
+						error = true;
+					}
 					break;
 
 			} /* switch(block) */
@@ -767,6 +808,11 @@ ACTION(
 	if(rdPtr->blocks & BLOCK_TILESETS)
 		rdPtr->currentTileset = 0;
 	rdPtr->currentLayer = 0;
+
+	if(error)
+		rdPtr->rRd->GenerateEvent(2);
+	else
+		rdPtr->rRd->GenerateEvent(0);
 
 	fclose(file);
 
@@ -780,12 +826,16 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(1, PARAM_FILENAME2,"File")
 ) {
-	unsigned char layerCount = rdPtr->layers->size();
-	unsigned char tilesetCount = rdPtr->tilesets->size();
+	unsigned int layerCount = rdPtr->layers->size();
+	unsigned int tilesetCount = rdPtr->tilesets->size();
 
 	/* Open file */
 	FILE* file = fopen((const char*)param1, "wb");
-	if(!file) return;
+	if(!file)
+	{
+		rdPtr->rRd->GenerateEvent(3);
+		return;
+	}
 
 	/* Magic number, version, tileset and layer count */
 	fputs(MAGIC, file);
@@ -835,7 +885,7 @@ ACTION(
 		blockSize = ftell(file);
 		fwrite(&blockSize, sizeof(int), 1, file);
 
-		fwrite(&layerCount, sizeof(char), 1, file);
+		fwrite(&layerCount, sizeof(short), 1, file);
 
 		for(unsigned int i = 0; i < layerCount; ++i)
 		{
@@ -868,13 +918,13 @@ ACTION(
 				mz_ulong dataSize = sizeof(Tile) * layer->width * layer->height;
 				mz_ulong dataAlloc = mz_compressBound(dataSize);
 				unsigned char* temp = new unsigned char[dataAlloc];
-				mz_compress2(temp, &dataSize, (const unsigned char*)layer->data, dataSize, rdPtr->compress);
+				mz_compress2(temp, &dataAlloc, (const unsigned char*)layer->data, dataSize, rdPtr->compress);
 
 				/* Write compressed size */
-				fwrite(&dataSize, sizeof(int), 1, file);
+				fwrite(&dataAlloc, sizeof(int), 1, file);
 
 				/* Write compressed data */
-				fwrite(temp, dataSize, 1, file);
+				fwrite(temp, dataAlloc, 1, file);
 
 				/* Delete temporary compression buffer */
 				delete[] temp;
@@ -894,6 +944,7 @@ ACTION(
 		fwrite(&blockSize, sizeof(int), 1, file);
 	}
 
+	rdPtr->rRd->GenerateEvent(1);
 	fclose(file);
 }
 
@@ -901,7 +952,7 @@ ACTION(
 	/* ID */			23,
 	/* Name */			"Clear layer tile at (%0, %1)",
 	/* Flags */			0,
-	/* Params */		(5, PARAM_NUMBER,"Tile X", PARAM_NUMBER,"Tile Y")
+	/* Params */		(2, PARAM_NUMBER,"Tile X", PARAM_NUMBER,"Tile Y")
 ) {
 	if(rdPtr->currentLayer)
 	{
@@ -928,7 +979,7 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(6, PARAM_NUMBER,"Top-left tile X (Negative numbers will wrap)", PARAM_NUMBER,"Top-left tile Y (Negative numbers will wrap)",
 	PARAM_NUMBER,"Bottom-right tile X (Negative numbers will wrap)", PARAM_NUMBER,"Bottom-right tile Y (Negative numbers will wrap)",
-	 /*PARAM_NUMBER,"Tileset index (0-99, -1: Empty)",*/ PARAM_NUMBER,"Tileset X", PARAM_NUMBER,"Tileset Y")
+	 /*PARAM_NUMBER,"Tileset index (0-99, -1: Empty)",*/ PARAM_NUMBER,"Tileset X (-1: Empty)", PARAM_NUMBER,"Tileset Y (-1: Empty)")
 ) {
 
 	if(rdPtr->currentLayer)
@@ -1218,7 +1269,7 @@ ACTION(
 	/* ID */			36,
 	/* Name */			"Select tileset tile (%0, %1) for cursor",
 	/* Flags */			0,
-	/* Params */		(2, PARAM_NUMBER, "Tileset X", PARAM_NUMBER, "Tileset Y")
+	/* Params */		(2, PARAM_NUMBER, "Tileset X (-1: Empty)", PARAM_NUMBER, "Tileset Y (-1: Empty)")
 ) {
 	rdPtr->cursor.tiles.x1 = (unsigned char)intParam();
 	rdPtr->cursor.tiles.y1 = (unsigned char)intParam();
@@ -1309,9 +1360,79 @@ ACTION(
 	/* ID */			40,
 	/* Name */			"Set file block options to %0",
 	/* Flags */			0,
-	/* Params */		(1, PARAM_NUMBER, "Blocks to load/save, add together (1: Map, 2: Layers, 4: Tilesets, Default: 1+2+4)")
+	/* Params */		(1, PARAM_NUMBER, "Blocks to load/save, add together (1: Map, 2: Layers, 4: Tilesets, Default: 2)")
 ) {
 	rdPtr->blocks = param1;
+}
+
+ACTION(
+	/* ID */			41,
+	/* Name */			"Delete tileset %0",
+	/* Flags */			0,
+	/* Params */		(1, PARAM_NUMBER, "Tileset index")
+) {
+	unsigned int i = Param(TYPE_INT);
+
+	if(i < rdPtr->tilesets->size())
+	{
+		if(&(*rdPtr->tilesets)[i] == rdPtr->currentTileset)
+			rdPtr->currentTileset = 0;
+
+		rdPtr->tilesets->erase(rdPtr->tilesets->begin() + i);
+
+		rdPtr->redraw = true;
+	}
+}
+
+ACTION(
+	/* ID */			42,
+	/* Name */			"Delete layer %0",
+	/* Flags */			0,
+	/* Params */		(1, PARAM_NUMBER, "Layer index")
+) {
+	unsigned int i = Param(TYPE_INT);
+
+	if(i < rdPtr->layers->size())
+	{
+		if(&(*rdPtr->layers)[i] == rdPtr->currentLayer)
+			rdPtr->currentLayer = 0;
+
+		rdPtr->layers->erase(rdPtr->layers->begin() + i);
+
+		rdPtr->redraw = true;
+	}
+}
+
+ACTION(
+	/* ID */			43,
+	/* Name */			"Delete all tilesets",
+	/* Flags */			0,
+	/* Params */		(0)
+) {
+	rdPtr->tilesets->clear();
+	rdPtr->currentTileset = 0;
+}
+
+ACTION(
+	/* ID */			44,
+	/* Name */			"Delete all layers",
+	/* Flags */			0,
+	/* Params */		(0)
+) {
+	rdPtr->layers->clear();
+	rdPtr->currentLayer = 0;
+}
+
+ACTION(
+	/* ID */			45,
+	/* Name */			"Clear layer",
+	/* Flags */			0,
+	/* Params */		(0)
+) {
+	if(rdPtr->currentLayer && rdPtr->currentLayer->isValid())
+	{
+		memset(rdPtr->currentLayer->data, -1, rdPtr->currentLayer->width*rdPtr->currentLayer->height*sizeof(Tile));
+	}
 }
 
 

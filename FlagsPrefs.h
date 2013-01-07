@@ -33,5 +33,5 @@
 #define M_OEPREFS_TRANSITIONS
 #define M_OEPREFS_FINECOLLISIONS
 
-#define     OEFLAGS                    
+#define     OEFLAGS    M_OEFLAG_VALUES      
 #define     OEPREFS                    

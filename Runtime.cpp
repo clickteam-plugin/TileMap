@@ -35,6 +35,8 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
 	freopen("conout$","w", stdout);
 	freopen("conout$","w", stderr);
 
+	printf("TILEMAP DEBUG MODE\n");
+
 #endif
 	
 	LPRH rhPtr = rdPtr->rHo.hoAdRunHeader;
@@ -46,7 +48,7 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
 	/* Create surface, get MMF depth.. */
 	cSurface *proto, *ps = WinGetSurface((int)rdPtr->rHo.hoAdRunHeader->rhIdEditWin);
 	rdPtr->depth = ps->GetDepth();
-	GetSurfacePrototype(&proto, rdPtr->depth, SURFACE_TYPE, SURFACE_DRIVER);
+	GetSurfacePrototype(&proto, rdPtr->depth, SURF_TYPE, SURF_DRIVER);
 
 	/* Database */
 	rdPtr->layers = new vector<Layer>;
@@ -63,12 +65,12 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
 		/* Create a tileset for each image */
 		if(LockImageSurface(rhPtr->rhIdAppli, edPtr->tilesets[i], is))
 		{
-				tileset.transpCol = is.GetTransparentColor();
-				tileset.surface = new cSurface;
-				tileset.surface->Create(is.GetWidth(), is.GetHeight(), proto);
-				is.Blit(*tileset.surface, 0, 0, BMODE_COPY, BOP_COPY, 0, BLTF_COPYALPHA);
-				tileset.surface->SetTransparentColor(is.GetTransparentColor());
-				UnlockImageSurface(is);
+			tileset.transpCol = is.GetTransparentColor();
+			tileset.surface = new cSurface;
+			tileset.surface->Create(is.GetWidth(), is.GetHeight(), proto);
+			is.Blit(*tileset.surface, 0, 0, BMODE_HWA, BOP_COPY, 0, BLTF_COPYALPHA);
+			tileset.surface->SetTransparentColor(is.GetTransparentColor());
+			UnlockImageSurface(is);
 		}
 
 		rdPtr->tilesets->push_back(tileset);
@@ -80,9 +82,10 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
 	rdPtr->tileWidth = edPtr->tileWidth;
 	rdPtr->tileHeight = edPtr->tileHeight;
 
+	rdPtr->blocks = (edPtr->blockMap ? BLOCK_MAP : 0) | (edPtr->blockLayers ? BLOCK_LAYERS : 0) | (edPtr->blockTilesets ? BLOCK_TILESETS : 0);
+
 	/* Default compression level */
 	rdPtr->compress = 6;
-	rdPtr->blocks = BLOCK_MAP | BLOCK_TILESETS | BLOCK_LAYERS;
 
 	/* Set up tile cursor */
 	rdPtr->cursor.x = 0;
@@ -111,8 +114,7 @@ short WINAPI DLLExport DestroyRunObject(LPRDATA rdPtr, long fast)
 	for(it = rdPtr->viewports->begin(); it != rdPtr->viewports->end(); ++it)
 	{
 		/* Detach Tile Map */
-		if(((*it)->rHo.hoFlags & HOF_DESTROYED) == 0)
-			(*it)->p = 0;
+		(*it)->p = 0;
 	}
 	delete rdPtr->layers;
 	delete rdPtr->tilesets;
@@ -135,7 +137,12 @@ short WINAPI DLLExport HandleRunObject(LPRDATA rdPtr)
 		list<TMAPVIEW*>::iterator it;
 		for(it = rdPtr->viewports->begin(); it != rdPtr->viewports->end(); ++it)
 		{
-			rdPtr->rRd->LPRO_Redraw((LPRO)*it);
+			if(((*it)->rHo.hoFlags & HOF_DESTROYED) == 0)
+				rdPtr->rRd->LPRO_Redraw((LPRO)*it);
+			else
+			{
+				rdPtr->viewports->erase(it++);
+			}
 		}
 
 		rdPtr->redraw = false;

@@ -8,20 +8,25 @@
 // General includes
 #include	"TemplateInc.h"
 
+
 #ifdef HWABETA
-#define SURFACE_TYPE ST_HWA_RTTEXTURE
-#define SURFACE_DRIVER SD_D3D9
-#define BMODE_COPY BMODE_TRANSP
+#define SURF_DRIVER SD_D3D9
+#define SURF_TYPE ST_HWA_RTTEXTURE
+#define BMODE_HWA BMODE_TRANSP
 #else
-#define SURFACE_TYPE ST_MEMORY
-#define SURFACE_DRIVER SD_DIB
-#define BMODE_COPY BMODE_OPAQUE
+#define SURF_DRIVER SD_DIB
+#define SURF_TYPE ST_MEMORY
+#define BMODE_HWA BMODE_OPAQUE
 #endif
+
 
 #define MAXTILESETS 100
 
 // Specific to this extension
 #include	<vector>
+//#include	"tinyxml/tinyxml.h"
+//#include	<b64/cencode.h>
+//#include	<b64/cdecode.h>
 #include <fstream>
 using namespace std;
 

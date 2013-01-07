@@ -3,6 +3,13 @@
 // --------------------------------
 
 #ifdef CONDITION_MENU
+
+	ITEM(0, "File loaded")
+	ITEM(2, "Loading file failed")
+	SEPARATOR
+	ITEM(1, "File saved")
+	ITEM(3, "Saving file failed")
+	
 #endif
 
 // --------------------------------
@@ -28,6 +35,10 @@
 	SUB_START("Tilesets")
 		ITEM(12, "Add tileset")
 		ITEM(25, "Add tilesets from Surface")
+		SEPARATOR
+		ITEM(41, "Delete tileset")
+		ITEM(43, "Delete all tilesets")
+		SEPARATOR
 		ITEM(30, "Set current tileset")
 		ITEM(34, "Swap two tilesets")
 		SEPARATOR
@@ -40,6 +51,10 @@
 	SUB_END
 	SUB_START("Layers")
 		ITEM(29, "Add layer")
+		SEPARATOR
+		ITEM(42, "Delete layer")
+		ITEM(44, "Delete all layers")
+		SEPARATOR
 		ITEM(8,"Set current layer")
 		SEPARATOR
 		ITEM(1, "Resize")
@@ -56,6 +71,8 @@
 	SUB_END
 	SEPARATOR
 	SUB_START("Tiles")
+		ITEM(45, "Clear layer")
+		SEPARATOR
 		ITEM(23, "Clear tile")
 		ITEM(7, "Set tile")
 		SEPARATOR
@@ -105,9 +122,10 @@
 
 #ifdef EXPRESSION_MENU
 
+	SEPARATOR
 	SUB_START("Map")
 		ITEM(10, "Tile width")
-		ITEM(12, "Tile height")
+		ITEM(11, "Tile height")
 	SUB_END
 	SUB_START("Tilesets")
 		ITEM(16, "Count")
@@ -142,5 +160,6 @@
 			ITEM(14, "Compound value")
 		SUB_END
 	SUB_END
+	SEPARATOR
 
 #endif
