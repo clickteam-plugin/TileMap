@@ -24,9 +24,6 @@
 
 // Specific to this extension
 #include	<vector>
-//#include	"tinyxml/tinyxml.h"
-//#include	<b64/cencode.h>
-//#include	<b64/cdecode.h>
 #include <fstream>
 using namespace std;
 
