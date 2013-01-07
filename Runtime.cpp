@@ -48,7 +48,7 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
 	/* Create surface, get MMF depth.. */
 	cSurface *proto, *ps = WinGetSurface((int)rdPtr->rHo.hoAdRunHeader->rhIdEditWin);
 	rdPtr->depth = ps->GetDepth();
-	GetSurfacePrototype(&proto, rdPtr->depth, SURF_TYPE, SURF_DRIVER);
+	GetSurfacePrototype(&proto, rdPtr->depth, SURFACE_TYPE, SURFACE_DRIVER);
 
 	/* Database */
 	rdPtr->layers = new vector<Layer>;
@@ -68,7 +68,7 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
 			tileset.transpCol = is.GetTransparentColor();
 			tileset.surface = new cSurface;
 			tileset.surface->Create(is.GetWidth(), is.GetHeight(), proto);
-			is.Blit(*tileset.surface, 0, 0, BMODE_HWA, BOP_COPY, 0, BLTF_COPYALPHA);
+			is.Blit(*tileset.surface, 0, 0, BMODE_COPY, BOP_COPY, 0, BLTF_COPYALPHA);
 			tileset.surface->SetTransparentColor(is.GetTransparentColor());
 			UnlockImageSurface(is);
 		}

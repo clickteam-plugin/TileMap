@@ -5,30 +5,25 @@
 // Suppress the deprecated warnings for VC2005
 #define _CRT_SECURE_NO_WARNINGS
 
-// General includes
+
 #include	"TemplateInc.h"
-
-
-#ifdef HWABETA
-#define SURF_DRIVER SD_D3D9
-#define SURF_TYPE ST_HWA_RTTEXTURE
-#define BMODE_HWA BMODE_TRANSP
-#else
-#define SURF_DRIVER SD_DIB
-#define SURF_TYPE ST_MEMORY
-#define BMODE_HWA BMODE_OPAQUE
-#endif
-
-
-#define MAXTILESETS 100
-
-// Specific to this extension
 #include	<vector>
-#include <fstream>
+#include	<fstream>
+#include	<shlwapi.h>
+#pragma		comment(lib, "shlwapi.lib")
 using namespace std;
 
-#include <shlwapi.h>
-#pragma comment(lib, "shlwapi.lib")
+#ifdef HWABETA
+#define SURFACE_TYPE	ST_HWA_RTTEXTURE
+#define SURFACE_DRIVER	SD_D3D9
+#define BMODE_COPY		BMODE_TRANSP
+#else
+#define SURFACE_TYPE	ST_MEMORY
+#define SURFACE_DRIVER	SD_DIB
+#define BMODE_COPY		BMODE_OPAQUE
+#endif
+
+#define MAXTILESETS 100
 
 #include	"Resource.h"
 #include	"FlagsPrefs.h"
