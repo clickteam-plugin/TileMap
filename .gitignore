@@ -11,7 +11,8 @@
 # Build results
 
 [Dd]ebug*/
-[Rr]elease/
+[Rr]elease*/
+Run_Only*/
 
 build/
 
