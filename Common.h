@@ -14,7 +14,7 @@
 using namespace std;
 
 #ifdef HWABETA
-#define SURFACE_TYPE	ST_HWA_RTTEXTURE
+#define SURFACE_TYPE	ST_HWA_ROMTEXTURE
 #define SURFACE_DRIVER	SD_D3D9
 #define BMODE_COPY		BMODE_TRANSP
 #else

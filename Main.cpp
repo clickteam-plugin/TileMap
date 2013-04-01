@@ -712,7 +712,7 @@ ACTION(
 						rdPtr->layers->reserve(layerCount);
 
 						/* Load them layers */
-						for(int i = 0; i < layerCount; ++i)
+						for(unsigned int i = 0; i < layerCount; ++i)
 						{
 							rdPtr->layers->push_back(Layer());
 							Layer* layer = &rdPtr->layers->back();

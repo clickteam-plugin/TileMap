@@ -35,10 +35,16 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
 	freopen("conout$","w", stdout);
 	freopen("conout$","w", stderr);
 
-	printf("TILEMAP DEBUG MODE\n");
+	printf("TILEMAP DEBUG MODE");
+
+#ifdef HWABETA
+	printf(" (HWA)");
 
 #endif
-	
+
+	printf("\n");
+#endif
+
 	LPRH rhPtr = rdPtr->rHo.hoAdRunHeader;
 
 	/* Attached viewports */
@@ -68,7 +74,11 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
 			tileset.transpCol = is.GetTransparentColor();
 			tileset.surface = new cSurface;
 			tileset.surface->Create(is.GetWidth(), is.GetHeight(), proto);
-			is.Blit(*tileset.surface, 0, 0, BMODE_COPY, BOP_COPY, 0, BLTF_COPYALPHA);
+#ifdef HWABETA
+			is.Blit(*tileset.surface);
+#else
+			is.Blit(*tileset.surface, 0, 0, BMODE_OPAQUE, BOP_COPY, 0, BLTF_COPYALPHA);
+#endif
 			tileset.surface->SetTransparentColor(is.GetTransparentColor());
 			UnlockImageSurface(is);
 		}
@@ -140,9 +150,7 @@ short WINAPI DLLExport HandleRunObject(LPRDATA rdPtr)
 			if(((*it)->rHo.hoFlags & HOF_DESTROYED) == 0)
 				rdPtr->rRd->LPRO_Redraw((LPRO)*it);
 			else
-			{
 				rdPtr->viewports->erase(it++);
-			}
 		}
 
 		rdPtr->redraw = false;
