@@ -35,12 +35,6 @@ struct Layer
 		visible(true), opacity(1.0), tileset(0), collision(-1),
 		width(0), height(0), data(0)
 	{
-		///* By default, each local tileset corresponds to the same global tileset */
-		//for(int i = 0; i < sizeof(tilesets)/sizeof(tilesets[0]); ++i)
-		//{
-		//	tilesets[i] = i;
-		//}
-		//memset(tilesets, -1, sizeof(tilesets));
 	}
 
 	Layer(const Layer& src)
@@ -57,7 +51,6 @@ struct Layer
 		opacity = src.opacity;
 		tileset = src.tileset;
 		collision = src.collision;
-		//memcpy(tilesets, src.tilesets, sizeof(tilesets));
 
 		if(src.data)
 		{
@@ -68,6 +61,7 @@ struct Layer
 				height = 0;
 				return;
 			}
+
 			/* Copy the source data */
 			memcpy(data, src.data, width*height*sizeof(Tile));
 		}
@@ -94,7 +88,7 @@ struct Layer
 		return data + x + width*y;
 	}
 
-	/* Resize function */
+	/* Resize layer, new tiles are empty */
 	void resize(unsigned int newWidth, unsigned int newHeight)
 	{
 		if(newWidth == 0 || newHeight == 0)

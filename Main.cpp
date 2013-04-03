@@ -4,10 +4,11 @@
 // 
 // ============================================================================
 
-#include "common.h"
-
+#include "Common.h"
 #define MINIZ_HEADER_FILE_ONLY 1
 #include "miniz.c"
+#include "Paramacro.h"
+#include "HWASurface.h"
 
 // ============================================================================
 //
@@ -59,6 +60,7 @@ CONDITION(
 // 
 // ============================================================================
 
+/* Place tiles at (x,y) */
 short WINAPI DLLExport ActionFunc32(LPRDATA rdPtr, long param1, long param2);
 
 ACTION(
@@ -136,8 +138,7 @@ ACTION(
 			tileset->surface->Delete();
 
 		/* Create blank surface */
-		cSurface* proto;
-		GetSurfacePrototype(&proto, rdPtr->depth, ST_MEMORY, SD_DIB);
+		cSurface* proto = getPrototype(rdPtr->depth);
 		tileset->surface->Create(file.GetWidth(), file.GetHeight(), proto);
 		tileset->surface->SetTransparentColor(tileset->transpCol);
 
@@ -402,8 +403,7 @@ ACTION(
 		memset(tileset->path, 0, 256);
 
 		/* Create blank surface */
-		cSurface* proto;
-		GetSurfacePrototype(&proto, rdPtr->depth, ST_MEMORY, SD_DIB);
+		cSurface* proto = getPrototype(rdPtr->depth);
 		tileset->surface->Create(image->GetWidth(), image->GetHeight(), proto);
 
 		/* Copy settings */

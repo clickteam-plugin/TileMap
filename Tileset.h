@@ -4,7 +4,6 @@ struct Tileset
 	cSurface*		surface;
 	COLORREF		transpCol;
 
-	/* Constructor/destructor */
 	Tileset() : surface(0), transpCol(0xFF00FF)
 	{
 		path[0] = 0;
@@ -30,7 +29,6 @@ struct Tileset
 		}
 	}
 
-	/* Check if a tileset is usable */
 	inline bool isValid()
 	{
 		return surface != 0 && surface->IsValid();

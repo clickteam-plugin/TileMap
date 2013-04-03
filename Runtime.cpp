@@ -5,7 +5,8 @@
 // ============================================================================
 
 // Common Include
-#include	"common.h"
+#include "Common.h"
+#include "HWASurface.h"
 
 // --------------------
 // GetRunObjectDataSize
@@ -52,9 +53,13 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
 	rdPtr->redraw = false;
 
 	/* Create surface, get MMF depth.. */
-	cSurface *proto, *ps = WinGetSurface((int)rdPtr->rHo.hoAdRunHeader->rhIdEditWin);
+	cSurface *ps = WinGetSurface((int)rdPtr->rHo.hoAdRunHeader->rhIdEditWin);
+
+	if(!ps)
+		return 1;
+
 	rdPtr->depth = ps->GetDepth();
-	GetSurfacePrototype(&proto, rdPtr->depth, SURFACE_TYPE, SURFACE_DRIVER);
+	cSurface* proto = getPrototype(rdPtr->depth);
 
 	/* Database */
 	rdPtr->layers = new vector<Layer>;
@@ -74,19 +79,17 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
 			tileset.transpCol = is.GetTransparentColor();
 			tileset.surface = new cSurface;
 			tileset.surface->Create(is.GetWidth(), is.GetHeight(), proto);
-#ifdef HWABETA
-			is.Blit(*tileset.surface);
-#else
-			is.Blit(*tileset.surface, 0, 0, BMODE_OPAQUE, BOP_COPY, 0, BLTF_COPYALPHA);
-#endif
+
+			copyBlit(is, *tileset.surface);
+
 			tileset.surface->SetTransparentColor(is.GetTransparentColor());
 			UnlockImageSurface(is);
 		}
 
 		rdPtr->tilesets->push_back(tileset);
 		delete tileset.surface;
+		tileset.surface = 0;
 	}
-	tileset.surface = 0;
 
 	/* Tileset settings */
 	rdPtr->tileWidth = edPtr->tileWidth;

@@ -1523,11 +1523,11 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="Information.h"
+				RelativePath=".\HWASurface.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Layer.h"
+				RelativePath="Information.h"
 				>
 			</File>
 			<File
@@ -1591,13 +1591,25 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\Tile.h"
+				RelativePath=".\Paramacro.h"
 				>
 			</File>
-			<File
-				RelativePath=".\Tileset.h"
+			<Filter
+				Name="Format"
 				>
-			</File>
+				<File
+					RelativePath=".\Layer.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Tile.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Tileset.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"
