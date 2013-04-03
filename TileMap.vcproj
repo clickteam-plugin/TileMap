@@ -789,7 +789,7 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release HWA|Win32"
+			Name="Release HWAA|Win32"
 			OutputDirectory="$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
@@ -811,35 +811,35 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				PreprocessorDefinitions="_DEBUG"
+				PreprocessorDefinitions="NDEBUG,RUN_ONLY"
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="1"
-				TypeLibraryName=".\Debug/rSDK.tlb"
+				TypeLibraryName=".\Run_Only/rSDK.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="0"
+				Optimization="2"
+				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\Inc"
-				PreprocessorDefinitions="NDEBUG;WIN32;_WINDOWS;STRICT;COXSDK;IN_EXT_VERSION2;RSDK;HWABETA"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="2"
-				PrecompiledHeaderFile=".\Debug/rSDK.pch"
-				AssemblerListingLocation=".\Debug/"
-				ObjectFile=".\Debug/"
-				ProgramDataBaseFileName=".\Debug/"
-				BrowseInformation="1"
+				PreprocessorDefinitions="NDEBUG;HWABETA;WIN32;_WINDOWS;STRICT;COXSDK;IN_EXT_VERSION2;RSDK"
+				StringPooling="true"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="true"
+				PrecompiledHeaderFile=".\Run_Only/rSDK.pch"
+				AssemblerListingLocation=".\Run_Only/"
+				ObjectFile=".\Run_Only/"
+				ProgramDataBaseFileName=".\Run_Only/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
-				DebugInformationFormat="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_DEBUG,EDITOR"
+				PreprocessorDefinitions="NDEBUG,RUN_ONLY"
 				Culture="1033"
 				AdditionalIncludeDirectories="..\..\Inc"
 			/>
@@ -850,16 +850,15 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib mmfs2hwa.lib"
 				OutputFile="c:\mmf2\extensions\hwa\TileMap.mfx"
-				LinkIncremental="2"
+				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\lib\"
 				ModuleDefinitionFile=".\Ext.def"
-				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\Debug/rsdk.pdb"
+				ProgramDatabaseFile=".\Run_Only/Template.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary=".\Debug/rsdk.lib"
+				ImportLibrary=".\Run_Only/Template.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -873,7 +872,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Debug/rSDK.bsc"
+				OutputFile=".\Run_Only/rSDK.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -1068,7 +1067,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release HWA|Win32"
+					Name="Release HWAA|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1165,7 +1164,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release HWA|Win32"
+					Name="Release HWAA|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1262,7 +1261,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release HWA|Win32"
+					Name="Release HWAA|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1363,7 +1362,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release HWA|Win32"
+					Name="Release HWAA|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1434,7 +1433,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release HWA|Win32"
+					Name="Release HWAA|Win32"
 					ExcludedFromBuild="true"
 					>
 					<Tool
@@ -1506,7 +1505,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release HWA|Win32"
+					Name="Release HWAA|Win32"
 					ExcludedFromBuild="true"
 					>
 					<Tool
@@ -1574,7 +1573,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release HWA|Win32"
+					Name="Release HWAA|Win32"
 					ExcludedFromBuild="true"
 					>
 					<Tool
@@ -1692,7 +1691,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release HWA|Win32"
+					Name="Release HWAA|Win32"
 					>
 					<Tool
 						Name="VCResourceCompilerTool"

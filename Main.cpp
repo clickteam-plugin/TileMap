@@ -143,7 +143,7 @@ ACTION(
 		tileset->surface->SetTransparentColor(tileset->transpCol);
 
 		/* Blit file onto surface */
-		file.Blit(*tileset->surface, 0, 0, BMODE_OPAQUE, BOP_COPY, 0, BLTF_COPYALPHA);
+		copyBlit(file, *tileset->surface);
 
 		/* Store relative file path, in case the file is saved */
 		memset(tileset->path, 0, 256);
@@ -410,7 +410,7 @@ ACTION(
 		tileset->surface->SetTransparentColor(tileset->transpCol = image->GetTransparentColor());
 
 		/* Blit file onto surface */
-		image->Blit(*tileset->surface, 0, 0, BMODE_OPAQUE, BOP_COPY, 0, BLTF_COPYALPHA);
+		copyBlit(*image, *tileset->surface);
 	
 		rdPtr->redraw = true;
 	}

@@ -1,15 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual C++ Express 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TileMap", "rSDK.vcproj", "{6F17931E-377D-481D-AB1B-8A316017F723}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TileMapViewport", "..\TileMapViewport\TileMapViewport.vcproj", "{603A2407-CFD4-437F-A3C0-1CA0E67F8556}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TileMap", "TileMap.vcproj", "{6F17931E-377D-481D-AB1B-8A316017F723}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug HWA|Win32 = Debug HWA|Win32
 		Debug|Win32 = Debug|Win32
+		Release HW|Win32 = Release HW|Win32
 		Release HWA|Win32 = Release HWA|Win32
+		Release HWAA|Win32 = Release HWAA|Win32
 		Release_Small|Win32 = Release_Small|Win32
 		Release|Win32 = Release|Win32
 		Run_Only HWA|Win32 = Run_Only HWA|Win32
@@ -19,32 +21,16 @@ Global
 		Vitalize|Win32 = Vitalize|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{6F17931E-377D-481D-AB1B-8A316017F723}.Debug HWA|Win32.ActiveCfg = Debug HWA|Win32
-		{6F17931E-377D-481D-AB1B-8A316017F723}.Debug HWA|Win32.Build.0 = Debug HWA|Win32
-		{6F17931E-377D-481D-AB1B-8A316017F723}.Debug|Win32.ActiveCfg = Debug|Win32
-		{6F17931E-377D-481D-AB1B-8A316017F723}.Debug|Win32.Build.0 = Debug|Win32
-		{6F17931E-377D-481D-AB1B-8A316017F723}.Release HWA|Win32.ActiveCfg = Release HWA|Win32
-		{6F17931E-377D-481D-AB1B-8A316017F723}.Release HWA|Win32.Build.0 = Release HWA|Win32
-		{6F17931E-377D-481D-AB1B-8A316017F723}.Release_Small|Win32.ActiveCfg = Release_Small|Win32
-		{6F17931E-377D-481D-AB1B-8A316017F723}.Release_Small|Win32.Build.0 = Release_Small|Win32
-		{6F17931E-377D-481D-AB1B-8A316017F723}.Release|Win32.ActiveCfg = Release|Win32
-		{6F17931E-377D-481D-AB1B-8A316017F723}.Release|Win32.Build.0 = Release|Win32
-		{6F17931E-377D-481D-AB1B-8A316017F723}.Run_Only HWA|Win32.ActiveCfg = Run_Only HWA|Win32
-		{6F17931E-377D-481D-AB1B-8A316017F723}.Run_Only HWA|Win32.Build.0 = Run_Only HWA|Win32
-		{6F17931E-377D-481D-AB1B-8A316017F723}.Run_Only_Small|Win32.ActiveCfg = Run_Only_Small|Win32
-		{6F17931E-377D-481D-AB1B-8A316017F723}.Run_Only_Small|Win32.Build.0 = Run_Only_Small|Win32
-		{6F17931E-377D-481D-AB1B-8A316017F723}.Run_Only|Win32.ActiveCfg = Run_Only|Win32
-		{6F17931E-377D-481D-AB1B-8A316017F723}.Run_Only|Win32.Build.0 = Run_Only|Win32
-		{6F17931E-377D-481D-AB1B-8A316017F723}.Vitalize_Small|Win32.ActiveCfg = Vitalize_Small|Win32
-		{6F17931E-377D-481D-AB1B-8A316017F723}.Vitalize_Small|Win32.Build.0 = Vitalize_Small|Win32
-		{6F17931E-377D-481D-AB1B-8A316017F723}.Vitalize|Win32.ActiveCfg = Vitalize|Win32
-		{6F17931E-377D-481D-AB1B-8A316017F723}.Vitalize|Win32.Build.0 = Vitalize|Win32
 		{603A2407-CFD4-437F-A3C0-1CA0E67F8556}.Debug HWA|Win32.ActiveCfg = Debug HWA|Win32
 		{603A2407-CFD4-437F-A3C0-1CA0E67F8556}.Debug HWA|Win32.Build.0 = Debug HWA|Win32
 		{603A2407-CFD4-437F-A3C0-1CA0E67F8556}.Debug|Win32.ActiveCfg = Debug|Win32
 		{603A2407-CFD4-437F-A3C0-1CA0E67F8556}.Debug|Win32.Build.0 = Debug|Win32
+		{603A2407-CFD4-437F-A3C0-1CA0E67F8556}.Release HW|Win32.ActiveCfg = Release HWA|Win32
+		{603A2407-CFD4-437F-A3C0-1CA0E67F8556}.Release HW|Win32.Build.0 = Release HWA|Win32
 		{603A2407-CFD4-437F-A3C0-1CA0E67F8556}.Release HWA|Win32.ActiveCfg = Release HWA|Win32
 		{603A2407-CFD4-437F-A3C0-1CA0E67F8556}.Release HWA|Win32.Build.0 = Release HWA|Win32
+		{603A2407-CFD4-437F-A3C0-1CA0E67F8556}.Release HWAA|Win32.ActiveCfg = Release HWA|Win32
+		{603A2407-CFD4-437F-A3C0-1CA0E67F8556}.Release HWAA|Win32.Build.0 = Release HWA|Win32
 		{603A2407-CFD4-437F-A3C0-1CA0E67F8556}.Release_Small|Win32.ActiveCfg = Release_Small|Win32
 		{603A2407-CFD4-437F-A3C0-1CA0E67F8556}.Release_Small|Win32.Build.0 = Release_Small|Win32
 		{603A2407-CFD4-437F-A3C0-1CA0E67F8556}.Release|Win32.ActiveCfg = Release|Win32
@@ -59,6 +45,30 @@ Global
 		{603A2407-CFD4-437F-A3C0-1CA0E67F8556}.Vitalize_Small|Win32.Build.0 = Vitalize_Small|Win32
 		{603A2407-CFD4-437F-A3C0-1CA0E67F8556}.Vitalize|Win32.ActiveCfg = Vitalize|Win32
 		{603A2407-CFD4-437F-A3C0-1CA0E67F8556}.Vitalize|Win32.Build.0 = Vitalize|Win32
+		{6F17931E-377D-481D-AB1B-8A316017F723}.Debug HWA|Win32.ActiveCfg = Debug HWA|Win32
+		{6F17931E-377D-481D-AB1B-8A316017F723}.Debug HWA|Win32.Build.0 = Debug HWA|Win32
+		{6F17931E-377D-481D-AB1B-8A316017F723}.Debug|Win32.ActiveCfg = Debug|Win32
+		{6F17931E-377D-481D-AB1B-8A316017F723}.Debug|Win32.Build.0 = Debug|Win32
+		{6F17931E-377D-481D-AB1B-8A316017F723}.Release HW|Win32.ActiveCfg = Release HWAA|Win32
+		{6F17931E-377D-481D-AB1B-8A316017F723}.Release HW|Win32.Build.0 = Release HWAA|Win32
+		{6F17931E-377D-481D-AB1B-8A316017F723}.Release HWA|Win32.ActiveCfg = Release HWAA|Win32
+		{6F17931E-377D-481D-AB1B-8A316017F723}.Release HWA|Win32.Build.0 = Release HWAA|Win32
+		{6F17931E-377D-481D-AB1B-8A316017F723}.Release HWAA|Win32.ActiveCfg = Release HWAA|Win32
+		{6F17931E-377D-481D-AB1B-8A316017F723}.Release HWAA|Win32.Build.0 = Release HWAA|Win32
+		{6F17931E-377D-481D-AB1B-8A316017F723}.Release_Small|Win32.ActiveCfg = Release_Small|Win32
+		{6F17931E-377D-481D-AB1B-8A316017F723}.Release_Small|Win32.Build.0 = Release_Small|Win32
+		{6F17931E-377D-481D-AB1B-8A316017F723}.Release|Win32.ActiveCfg = Release|Win32
+		{6F17931E-377D-481D-AB1B-8A316017F723}.Release|Win32.Build.0 = Release|Win32
+		{6F17931E-377D-481D-AB1B-8A316017F723}.Run_Only HWA|Win32.ActiveCfg = Run_Only HWA|Win32
+		{6F17931E-377D-481D-AB1B-8A316017F723}.Run_Only HWA|Win32.Build.0 = Run_Only HWA|Win32
+		{6F17931E-377D-481D-AB1B-8A316017F723}.Run_Only_Small|Win32.ActiveCfg = Run_Only_Small|Win32
+		{6F17931E-377D-481D-AB1B-8A316017F723}.Run_Only_Small|Win32.Build.0 = Run_Only_Small|Win32
+		{6F17931E-377D-481D-AB1B-8A316017F723}.Run_Only|Win32.ActiveCfg = Run_Only|Win32
+		{6F17931E-377D-481D-AB1B-8A316017F723}.Run_Only|Win32.Build.0 = Run_Only|Win32
+		{6F17931E-377D-481D-AB1B-8A316017F723}.Vitalize_Small|Win32.ActiveCfg = Vitalize_Small|Win32
+		{6F17931E-377D-481D-AB1B-8A316017F723}.Vitalize_Small|Win32.Build.0 = Vitalize_Small|Win32
+		{6F17931E-377D-481D-AB1B-8A316017F723}.Vitalize|Win32.ActiveCfg = Vitalize|Win32
+		{6F17931E-377D-481D-AB1B-8A316017F723}.Vitalize|Win32.Build.0 = Vitalize|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
