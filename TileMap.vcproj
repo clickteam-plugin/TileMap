@@ -1593,6 +1593,10 @@
 				RelativePath=".\Paramacro.h"
 				>
 			</File>
+			<File
+				RelativePath=".\Rundata.h"
+				>
+			</File>
 			<Filter
 				Name="Format"
 				>

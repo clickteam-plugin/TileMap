@@ -1435,6 +1435,39 @@ ACTION(
 	}
 }
 
+ACTION(
+	/* ID */			46,
+	/* Name */			"Fill layer with tile (%´0, %1)",
+	/* Flags */			0,
+	/* Params */		(2, PARAM_NUMBER,"Tileset X (-1: Empty)", PARAM_NUMBER,"Tileset Y (-1: Empty)")
+) {
+
+	if (rdPtr->currentLayer)
+	{
+		if (!rdPtr->currentLayer->isValid())
+			return;
+
+		int tileX = intParam();
+		int tileY = intParam();
+
+		int width = rdPtr->currentLayer->width;
+		int height = rdPtr->currentLayer->height;
+
+		Tile* data = rdPtr->currentLayer->data;
+		for (int x = 0; x < width; ++x)
+		{
+			for (int y = 0; y < height; ++y)
+			{
+				Tile* tile = data + x + width*y;
+				tile->x = tileX;
+				tile->y = tileY;
+			}
+		}
+
+		rdPtr->redraw = true;
+	}
+}
+
 
 // ============================================================================
 //

@@ -76,11 +76,8 @@
 		ITEM(23, "Clear tile")
 		ITEM(7, "Set tile")
 		SEPARATOR
+		ITEM(46, "Fill with tile")
 		ITEM(24, "Fill area with tile")
-		//SUB_START("Fill area")
-		//	ITEM(24, "With single tile")
-		//	ITEM(13, "With tiles using method")
-		//SUB_END
 	SUB_END
 	SUB_START("Cursor")
 		ITEM(35, "Move")
