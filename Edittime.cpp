@@ -252,7 +252,7 @@ void WINAPI DLLExport SetPropValue(LPMV mV, LPEDATA edPtr, UINT nPropID, LPVOID 
 			break;
 
 		case PROPID_TILESETS:
-		if(((CPropDataValue*)pValue)->m_pData)
+		if (((CPropDataValue*)pValue)->m_pData)
 		{
 			LPWORD pw = (LPWORD)((CPropDataValue*)pValue)->m_pData;
 			//edPtr->imageCount = *pw++;
@@ -316,10 +316,10 @@ BOOL WINAPI DLLExport EditProp(LPMV mV, LPEDATA edPtr, UINT nPropID)
 	if (nPropID==PROPID_DELETESETS)
 	{
 		int kill = MessageBox(0,"Do you really want to delete all tilesets?","Warning",MB_YESNO|MB_ICONWARNING);
-		if(kill==IDYES)
+		if (kill==IDYES)
 		{
 			mvInvalidateObject(mV,edPtr);
-			for(int i=0;i<TILESETCOUNT;i++)
+			for (int i=0;i<TILESETCOUNT;i++)
 				edPtr->tilesets[i] = 0;
 			edPtr->tilesetCount = 0;
 			mvRefreshProp(mV, edPtr, PROPID_TILESETS, true);
@@ -603,7 +603,7 @@ int WINAPI DLLExport CreateObject(mv _far *mV, fpLevObj loPtr, LPEDATA edPtr)
 	edPtr->tileWidth = 16;
 	edPtr->tileHeight = 16;
 
-	for(int i = 0; i < TILESETCOUNT; ++i)
+	for (int i = 0; i < TILESETCOUNT; ++i)
 		edPtr->tilesets[i] = 0;
 	edPtr->tilesetCount = 0;
 
@@ -738,24 +738,24 @@ void WINAPI DLLExport GetObjectRect(mv _far *mV, RECT FAR *rc, fpLevObj loPtr, L
 //
 //		/* Get surfaces of tilesets */
 //		cSurface surfs[TILESETCOUNT];
-//		for(int i = 0; i < edPtr->tilesetCount; ++i)
+//		for (int i = 0; i < edPtr->tilesetCount; ++i)
 //		{
 //			LockImageSurface(mV->mvIdAppli, edPtr->tilesets[i], surfs[i]);
 //		}
 //	
 //		/* Draw opaque background */
-//		if(!edPtr->transparent)
+//		if (!edPtr->transparent)
 //			ps->Rectangle(rc->left, rc->top, rc->right, rc->bottom, edPtr->background, 0, 0, 1);
 //
 //		/* For each tile */
-//		if(edPtr->tileWidth > 0 && edPtr->tileHeight > 0)
+//		if (edPtr->tileWidth > 0 && edPtr->tileHeight > 0)
 //		{
-//			for(int x = rc->left; x <= rc->right; x += edPtr->tileWidth)
+//			for (int x = rc->left; x <= rc->right; x += edPtr->tileWidth)
 //			{
-//				for(int y = rc->top; y <= rc->bottom; y += edPtr->tileHeight)
+//				for (int y = rc->top; y <= rc->bottom; y += edPtr->tileHeight)
 //				{
 //					/* Draw a random tile */
-//					if(edPtr->tilesetCount)
+//					if (edPtr->tilesetCount)
 //					{
 //						int tileset = 0;
 //						//int tileset = rand() % edPtr->tilesetCount;
@@ -777,7 +777,7 @@ void WINAPI DLLExport GetObjectRect(mv _far *mV, RECT FAR *rc, fpLevObj loPtr, L
 //		ps->ClearClipRect();
 //
 //		/* Unlock stuff */
-//		for(int i = 0; i < edPtr->tilesetCount; ++i)
+//		for (int i = 0; i < edPtr->tilesetCount; ++i)
 //		{
 //			UnlockImageSurface(surfs[i]);
 //		}
@@ -939,11 +939,11 @@ HMENU GetPopupMenu(LPEDATA edPtr, short mn)
 {
 	HMENU hPopup=CreatePopupMenu();
 	
-	if(mn == MN_CONDITIONS)
+	if (mn == MN_CONDITIONS)
 		menucpy(hPopup, ConditionMenu(edPtr));
-	else if(mn == MN_ACTIONS)
+	else if (mn == MN_ACTIONS)
 		menucpy(hPopup, ActionMenu(edPtr));
-	else if(mn == MN_EXPRESSIONS)
+	else if (mn == MN_EXPRESSIONS)
 		menucpy(hPopup, ExpressionMenu(edPtr));
 
 	return hPopup;
@@ -959,7 +959,7 @@ HMENU GetPopupMenu(LPEDATA edPtr, short mn)
 static LPEVENTINFOS2 GetEventInformations(LPEVENTINFOS2 eiPtr, short code)
 
 {
-	while(eiPtr->infos.code != code)
+	while (eiPtr->infos.code != code)
 		eiPtr = EVINFO2_NEXT(eiPtr);
 	
 	return eiPtr;
@@ -1021,29 +1021,29 @@ void GetCodeTitle(LPEVENTINFOS2 eiPtr, short code, short param, short mn, LPSTR 
 	// If a special string is to be returned
 	short strID = EVINFO2_PARAMTITLE(eiPtr, param);
 
-	if(strID) {
+	if (strID) {
 		switch(mn) {
 		case MN_CONDITIONS:
-			if(code>=0&&code<(short)Conditions.size()) {
-				if(param>=0&&param<(short)Conditions[code]->getParamCount())
+			if (code>=0&&code<(short)Conditions.size()) {
+				if (param>=0&&param<(short)Conditions[code]->getParamCount())
 					strcpy(strBuf, Conditions[code]->getParamName(param));
 			}
 			break;
 		case MN_ACTIONS:
-			if(code>=0&&code<(short)Actions.size()) {
-				if(param>=0&&param<(short)Actions[code]->getParamCount())
+			if (code>=0&&code<(short)Actions.size()) {
+				if (param>=0&&param<(short)Actions[code]->getParamCount())
 					strcpy(strBuf, Actions[code]->getParamName(param));
 			}
 			break;
 		case MN_EXPRESSIONS:
-			if(code>=0&&code<(short)Expressions.size()) {
-				if(param>=0&&param<(short)Expressions[code]->getParamCount())
+			if (code>=0&&code<(short)Expressions.size()) {
+				if (param>=0&&param<(short)Expressions[code]->getParamCount())
 					strcpy(strBuf, Expressions[code]->getParamName(param));
 			}
 			break;
 		}
 	} else {
-		if((hMn=LoadMenu(hInstLib, MAKEINTRESOURCE(mn)))) {
+		if ((hMn=LoadMenu(hInstLib, MAKEINTRESOURCE(mn)))) {
 			GetMenuString(hMn, eiPtr->menu, strBuf, maxLen, MF_BYCOMMAND);
 			DestroyMenu(hMn);
 		}
@@ -1075,9 +1075,9 @@ short WINAPI DLLExport GetConditionCodeFromMenu(mv _far *mV, short menuId)
 #ifndef RUN_ONLY
 	LPEVENTINFOS2 eiPtr;
 	int n;
-	for(n=Conditions.size(), eiPtr=(LPEVENTINFOS2)conditionsInfos;n>0&&eiPtr->menu!=menuId;n--)
+	for (n=Conditions.size(), eiPtr=(LPEVENTINFOS2)conditionsInfos;n>0&&eiPtr->menu!=menuId;n--)
 		eiPtr=EVINFO2_NEXT(eiPtr);
-	if(n>0)
+	if (n>0)
 		return eiPtr->infos.code;
 #endif // !RUN_ONLY
 	return -1;
@@ -1156,7 +1156,7 @@ LPINFOEVENTSV2 WINAPI DLLExport GetExpressionInfos(mv _far *mV, short code)
 void WINAPI DLLExport GetConditionString(mv _far *mV, short code, LPSTR strPtr, short maxLen)
 {
 #ifndef RUN_ONLY
-		if(code>=0&&code<(short)Conditions.size())
+		if (code>=0&&code<(short)Conditions.size())
 			strcpy(strPtr, Conditions[code]->getName());
 #endif // !RUN_ONLY
 }
@@ -1164,7 +1164,7 @@ void WINAPI DLLExport GetConditionString(mv _far *mV, short code, LPSTR strPtr, 
 void WINAPI DLLExport GetActionString(mv _far *mV, short code, LPSTR strPtr, short maxLen)
 {
 #ifndef RUN_ONLY
-		if(code>=0&&code<(short)Actions.size())
+		if (code>=0&&code<(short)Actions.size())
 			strcpy(strPtr, Actions[code]->getName());
 #endif // !RUN_ONLY
 }
@@ -1172,7 +1172,7 @@ void WINAPI DLLExport GetActionString(mv _far *mV, short code, LPSTR strPtr, sho
 void WINAPI DLLExport GetExpressionString(mv _far *mV, short code, LPSTR strPtr, short maxLen)
 {
 #ifndef RUN_ONLY
-		if(code>=0&&code<(short)Expressions.size())
+		if (code>=0&&code<(short)Expressions.size())
 			strcpy(strPtr, Expressions[code]->getName());
 #endif // !RUN_ONLY
 }
@@ -1186,7 +1186,7 @@ void WINAPI DLLExport GetExpressionString(mv _far *mV, short code, LPSTR strPtr,
 void WINAPI DLLExport GetExpressionParam(mv _far *mV, short code, short param, LPSTR strBuf, short maxLen)
 {
 #ifndef RUN_ONLY
-	if(strlen(Expressions[code]->getParamName(param)))
+	if (strlen(Expressions[code]->getParamName(param)))
 		strcpy(strBuf, Expressions[code]->getParamName(param));
 	else
 		*strBuf=0;

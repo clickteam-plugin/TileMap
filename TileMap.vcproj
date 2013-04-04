@@ -789,7 +789,7 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release HWAA|Win32"
+			Name="Release HWA|Win32"
 			OutputDirectory="$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
@@ -1067,7 +1067,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release HWAA|Win32"
+					Name="Release HWA|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1164,7 +1164,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release HWAA|Win32"
+					Name="Release HWA|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1261,7 +1261,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release HWAA|Win32"
+					Name="Release HWA|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1362,7 +1362,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release HWAA|Win32"
+					Name="Release HWA|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1433,7 +1433,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release HWAA|Win32"
+					Name="Release HWA|Win32"
 					ExcludedFromBuild="true"
 					>
 					<Tool
@@ -1505,7 +1505,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release HWAA|Win32"
+					Name="Release HWA|Win32"
 					ExcludedFromBuild="true"
 					>
 					<Tool
@@ -1573,7 +1573,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release HWAA|Win32"
+					Name="Release HWA|Win32"
 					ExcludedFromBuild="true"
 					>
 					<Tool
@@ -1691,7 +1691,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release HWAA|Win32"
+					Name="Release HWA|Win32"
 					>
 					<Tool
 						Name="VCResourceCompilerTool"

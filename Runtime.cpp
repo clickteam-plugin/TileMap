@@ -55,7 +55,7 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
 	/* Create surface, get MMF depth.. */
 	cSurface *ps = WinGetSurface((int)rdPtr->rHo.hoAdRunHeader->rhIdEditWin);
 
-	if(!ps)
+	if (!ps)
 		return 1;
 
 	rdPtr->depth = ps->GetDepth();
@@ -71,10 +71,10 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
 	Tileset tileset;
 	cSurface is;
 
-	for(int i = 0; i < edPtr->tilesetCount; ++i)
+	for (int i = 0; i < edPtr->tilesetCount; ++i)
 	{
 		/* Create a tileset for each image */
-		if(LockImageSurface(rhPtr->rhIdAppli, edPtr->tilesets[i], is))
+		if (LockImageSurface(rhPtr->rhIdAppli, edPtr->tilesets[i], is))
 		{
 			tileset.transpCol = is.GetTransparentColor();
 			tileset.surface = new cSurface;
@@ -124,7 +124,7 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
 short WINAPI DLLExport DestroyRunObject(LPRDATA rdPtr, long fast)
 {
 	list<TMAPVIEW*>::iterator it;
-	for(it = rdPtr->viewports->begin(); it != rdPtr->viewports->end(); ++it)
+	for (it = rdPtr->viewports->begin(); it != rdPtr->viewports->end(); ++it)
 	{
 		/* Detach Tile Map */
 		(*it)->p = 0;
@@ -144,13 +144,13 @@ short WINAPI DLLExport DestroyRunObject(LPRDATA rdPtr, long fast)
 // 
 short WINAPI DLLExport HandleRunObject(LPRDATA rdPtr)
 {
-	if(rdPtr->redraw)
+	if (rdPtr->redraw)
 	{
 		/* Redraw all attached viewports */
 		list<TMAPVIEW*>::iterator it;
-		for(it = rdPtr->viewports->begin(); it != rdPtr->viewports->end(); ++it)
+		for (it = rdPtr->viewports->begin(); it != rdPtr->viewports->end(); ++it)
 		{
-			if(((*it)->rHo.hoFlags & HOF_DESTROYED) == 0)
+			if (((*it)->rHo.hoFlags & HOF_DESTROYED) == 0)
 				rdPtr->rRd->LPRO_Redraw((LPRO)*it);
 			else
 				rdPtr->viewports->erase(it++);
@@ -519,20 +519,20 @@ long ProcessCondition(LPRDATA rdPtr, long param1, long param2, long (*myFunc)(LP
 		LPQOI qualToOi = qualToOiStart;
 		bool passed = false;
 		
-		for(qualToOi; qualToOi->qoiOiList >= 0; qualToOi = (LPQOI)(((char*)qualToOi) + 4))
+		for (qualToOi; qualToOi->qoiOiList >= 0; qualToOi = (LPQOI)(((char*)qualToOi) + 4))
 		{
 			LPOIL curOi = oiList + qualToOi->qoiOiList;
 			
-			if(curOi->oilNObjects <= 0) continue;	//No Objects
+			if (curOi->oilNObjects <= 0) continue;	//No Objects
 
 			bool hasSelection = curOi->oilEventCount == rhPtr->rh2.rh2EventCount;
-			if(hasSelection && curOi->oilNumOfSelected <= 0) continue; //No selected objects
+			if (hasSelection && curOi->oilNumOfSelected <= 0) continue; //No selected objects
 			
 			LPHO curObj = NULL;
 			LPHO prevSelected = NULL;
 			int count = 0;
 			int selected = 0;
-			if(hasSelection) //Already has selected objects
+			if (hasSelection) //Already has selected objects
 			{
 				curObj = objList[curOi->oilListSelected].oblOffset;
 				count = curOi->oilNumOfSelected;
@@ -544,12 +544,12 @@ long ProcessCondition(LPRDATA rdPtr, long param1, long param2, long (*myFunc)(LP
 				curOi->oilEventCount = rhPtr->rh2.rh2EventCount; //tell mmf that the object selection is relevant to this event
 			}
 			
-			for(int i = 0; i < count; i++)
+			for (int i = 0; i < count; i++)
 			{
 				//Check here
-				if(myFunc(rdPtr, curObj, param2))
+				if (myFunc(rdPtr, curObj, param2))
 				{
-					if(selected++ == 0)
+					if (selected++ == 0)
 					{
 						curOi->oilListSelected = curObj->hoNumber;
 					}
@@ -559,14 +559,14 @@ long ProcessCondition(LPRDATA rdPtr, long param1, long param2, long (*myFunc)(LP
 					}
 					prevSelected = curObj;
 				}
-				if(hasSelection)
+				if (hasSelection)
 				{
-					if(curObj->hoNextSelected >= 0) curObj = objList[curObj->hoNextSelected].oblOffset;
+					if (curObj->hoNextSelected >= 0) curObj = objList[curObj->hoNextSelected].oblOffset;
 					else break;
 				}
 				else
 				{
-					if(curObj->hoNumNext >= 0) curObj = objList[curObj->hoNumNext].oblOffset;
+					if (curObj->hoNumNext >= 0) curObj = objList[curObj->hoNumNext].oblOffset;
 					else break;
 				}
 			}
@@ -587,16 +587,16 @@ long ProcessCondition(LPRDATA rdPtr, long param1, long param2, long (*myFunc)(LP
 	else	// Not a qualifier
 	{
 		LPOIL curOi = oiList + p1;
-		if(curOi->oilNObjects <= 0) return false;	//No Objects
+		if (curOi->oilNObjects <= 0) return false;	//No Objects
 
 		bool hasSelection = curOi->oilEventCount == rhPtr->rh2.rh2EventCount;
-		if(hasSelection && curOi->oilNumOfSelected <= 0) return false; //No selected objects
+		if (hasSelection && curOi->oilNumOfSelected <= 0) return false; //No selected objects
 		
 		LPHO curObj = NULL;
 		LPHO prevSelected = NULL;
 		int count = 0;
 		int selected = 0;
-		if(hasSelection) //Already has selected objects
+		if (hasSelection) //Already has selected objects
 		{
 			curObj = objList[curOi->oilListSelected].oblOffset;
 			count = curOi->oilNumOfSelected;
@@ -608,12 +608,12 @@ long ProcessCondition(LPRDATA rdPtr, long param1, long param2, long (*myFunc)(LP
 			curOi->oilEventCount = rhPtr->rh2.rh2EventCount; //tell mmf that the object selection is relevant to this event
 		}
 
-		for(int i = 0; i < count; i++)
+		for (int i = 0; i < count; i++)
 		{
 			//Check here
-			if(myFunc(rdPtr, curObj, param2))
+			if (myFunc(rdPtr, curObj, param2))
 			{
-				if(selected++ == 0)
+				if (selected++ == 0)
 				{
 					curOi->oilListSelected = curObj->hoNumber;
 				}
@@ -623,14 +623,14 @@ long ProcessCondition(LPRDATA rdPtr, long param1, long param2, long (*myFunc)(LP
 				}
 				prevSelected = curObj;
 			}
-			if(hasSelection)
+			if (hasSelection)
 			{
-				if(curObj->hoNextSelected < 0) break;
+				if (curObj->hoNextSelected < 0) break;
 				else curObj = objList[curObj->hoNextSelected].oblOffset;
 			}
 			else
 			{
-				if(curObj->hoNumNext < 0) break;
+				if (curObj->hoNumNext < 0) break;
 				else curObj = objList[curObj->hoNumNext].oblOffset;
 			}
 		}

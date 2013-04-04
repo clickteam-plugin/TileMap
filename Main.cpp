@@ -80,7 +80,7 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(2, PARAM_NUMBER,"Layer width (tiles)", PARAM_NUMBER,"Layer height (tiles)")
 ) {
-	if(rdPtr->currentLayer)
+	if (rdPtr->currentLayer)
 	{
 		int width = intParam();
 		int height = intParam();
@@ -96,7 +96,7 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(2, PARAM_NUMBER,"X speed (1.0 = normal)", PARAM_NUMBER,"Y speed (1.0 = normal)")
 ) {
-	if(rdPtr->currentLayer)
+	if (rdPtr->currentLayer)
 	{
 		rdPtr->currentLayer->scrollX = fltParam();
 		rdPtr->currentLayer->scrollY = fltParam();
@@ -110,7 +110,7 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(1, PARAM_STRING, "File path (Relative file path, e.g. \"./Tileset.png\" or custom identifier)")
 ) {
-	if(rdPtr->currentTileset)
+	if (rdPtr->currentTileset)
 	{
 		memset(rdPtr->currentTileset->path, 0, 256);
 		strncpy(rdPtr->currentTileset->path, strParam(), 255);
@@ -123,16 +123,16 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(1, PARAM_FILENAME2,"File path")
 ) {
-	if(rdPtr->currentTileset)
+	if (rdPtr->currentTileset)
 	{
 		/* Load file */
 		cSurface file;
-		if(!ImportImage(rdPtr->rHo.hoAdRunHeader->rh4.rh4Mv->mvImgFilterMgr, (const char*)param1, &file, 0, 0))
+		if (!ImportImage(rdPtr->rHo.hoAdRunHeader->rh4.rh4Mv->mvImgFilterMgr, (const char*)param1, &file, 0, 0))
 			return;
 
 		/* Allocate surface */
 		Tileset* tileset = rdPtr->currentTileset;
-		if(!tileset->surface)
+		if (!tileset->surface)
 			tileset->surface = new cSurface;
 		else
 			tileset->surface->Delete();
@@ -149,7 +149,7 @@ ACTION(
 		memset(tileset->path, 0, 256);
 		char path[MAX_PATH], workingDir[MAX_PATH];
 		GetCurrentDirectory(MAX_PATH, workingDir);
-		if(PathRelativePathTo(path, workingDir, FILE_ATTRIBUTE_DIRECTORY, (const char*)param1, 0))
+		if (PathRelativePathTo(path, workingDir, FILE_ATTRIBUTE_DIRECTORY, (const char*)param1, 0))
 		{
 			strcpy_s(tileset->path, 256, path);
 		}
@@ -197,7 +197,7 @@ ACTION(
 	/* Params */		(4, PARAM_NUMBER,"Tile X", PARAM_NUMBER,"Tile Y", /*PARAM_NUMBER,"Tileset index (0-99, -1: Empty)",*/
 	PARAM_NUMBER,"Tileset X (-1: Empty)", PARAM_NUMBER,"Tileset Y (-1: Empty)")
 ) {
-	if(rdPtr->currentLayer)
+	if (rdPtr->currentLayer)
 	{
 		unsigned int x = intParam();
 		unsigned int y = intParam();
@@ -205,7 +205,7 @@ ACTION(
 		unsigned char tileY = (unsigned char)intParam();
 
 		Layer* layer = rdPtr->currentLayer;
-		if(layer->isValid() && x < layer->width && y < layer->height)
+		if (layer->isValid() && x < layer->width && y < layer->height)
 		{
 			Tile* tile = layer->get(x, y);
 			tile->x = tileX;
@@ -224,7 +224,7 @@ ACTION(
 ) {
 	unsigned int id = intParam();
 
-	if(id < rdPtr->layers->size())
+	if (id < rdPtr->layers->size())
 		rdPtr->currentLayer = &(*rdPtr->layers)[id];
 	else	
 		rdPtr->currentLayer = 0;
@@ -236,7 +236,7 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(2, PARAM_NUMBER,"Wrap X (0: No, 1: Yes)", PARAM_NUMBER,"Wrap Y (0: No, 1: Yes)")
 ) {
-	if(rdPtr->currentLayer)
+	if (rdPtr->currentLayer)
 	{
 		rdPtr->currentLayer->wrapX = intParam() != 0;
 		rdPtr->currentLayer->wrapY = intParam() != 0;
@@ -250,7 +250,7 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(2, PARAM_NUMBER,"Offset X (pixels)", PARAM_NUMBER,"Offset Y (pixels)")
 ) {
-	if(rdPtr->currentLayer)
+	if (rdPtr->currentLayer)
 	{	
 		rdPtr->currentLayer->offsetX = (short)intParam();
 		rdPtr->currentLayer->offsetY = (short)intParam();
@@ -295,9 +295,9 @@ ACTION(
 	PARAM_NUMBER,"Method, add one of X (1: Wrap, 4: Repeat, 16: Box, 64: Random) and Y (2: Wrap, 8: Repeat, 32: Box, 128: Random)")
 ) {
 
-	if(rdPtr->currentLayer)
+	if (rdPtr->currentLayer)
 	{
-		if(!rdPtr->currentLayer->isValid())
+		if (!rdPtr->currentLayer->isValid())
 			return;
 
 		int tlX = intParam();
@@ -317,23 +317,23 @@ ACTION(
 		int width = rdPtr->currentLayer->width;
 		int height = rdPtr->currentLayer->height;
 
-		if(tlX < 0) tlX += width;
-		if(tlY < 0) tlY += height;
-		if(brX < 0) brX += width;
-		if(brY < 0) brY += height;
+		if (tlX < 0) tlX += width;
+		if (tlY < 0) tlY += height;
+		if (brX < 0) brX += width;
+		if (brY < 0) brY += height;
 
 		tlX = max(0, min(width-1, tlX));
 		brX = max(0, min(width-1, brX));
 		tlY = max(0, min(height-1, tlY));
 		brY = max(0, min(height-1, brY));
 
-		if(brX-tlX < 0 || brY-tlY < 0)
+		if (brX-tlX < 0 || brY-tlY < 0)
 			return;
 
 		Tile* data = rdPtr->currentLayer->data;
-		for(int x = 0; x <= brX-tlX; ++x)
+		for (int x = 0; x <= brX-tlX; ++x)
 		{
-			for(int y = 0; y <= brY-tlY; ++y)
+			for (int y = 0; y <= brY-tlY; ++y)
 			{
 				Tile* tile = data + (tlX+x) + width*(tlY+y);
 				//tile->tileset = tilesetID + 1;
@@ -382,21 +382,21 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(2, PARAM_OBJECT,"Surface", PARAM_NUMBER,"Image index")
 ) {
-	if(rdPtr->currentTileset)
+	if (rdPtr->currentTileset)
 	{
 		SURFACE* surface = (SURFACE*)param1;
 		int id = param2;
 
-		if(surface->rHo.hoIdentifier != MAKEID(S, U, R, F))
+		if (surface->rHo.hoIdentifier != MAKEID(S, U, R, F))
 			return;
 
 		cSurface* image = surface->imageAt(surface, id);
-		if(!image || !image->IsValid())
+		if (!image || !image->IsValid())
 			return;
 
 		/* Allocate surface */
 		Tileset* tileset = rdPtr->currentTileset;
-		if(!tileset->surface)
+		if (!tileset->surface)
 			tileset->surface = new cSurface;
 		else
 			tileset->surface->Delete();
@@ -422,7 +422,7 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(1, PARAM_NUMBER,"Tileset index (0-99, -1: Same as normal tileset)")
 ) {
-	if(rdPtr->currentLayer)
+	if (rdPtr->currentLayer)
 	{
 		rdPtr->currentLayer->collision = (unsigned char)intParam();
 		rdPtr->redraw = true;
@@ -438,16 +438,16 @@ ACTION(
 	/* Params */		(2, PARAM_OBJECT,"Surface", PARAM_NUMBER,"Image index")
 ) {
 	Layer* layer = rdPtr->currentLayer;
-	if(layer && layer->isValid())
+	if (layer && layer->isValid())
 	{
 		SURFACE* surface = (SURFACE*)param1;
 		int id = param2;
 
-		if(surface->rHo.hoIdentifier != MAKEID(S, U, R, F))
+		if (surface->rHo.hoIdentifier != MAKEID(S, U, R, F))
 			return;
 
 		cSurface* image = surface->imageAt(surface, id);
-		if(!image || !image->IsValid())
+		if (!image || !image->IsValid())
 			return;
 
 		/* Get layer size */
@@ -469,9 +469,9 @@ ACTION(
 		x2 = max(0, min(layerWidth, x2));
 		y2 = max(0, min(layerHeight, y2));
 	
-		for(int x = 0; x < x2-x1; ++x)
+		for (int x = 0; x < x2-x1; ++x)
 		{
-			for(int y = 0; y < y2-y1; ++y)
+			for (int y = 0; y < y2-y1; ++y)
 			{
 				Tile* tile = layer->get(x+x1, y+y1);
 
@@ -483,7 +483,7 @@ ACTION(
 		}
 
 		/* Redraw surface if necessary */
-		if(id == surface->targetId)
+		if (id == surface->targetId)
 			surface->rc.rcChanged = true;
 	}
 }
@@ -495,16 +495,16 @@ ACTION(
 	/* Params */		(2, PARAM_OBJECT,"Surface", PARAM_NUMBER,"Image index")
 ) {
 	Layer* layer = rdPtr->currentLayer;
-	if(layer && layer->isValid())
+	if (layer && layer->isValid())
 	{
 		SURFACE* surface = (SURFACE*)param1;
 		int id = param2;
 
-		if(surface->rHo.hoIdentifier != MAKEID(S, U, R, F))
+		if (surface->rHo.hoIdentifier != MAKEID(S, U, R, F))
 			return;
 
 		cSurface* image = surface->imageAt(surface, id);
-		if(!image || !image->IsValid())
+		if (!image || !image->IsValid())
 			return;
 
 		/* Get layer size */
@@ -526,9 +526,9 @@ ACTION(
 		x2 = max(0, min(layerWidth, x2));
 		y2 = max(0, min(layerHeight, y2));
 	
-		for(int x = 0; x < x2-x1; ++x)
+		for (int x = 0; x < x2-x1; ++x)
 		{
-			for(int y = 0; y < y2-y1; ++y)
+			for (int y = 0; y < y2-y1; ++y)
 			{
 				Tile* tile = layer->get(x+x1, y+y1);
 
@@ -550,7 +550,7 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(1, PARAM_NUMBER,"Visible (0: No, 1: Yes)")
 ) {
-	if(rdPtr->currentLayer)
+	if (rdPtr->currentLayer)
 	{
 		rdPtr->currentLayer->visible = intParam() != 0;
 		rdPtr->redraw = true;
@@ -563,7 +563,7 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(1, PARAM_NUMBER,"Opacity (0.0-1.0)")
 ) {
-	if(rdPtr->currentLayer)
+	if (rdPtr->currentLayer)
 	{
 		rdPtr->currentLayer->opacity = fltParam();
 		rdPtr->currentLayer->opacity = max(0, min(1, rdPtr->currentLayer->opacity));
@@ -605,7 +605,7 @@ ACTION(
 	
 	/* Start reading file */
 	FILE* file = fopen(path, "rb");
-	if(!file)
+	if (!file)
 	{
 		rdPtr->rRd->GenerateEvent(2);
 		return;
@@ -618,18 +618,18 @@ ACTION(
 		/* Check magic number */
 		char leMagic[8];
 		fread(&leMagic, sizeof(char)*8, 1, file);
-		if(memcmp(leMagic, MAGIC, sizeof(char)*8))
+		if (memcmp(leMagic, MAGIC, sizeof(char)*8))
 			break;
 
 		/* Check version */
 		short version;
 		fread(&version, sizeof(short), 1, file);
-		if(version < VER_10 || version > VER)
+		if (version < VER_10 || version > VER)
 			break;
 		
 		/* Read blocks */
 		error = false;
-		while(!error && !feof(file))
+		while (!error && !feof(file))
 		{
 			/* Read block identifier + size */
 			int block = 0, blockSize = 0;
@@ -640,10 +640,10 @@ ACTION(
 			{
 				case MAP_:
 
-					if(rdPtr->blocks & BLOCK_MAP)
+					if (rdPtr->blocks & BLOCK_MAP)
 					{
 						/* Invalid size, exit */
-						if(blockSize != sizeof(short)*2)
+						if (blockSize != sizeof(short)*2)
 						{
 							error = true;
 							break;
@@ -662,7 +662,7 @@ ACTION(
 
 				case TILE:
 
-					if(rdPtr->blocks & BLOCK_TILESETS)
+					if (rdPtr->blocks & BLOCK_TILESETS)
 					{
 						rdPtr->tilesets->clear();
 
@@ -671,7 +671,7 @@ ACTION(
 						rdPtr->tilesets->reserve(tilesetCount);
 
 						Tileset* oldTileset = rdPtr->currentTileset;
-						for(int i = 0; i < tilesetCount; ++i)
+						for (int i = 0; i < tilesetCount; ++i)
 						{
 							rdPtr->tilesets->push_back(Tileset());
 							Tileset* tileset = &rdPtr->tilesets->back();
@@ -686,7 +686,7 @@ ACTION(
 							fread(tileset->path, 1, pathLength, file);
 
 							/* If the file exists, try to load image */
-							if(GetFileAttributes(tileset->path) != 0xFFFFFFFF)
+							if (GetFileAttributes(tileset->path) != 0xFFFFFFFF)
 							{
 								rdPtr->currentTileset = tileset;
 								ActionFunc6(rdPtr, (long)&tileset->path[0], 0);
@@ -703,7 +703,7 @@ ACTION(
 
 				case LAYR:
 
-					if(rdPtr->blocks & BLOCK_LAYERS)
+					if (rdPtr->blocks & BLOCK_LAYERS)
 					{
 						rdPtr->layers->clear();
 
@@ -712,14 +712,14 @@ ACTION(
 						rdPtr->layers->reserve(layerCount);
 
 						/* Load them layers */
-						for(unsigned int i = 0; i < layerCount; ++i)
+						for (unsigned int i = 0; i < layerCount; ++i)
 						{
 							rdPtr->layers->push_back(Layer());
 							Layer* layer = &rdPtr->layers->back();
 
 							/* Read settings */
 							fread(&layer->width, sizeof(int), 1, file);
-							if(feof(file)) { error = true; break; }
+							if (feof(file)) { error = true; break; }
 							fread(&layer->height, sizeof(int), 1, file);
 							fread(&layer->tileset, sizeof(char), 1, file);
 							fread(&layer->collision, sizeof(char), 1, file);
@@ -737,7 +737,7 @@ ACTION(
 							fread(&dataBlockCount, sizeof(char), 1, file);
 
 							/* Now, keeps read all the data blocks */
-							for(int i = 0; i < dataBlockCount; ++i)
+							for (int i = 0; i < dataBlockCount; ++i)
 							{
 								int dataBlock;
 								fread(&dataBlock, sizeof(int), 1, file);
@@ -753,7 +753,7 @@ ACTION(
 										layer->resize(layer->width, layer->height);
 
 										/* Allocation succeeded, assign data pointer */
-										if(layer->isValid())
+										if (layer->isValid())
 											destination = (unsigned char*)layer->data;
 
 										break;
@@ -764,7 +764,7 @@ ACTION(
 								fread(&dataSize, sizeof(long), 1, file);
 										
 								/* Recognized data, read it */
-								if(destination)
+								if (destination)
 								{
 									/* Read the compressed data */
 									unsigned char* temp = new unsigned char[dataSize];
@@ -793,7 +793,7 @@ ACTION(
 				break;
 
 				default:
-					if(!feof(file))
+					if (!feof(file))
 					{
 						/* Error occured */
 						error = true;
@@ -801,15 +801,15 @@ ACTION(
 					break;
 
 			} /* switch(block) */
-		} /* while(!error && !feof(file)) */
+		} /* while (!error && !feof(file)) */
 
-	} while(0);
+	} while (0);
 
-	if(rdPtr->blocks & BLOCK_TILESETS)
+	if (rdPtr->blocks & BLOCK_TILESETS)
 		rdPtr->currentTileset = 0;
 	rdPtr->currentLayer = 0;
 
-	if(error)
+	if (error)
 		rdPtr->rRd->GenerateEvent(2);
 	else
 		rdPtr->rRd->GenerateEvent(0);
@@ -831,7 +831,7 @@ ACTION(
 
 	/* Open file */
 	FILE* file = fopen((const char*)param1, "wb");
-	if(!file)
+	if (!file)
 	{
 		rdPtr->rRd->GenerateEvent(3);
 		return;
@@ -844,7 +844,7 @@ ACTION(
 	int blockSize = 0;
 
 	/* Write map block */
-	if(rdPtr->blocks & BLOCK_MAP)
+	if (rdPtr->blocks & BLOCK_MAP)
 	{
 		fwrite(&MAP_, sizeof(int), 1, file);
 		blockSize = sizeof(short)*2;
@@ -854,11 +854,11 @@ ACTION(
 	}
 
 	/* Write tileset block */
-	if(rdPtr->blocks & BLOCK_TILESETS)
+	if (rdPtr->blocks & BLOCK_TILESETS)
 	{
 		fwrite(&TILE, sizeof(int), 1, file);
 		blockSize = sizeof(char);
-		for(unsigned int i = 0; i < tilesetCount; ++i)
+		for (unsigned int i = 0; i < tilesetCount; ++i)
 		{
 			blockSize += sizeof(COLORREF);
 			blockSize += sizeof(char);
@@ -867,7 +867,7 @@ ACTION(
 		fwrite(&blockSize, sizeof(int), 1, file);
 		fwrite(&tilesetCount, sizeof(char), 1, file);
 
-		for(unsigned int i = 0; i < tilesetCount; ++i)
+		for (unsigned int i = 0; i < tilesetCount; ++i)
 		{
 			Tileset* tileset = &(*rdPtr->tilesets)[i];
 			fwrite(&tileset->transpCol, sizeof(COLORREF), 1, file);
@@ -877,7 +877,7 @@ ACTION(
 	}
 
 	/* Write layer block */
-	if(rdPtr->blocks & BLOCK_LAYERS)
+	if (rdPtr->blocks & BLOCK_LAYERS)
 	{
 		fwrite(&LAYR, sizeof(int), 1, file);
 		
@@ -887,7 +887,7 @@ ACTION(
 
 		fwrite(&layerCount, sizeof(short), 1, file);
 
-		for(unsigned int i = 0; i < layerCount; ++i)
+		for (unsigned int i = 0; i < layerCount; ++i)
 		{
 			Layer* layer = &(*rdPtr->layers)[i];
 
@@ -912,7 +912,7 @@ ACTION(
 			/* Tile data */
 			fwrite(&MAIN, sizeof(int), 1, file);
 
-			if(layer->isValid())
+			if (layer->isValid())
 			{
 				/* Compress tile data... */
 				mz_ulong dataSize = sizeof(Tile) * layer->width * layer->height;
@@ -954,13 +954,13 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(2, PARAM_NUMBER,"Tile X", PARAM_NUMBER,"Tile Y")
 ) {
-	if(rdPtr->currentLayer)
+	if (rdPtr->currentLayer)
 	{
 		unsigned int x = intParam();
 		unsigned int y = intParam();
 
 		Layer* layer = rdPtr->currentLayer;
-		if(layer->isValid() && x < layer->width && y < layer->height)
+		if (layer->isValid() && x < layer->width && y < layer->height)
 		{
 			Tile* tile = layer->get(x, y);
 			//tile->tileset = 0;
@@ -982,9 +982,9 @@ ACTION(
 	 /*PARAM_NUMBER,"Tileset index (0-99, -1: Empty)",*/ PARAM_NUMBER,"Tileset X (-1: Empty)", PARAM_NUMBER,"Tileset Y (-1: Empty)")
 ) {
 
-	if(rdPtr->currentLayer)
+	if (rdPtr->currentLayer)
 	{
-		if(!rdPtr->currentLayer->isValid())
+		if (!rdPtr->currentLayer->isValid())
 			return;
 
 		int tlX = intParam();
@@ -999,23 +999,23 @@ ACTION(
 		int width = rdPtr->currentLayer->width;
 		int height = rdPtr->currentLayer->height;
 
-		if(tlX < 0) tlX += width;
-		if(tlY < 0) tlY += height;
-		if(brX < 0) brX += width;
-		if(brY < 0) brY += height;
+		if (tlX < 0) tlX += width;
+		if (tlY < 0) tlY += height;
+		if (brX < 0) brX += width;
+		if (brY < 0) brY += height;
 
 		tlX = max(0, min(width-1, tlX));
 		brX = max(0, min(width-1, brX));
 		tlY = max(0, min(height-1, tlY));
 		brY = max(0, min(height-1, brY));
 
-		if(brX-tlX < 0 || brY-tlY < 0)
+		if (brX-tlX < 0 || brY-tlY < 0)
 			return;
 
 		Tile* data = rdPtr->currentLayer->data;
-		for(int x = 0; x <= brX-tlX; ++x)
+		for (int x = 0; x <= brX-tlX; ++x)
 		{
-			for(int y = 0; y <= brY-tlY; ++y)
+			for (int y = 0; y <= brY-tlY; ++y)
 			{
 				Tile* tile = data + (tlX+x) + width*(tlY+y);
 				//tile->tileset = tilesetID + 1;
@@ -1037,10 +1037,10 @@ ACTION(
 	SURFACE* surface = (SURFACE*)objParam();
 	Tileset* oldTileset = rdPtr->currentTileset;
 
-	if(surface->rHo.hoIdentifier != MAKEID(S, U, R, F))
+	if (surface->rHo.hoIdentifier != MAKEID(S, U, R, F))
 		return;
 
-	for(int i = 0; i < surface->imageCount(surface); ++i)
+	for (int i = 0; i < surface->imageCount(surface); ++i)
 	{
 		/* Add tileset */
 		ActionFunc12(rdPtr, 0, 0);
@@ -1067,11 +1067,11 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(1, PARAM_COLOUR, "Transparent color")
 ) {
-	if(rdPtr->currentTileset)
+	if (rdPtr->currentTileset)
 	{
 		rdPtr->currentTileset->transpCol = param1;
 
-		if(rdPtr->currentTileset->surface)
+		if (rdPtr->currentTileset->surface)
 			rdPtr->currentTileset->surface->SetTransparentColor(param1);
 
 		rdPtr->redraw = true;
@@ -1107,7 +1107,7 @@ ACTION(
 ) {
 	unsigned int id = intParam();
 
-	if(id < rdPtr->tilesets->size())
+	if (id < rdPtr->tilesets->size())
 		rdPtr->currentTileset = &(*rdPtr->tilesets)[id];
 	else	
 		rdPtr->currentTileset = 0;
@@ -1136,7 +1136,7 @@ ACTION(
 	/* Params */		(2, PARAM_NUMBER, "Tile X", PARAM_NUMBER, "Tile Y")
 ) {
 	Layer* layer = rdPtr->currentLayer;
-	if(layer && layer->isValid())
+	if (layer && layer->isValid())
 	{
 		/* Get layer size */
 		int layerWidth = layer->width;
@@ -1150,9 +1150,9 @@ ACTION(
 		int y1 = param2;
 
 		/* Single tile, avoid loop */
-		if(width == 1 && height == 1)
+		if (width == 1 && height == 1)
 		{
-			if(x1 >= 0 && y1 >= 0 && x1 < layerWidth && y1 < layerHeight)
+			if (x1 >= 0 && y1 >= 0 && x1 < layerWidth && y1 < layerHeight)
 			{
 				Tile* tile = layer->get(x1, y1);
 				tile->x = rdPtr->cursor.tiles.x1;
@@ -1178,14 +1178,14 @@ ACTION(
 		unsigned char patternX = rdPtr->cursor.patternX;
 		unsigned char patternY = rdPtr->cursor.patternY;
 
-		for(int x = 0; x <= x2-x1; ++x)
+		for (int x = 0; x <= x2-x1; ++x)
 		{
-			for(int y = 0; y <= y2-y1; ++y)
+			for (int y = 0; y <= y2-y1; ++y)
 			{
 				Tile* tile = layer->get(x+x1, y+y1);
 
 				/* X value */
-				if(tiles.x2-tiles.x1)
+				if (tiles.x2-tiles.x1)
 				{
 					switch(patternX)
 					{
@@ -1205,7 +1205,7 @@ ACTION(
 				}
 
 				/* Y value */
-				if(tiles.y2-tiles.y1)
+				if (tiles.y2-tiles.y1)
 				{
 					switch(patternY)
 					{
@@ -1248,7 +1248,7 @@ ACTION(
 	/* Params */		(2, PARAM_NUMBER, "Tileset A (0-99)", PARAM_NUMBER, "Tileset B (0-99)")
 ) {
 	unsigned int a = intParam(), b = intParam();
-	if(a < rdPtr->tilesets->size() && b < rdPtr->tilesets->size())
+	if (a < rdPtr->tilesets->size() && b < rdPtr->tilesets->size())
 	{
 		swap(rdPtr->tilesets->at(a), rdPtr->tilesets->at(b));
 		rdPtr->redraw = true;
@@ -1283,7 +1283,7 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(1, PARAM_NUMBER,"Tileset index (0-99)")
 ) {
-	if(rdPtr->currentLayer)
+	if (rdPtr->currentLayer)
 	{
 		rdPtr->currentLayer->tileset = (unsigned char)intParam();
 		rdPtr->redraw = true;
@@ -1298,7 +1298,7 @@ ACTION(
 	/* Params */		(2,PARAM_NUMBER,"Tile X",PARAM_NUMBER,"Tile Y")
 ) {
 	Layer* layer = rdPtr->currentLayer;
-	if(layer && layer->isValid())
+	if (layer && layer->isValid())
 	{
 		/* Get layer size */
 		int layerWidth = layer->width;
@@ -1326,9 +1326,9 @@ ACTION(
 		x2 = max(0, min(layerWidth, x2));
 		y2 = max(0, min(layerHeight, y2));
 	
-		for(int x = 0; x < x2-x1; ++x)
+		for (int x = 0; x < x2-x1; ++x)
 		{
-			for(int y = 0; y < y2-y1; ++y)
+			for (int y = 0; y < y2-y1; ++y)
 			{
 				Tile* tile = layer->get(x+x1, y+y1);
 				Tile* src = layer->get(x+srcX, y+srcY);
@@ -1347,7 +1347,7 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(0)
 ) {
-	if(rdPtr->currentLayer)
+	if (rdPtr->currentLayer)
 	{
 		rdPtr->cursor.x = 0;
 		rdPtr->cursor.y = 0;
@@ -1373,9 +1373,9 @@ ACTION(
 ) {
 	unsigned int i = Param(TYPE_INT);
 
-	if(i < rdPtr->tilesets->size())
+	if (i < rdPtr->tilesets->size())
 	{
-		if(&(*rdPtr->tilesets)[i] == rdPtr->currentTileset)
+		if (&(*rdPtr->tilesets)[i] == rdPtr->currentTileset)
 			rdPtr->currentTileset = 0;
 
 		rdPtr->tilesets->erase(rdPtr->tilesets->begin() + i);
@@ -1392,9 +1392,9 @@ ACTION(
 ) {
 	unsigned int i = Param(TYPE_INT);
 
-	if(i < rdPtr->layers->size())
+	if (i < rdPtr->layers->size())
 	{
-		if(&(*rdPtr->layers)[i] == rdPtr->currentLayer)
+		if (&(*rdPtr->layers)[i] == rdPtr->currentLayer)
 			rdPtr->currentLayer = 0;
 
 		rdPtr->layers->erase(rdPtr->layers->begin() + i);
@@ -1429,7 +1429,7 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(0)
 ) {
-	if(rdPtr->currentLayer && rdPtr->currentLayer->isValid())
+	if (rdPtr->currentLayer && rdPtr->currentLayer->isValid())
 	{
 		memset(rdPtr->currentLayer->data, -1, rdPtr->currentLayer->width*rdPtr->currentLayer->height*sizeof(Tile));
 	}
@@ -1450,9 +1450,9 @@ EXPRESSION(
 ) {
 	unsigned int i = ExParam(TYPE_INT);
 
-	if(i < rdPtr->tilesets->size())
+	if (i < rdPtr->tilesets->size())
 	{
-		if((*rdPtr->tilesets)[i].isValid())
+		if ((*rdPtr->tilesets)[i].isValid())
 			return (*rdPtr->tilesets)[i].surface->GetWidth() / rdPtr->tileWidth;
 	}
 	
@@ -1467,9 +1467,9 @@ EXPRESSION(
 ) {
 	unsigned int i = ExParam(TYPE_INT);
 
-	if(i < rdPtr->tilesets->size())
+	if (i < rdPtr->tilesets->size())
 	{
-		if((*rdPtr->tilesets)[i].isValid())
+		if ((*rdPtr->tilesets)[i].isValid())
 			return (*rdPtr->tilesets)[i].surface->GetHeight() / rdPtr->tileHeight;
 	}
 	
@@ -1484,7 +1484,7 @@ EXPRESSION(
 ) {
 	unsigned int i = ExParam(TYPE_INT);
 
-	if(i < rdPtr->layers->size())
+	if (i < rdPtr->layers->size())
 	{
 		return (*rdPtr->layers)[i].width;
 	}
@@ -1500,7 +1500,7 @@ EXPRESSION(
 ) {
 	unsigned int i = ExParam(TYPE_INT);
 
-	if(i < rdPtr->layers->size())
+	if (i < rdPtr->layers->size())
 	{
 		return (*rdPtr->layers)[i].height;
 	}
@@ -1516,7 +1516,7 @@ EXPRESSION(
 ) {
 	unsigned int i = ExParam(TYPE_INT);
 
-	if(i < rdPtr->layers->size())
+	if (i < rdPtr->layers->size())
 	{
 		return (*rdPtr->layers)[i].wrapX;
 	}
@@ -1532,7 +1532,7 @@ EXPRESSION(
 ) {
 	unsigned int i = ExParam(TYPE_INT);
 
-	if(i < rdPtr->layers->size())
+	if (i < rdPtr->layers->size())
 	{
 		return (*rdPtr->layers)[i].wrapY;
 	}
@@ -1548,7 +1548,7 @@ EXPRESSION(
 ) {
 	unsigned int i = ExParam(TYPE_INT);
 
-	if(i < rdPtr->layers->size())
+	if (i < rdPtr->layers->size())
 	{
 		return (*rdPtr->layers)[i].offsetX;
 	}
@@ -1564,7 +1564,7 @@ EXPRESSION(
 ) {
 	unsigned int i = ExParam(TYPE_INT);
 
-	if(i < rdPtr->layers->size())
+	if (i < rdPtr->layers->size())
 	{
 		return (*rdPtr->layers)[i].offsetY;
 	}
@@ -1580,7 +1580,7 @@ EXPRESSION(
 ) {
 	unsigned int i = ExParam(TYPE_INT);
 
-	if(i < rdPtr->layers->size())
+	if (i < rdPtr->layers->size())
 	{
 		ReturnFloat((*rdPtr->layers)[i].scrollX);
 	}
@@ -1596,7 +1596,7 @@ EXPRESSION(
 ) {
 	unsigned int i = ExParam(TYPE_INT);
 
-	if(i < rdPtr->layers->size())
+	if (i < rdPtr->layers->size())
 	{
 		ReturnFloat((*rdPtr->layers)[i].scrollY);
 	}
@@ -1632,11 +1632,11 @@ EXPRESSION(
 	unsigned int x = ExParam(TYPE_INT);
 	unsigned int y = ExParam(TYPE_INT);
 
-	if(i < rdPtr->layers->size())
+	if (i < rdPtr->layers->size())
 	{
 		Layer* layer = &(*rdPtr->layers)[i];
 
-		if(x >= layer->width || y >= layer->height)
+		if (x >= layer->width || y >= layer->height)
 			return 0;
 
 		return layer->get(x, y)->x;
@@ -1655,11 +1655,11 @@ EXPRESSION(
 	unsigned int x = ExParam(TYPE_INT);
 	unsigned int y = ExParam(TYPE_INT);
 
-	if(i < rdPtr->layers->size())
+	if (i < rdPtr->layers->size())
 	{
 		Layer* layer = &(*rdPtr->layers)[i];
 
-		if(x >= layer->width || y >= layer->height)
+		if (x >= layer->width || y >= layer->height)
 			return 0;
 
 		return layer->get(x, y)->y;
@@ -1678,11 +1678,11 @@ EXPRESSION(
 	unsigned int x = ExParam(TYPE_INT);
 	unsigned int y = ExParam(TYPE_INT);
 
-	if(i < rdPtr->layers->size())
+	if (i < rdPtr->layers->size())
 	{
 		Layer* layer = &(*rdPtr->layers)[i];
 
-		if(x >= layer->width || y >= layer->height)
+		if (x >= layer->width || y >= layer->height)
 			return 0;
 
 		Tile* tile = layer->get(x, y);
