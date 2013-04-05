@@ -180,10 +180,8 @@ ACTION(
 	/* Params */		(0)
 ) {
 	TileRange temp = rdPtr->cursor.tiles;
-	rdPtr->cursor.tiles.x1 = 0xff;
-	rdPtr->cursor.tiles.y1 = 0xff;
-	rdPtr->cursor.tiles.x2 = 0xff;
-	rdPtr->cursor.tiles.y2 = 0xff;
+	rdPtr->cursor.tiles.a.id = Tile::EMPTY;
+	rdPtr->cursor.tiles.b.id = Tile::EMPTY;
 	ActionFunc32(rdPtr, rdPtr->cursor.x, rdPtr->cursor.y);
 	rdPtr->cursor.tiles = temp;
 	rdPtr->redraw = true;
@@ -577,10 +575,10 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(4, PARAM_NUMBER,"Top-left tileset X", PARAM_NUMBER,"Top-left tileset Y", PARAM_NUMBER,"Bottom-right tileset X", PARAM_NUMBER,"Bottom-right tileset Y")
 ) {
-	rdPtr->cursor.tiles.x1 = (unsigned char)intParam();
-	rdPtr->cursor.tiles.y1 = (unsigned char)intParam();
-	rdPtr->cursor.tiles.x2 = (unsigned char)intParam();
-	rdPtr->cursor.tiles.y2 = (unsigned char)intParam();
+	rdPtr->cursor.tiles.a.x = (unsigned char)intParam();
+	rdPtr->cursor.tiles.a.y = (unsigned char)intParam();
+	rdPtr->cursor.tiles.b.x = (unsigned char)intParam();
+	rdPtr->cursor.tiles.b.y = (unsigned char)intParam();
 }
 
 
@@ -1155,8 +1153,8 @@ ACTION(
 			if (x1 >= 0 && y1 >= 0 && x1 < layerWidth && y1 < layerHeight)
 			{
 				Tile* tile = layer->get(x1, y1);
-				tile->x = rdPtr->cursor.tiles.x1;
-				tile->y = rdPtr->cursor.tiles.y1;
+				tile->x = rdPtr->cursor.tiles.a.x;
+				tile->y = rdPtr->cursor.tiles.b.y;
 			}
 			
 			
@@ -1185,43 +1183,43 @@ ACTION(
 				Tile* tile = layer->get(x+x1, y+y1);
 
 				/* X value */
-				if (tiles.x2-tiles.x1)
+				if (tiles.b.x-tiles.a.x)
 				{
 					switch(patternX)
 					{
 						case 1: /* Repeat */
-							tile->x = min(tiles.x2, x + tiles.x1); break;
+							tile->x = min(tiles.b.x, x + tiles.a.x); break;
 						case 2: /* Box */
-							tile->x = tiles.x1 + (x ? (1 + x/(x2-x1)) : 0); break;
+							tile->x = tiles.a.x + (x ? (1 + x/(x2-x1)) : 0); break;
 						case 3: /* Random */
-							tile->x = tiles.x1 + rand() % (tiles.x2-tiles.x1+1); break;
+							tile->x = tiles.a.x + rand() % (tiles.b.x-tiles.a.x+1); break;
 						default: /* Wrap */
-							tile->x = tiles.x1 + x % (tiles.x2-tiles.x1+1);
+							tile->x = tiles.a.x + x % (tiles.b.x-tiles.a.x+1);
 					}
 				}
 				else
 				{
-					tile->x = tiles.x1;
+					tile->x = tiles.a.x;
 				}
 
 				/* Y value */
-				if (tiles.y2-tiles.y1)
+				if (tiles.b.y-tiles.a.y)
 				{
 					switch(patternY)
 					{
 						case 1: /* Repeat */
-							tile->y = min(tiles.y2, y + tiles.y1); break;
+							tile->y = min(tiles.b.y, y + tiles.a.y); break;
 						case 2: /* Box */
-							tile->y = tiles.y1 + (y ? (1 + y/(y2-y1)) : 0); break;
+							tile->y = tiles.a.y + (y ? (1 + y/(y2-y1)) : 0); break;
 						case 3: /* Random */
-							tile->y = tiles.y1 + rand() % (tiles.y2-tiles.y1+1); break;
+							tile->y = tiles.a.y + rand() % (tiles.b.y-tiles.a.y+1); break;
 						default: /* Wrap */
-							tile->y = tiles.y1 + y % (tiles.y2-tiles.y1+1);
+							tile->y = tiles.a.y + y % (tiles.b.y-tiles.a.y+1);
 					}
 				}
 				else
 				{
-					tile->y = tiles.y1;
+					tile->y = tiles.a.y;
 				}
 			}
 		}
@@ -1271,10 +1269,10 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(2, PARAM_NUMBER, "Tileset X (-1: Empty)", PARAM_NUMBER, "Tileset Y (-1: Empty)")
 ) {
-	rdPtr->cursor.tiles.x1 = (unsigned char)intParam();
-	rdPtr->cursor.tiles.y1 = (unsigned char)intParam();
-	rdPtr->cursor.tiles.x2 = rdPtr->cursor.tiles.x1;
-	rdPtr->cursor.tiles.y2 = rdPtr->cursor.tiles.y1;
+	rdPtr->cursor.tiles.a.x = (unsigned char)intParam();
+	rdPtr->cursor.tiles.a.y = (unsigned char)intParam();
+	rdPtr->cursor.tiles.b.x = rdPtr->cursor.tiles.a.x;
+	rdPtr->cursor.tiles.b.y = rdPtr->cursor.tiles.a.y;
 }
 
 ACTION(

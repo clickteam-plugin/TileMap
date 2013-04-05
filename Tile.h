@@ -1,13 +1,17 @@
-struct Tile
+union Tile
 {
-	unsigned char x;
-	unsigned char y;
+	static const unsigned short EMPTY = 0xffff; 
+
+	struct
+	{
+		unsigned char x;
+		unsigned char y;
+	};
+	unsigned short id;
 };
 
 struct TileRange
 {
-	unsigned char x1;
-	unsigned char y1;
-	unsigned char x2;
-	unsigned char y2;
+	Tile a;
+	Tile b;
 };
