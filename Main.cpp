@@ -145,6 +145,9 @@ ACTION(
 		/* Blit file onto surface */
 		copyBlit(file, *tileset->surface);
 
+		/* Update 'texture' surface (trivial in non-hwa) */
+		tileset->updateTexture();
+
 		/* Store relative file path, in case the file is saved */
 		memset(tileset->path, 0, 256);
 		char path[MAX_PATH], workingDir[MAX_PATH];
@@ -409,7 +412,10 @@ ACTION(
 
 		/* Blit file onto surface */
 		copyBlit(*image, *tileset->surface);
-	
+
+		/* Trivial in non-hwa */
+		tileset->updateTexture();
+
 		rdPtr->redraw = true;
 	}
 }

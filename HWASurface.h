@@ -1,13 +1,18 @@
-inline cSurface* getPrototype(int depth)
+#pragma once
+
+inline cSurface* getPrototype(int depth, bool render = false)
 {
 	cSurface* proto = 0;
 
 #ifdef HWABETA
-	GetSurfacePrototype(&proto, depth, ST_HWA_ROUTEXTURE, SD_D3D9);
-#else
-	GetSurfacePrototype(&proto, depth, ST_MEMORY, SD_DIB);
+	if (render)
+	{
+		GetSurfacePrototype(&proto, depth, ST_HWA_ROUTEXTURE, SD_D3D9);
+		return proto;
+	}
 #endif
 
+	GetSurfacePrototype(&proto, depth, ST_MEMORY, SD_DIB);
 	return proto;
 }
 

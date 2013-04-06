@@ -84,6 +84,8 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
 
 			tileset.surface->SetTransparentColor(is.GetTransparentColor());
 			UnlockImageSurface(is);
+
+			tileset.updateTexture();
 		}
 
 		rdPtr->tilesets->push_back(tileset);
@@ -105,10 +107,8 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
 	rdPtr->cursor.y = 0;
 	rdPtr->cursor.width = 1;
 	rdPtr->cursor.height = 1;
-	rdPtr->cursor.tiles.x1 = 0;
-	rdPtr->cursor.tiles.y1 = 0;
-	rdPtr->cursor.tiles.x2 = 0;
-	rdPtr->cursor.tiles.y2 = 0;
+	rdPtr->cursor.tiles.a.id = 0;
+	rdPtr->cursor.tiles.b.id = 0;
 	rdPtr->cursor.patternX = 0;
 	rdPtr->cursor.patternY = 0;
 
