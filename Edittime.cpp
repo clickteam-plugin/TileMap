@@ -59,10 +59,10 @@ PROPS_DATA_START()
 	PropData_CheckBox(PROPID_BLOCKLAYER, (int)"Layers", (int)"Stores each layer including its tiles and settings."),
 	PropData_CheckBox(PROPID_BLOCKTILE, (int)"Tilesets", (int)"Stores every tileset with settings and path, but not the image itself."),
 
-	PropData_Group(PROPID_GRP_MAP, (int)"Map", (int)""),
-	PropData_Size(PROPID_TILESIZE, (int)"Tile size", (int)"Size of each tile in pixels.", tileSize),
-
+	// PropData_Group(PROPID_GRP_MAP, (int)"Map", (int)""),
 	PropData_Group(PROPID_GRP_DATA, (int)"Data", (int)""),
+	PropData_Size(PROPID_TILESIZE, (int)"Default tile size", (int)"The default size of each tile in a new layer.", tileSize),
+
 	PropData_ImageList(PROPID_TILESETS, (int)"Tilesets",(int)""),
 	PropData_Button(PROPID_DELETESETS,(int)"",(int)"",(int)"Delete all"),
 

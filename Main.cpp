@@ -65,13 +65,12 @@ short WINAPI DLLExport ActionFunc32(LPRDATA rdPtr, long param1, long param2);
 
 ACTION(
 	/* ID */			0,
-	/* Name */			"Set tile size to (%0,%1)",
+	/* Name */			"Set default tile size to (%0,%1)",
 	/* Flags */			0,
 	/* Params */		(2, PARAM_NUMBER,"Tile width (pixels)", PARAM_NUMBER,"Tile height (pixels)")
 ) {
-	rdPtr->tileWidth = (short)intParam();
-	rdPtr->tileHeight = (short)intParam();
-	rdPtr->redraw = true;
+	rdPtr->tileWidth = (unsigned short)intParam();
+	rdPtr->tileHeight = (unsigned short)intParam();
 }
 
 ACTION(
@@ -590,14 +589,15 @@ ACTION(
 
 const char MAGIC[9] = "ACHTUNG!";
 const int TILE = 'ELIT';
-const int MAP_ = ' PAM';
+const int MAP_ = ' PAM'; // deprecated
 const int LAYR = 'RYAL';
 const int MAIN = 'NIAM'; /* LAYR sub-block: Main (tile data) */
 const int TSID = 'DIST'; /* LAYR sub-block: Tileset IDs */
 const int VALS = 'SLAV'; /* LAYR sub-block: Alterable values */
+const short VER_12 = (1<<8) | 2;
 const short VER_11 = (1<<8) | 1;
 const short VER_10 = (1<<8) | 0;
-#define VER VER_11
+#define VER VER_12
 
 ACTION(
 	/* ID */			21,
@@ -644,20 +644,21 @@ ACTION(
 			{
 				case MAP_:
 
-					if (rdPtr->blocks & BLOCK_MAP)
-					{
-						/* Invalid size, exit */
-						if (blockSize != sizeof(short)*2)
-						{
-							error = true;
-							break;
-						}
+					/* DEPRECATED */
+					//if (rdPtr->blocks & BLOCK_MAP)
+					//{
+					//	/* Invalid size, exit */
+					//	if (blockSize != sizeof(short)*2)
+					//	{
+					//		error = true;
+					//		break;
+					//	}
 
-						/* Tile size */
-						fread(&rdPtr->tileWidth, sizeof(short), 1, file);
-						fread(&rdPtr->tileHeight, sizeof(short), 1, file);
-					}
-					else
+					//	/* Tile size */
+					//	fread(&rdPtr->tileWidth, sizeof(short), 1, file);
+					//	fread(&rdPtr->tileHeight, sizeof(short), 1, file);
+					//}
+					//else
 					{
 						fseek(file, blockSize, SEEK_CUR);
 					}
@@ -723,8 +724,19 @@ ACTION(
 
 							/* Read settings */
 							fread(&layer->width, sizeof(int), 1, file);
-							if (feof(file)) { error = true; break; }
 							fread(&layer->height, sizeof(int), 1, file);
+
+							if (version >= VER_12)
+							{
+								fread(&layer->tileWidth, sizeof(short), 1, file);
+								fread(&layer->tileHeight, sizeof(short), 1, file);
+							}
+							else
+							{
+								layer->tileWidth = rdPtr->tileWidth;
+								layer->tileHeight = rdPtr->tileHeight;
+							}
+
 							fread(&layer->tileset, sizeof(char), 1, file);
 							fread(&layer->collision, sizeof(char), 1, file);
 							fread(&layer->offsetX, sizeof(int), 1, file);

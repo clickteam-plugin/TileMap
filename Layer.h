@@ -20,8 +20,9 @@ struct Layer
 	unsigned char	tileset;
 	unsigned char	collision;
 
-	/* Tileset index */
-	//short			tilesets[128];
+	/* Tile size (pixels) */
+	unsigned short	tileWidth;
+	unsigned short	tileHeight;
 
 	/* Tile count (map size) */
 	unsigned int	width;
@@ -33,7 +34,7 @@ struct Layer
 	/* Constructor/destructor */
 	Layer() : offsetX(0), offsetY(0), scrollX(1.0), scrollY(1.0), wrapX(false), wrapY(false),
 		visible(true), opacity(1.0), tileset(0), collision(-1),
-		width(0), height(0), data(0)
+		tileWidth(16), tileHeight(16), width(0), height(0), data(0)
 	{
 	}
 
@@ -47,6 +48,8 @@ struct Layer
 		wrapY = src.wrapY;
 		width = src.width;
 		height = src.height;
+		tileWidth = src.tileWidth;
+		tileHeight = src.tileHeight;
 		visible = src.visible;
 		opacity = src.opacity;
 		tileset = src.tileset;
@@ -79,7 +82,7 @@ struct Layer
 	/* Check if a layer is usable */
 	inline bool isValid()
 	{
-		return width > 0 && height > 0 && data != 0;
+		return width > 0 && height > 0 && tileWidth > 0 && tileHeight > 0 && data != 0;
 	}
 
 	/* Get a tile within the layer array */
