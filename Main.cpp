@@ -65,12 +65,16 @@ short WINAPI DLLExport ActionFunc32(LPRDATA rdPtr, long param1, long param2);
 
 ACTION(
 	/* ID */			0,
-	/* Name */			"Set default tile size to (%0,%1)",
+	/* Name */			"Set layer tile size to (%0,%1)",
 	/* Flags */			0,
 	/* Params */		(2, PARAM_NUMBER,"Tile width (pixels)", PARAM_NUMBER,"Tile height (pixels)")
 ) {
-	rdPtr->tileWidth = (unsigned short)intParam();
-	rdPtr->tileHeight = (unsigned short)intParam();
+	if (rdPtr->currentLayer)
+	{
+		rdPtr->currentLayer->tileWidth = (unsigned short)intParam();
+		rdPtr->currentLayer->tileHeight = (unsigned short)intParam();
+		rdPtr->redraw = true;
+	}
 }
 
 ACTION(
@@ -644,21 +648,22 @@ ACTION(
 			{
 				case MAP_:
 
-					/* DEPRECATED */
-					//if (rdPtr->blocks & BLOCK_MAP)
-					//{
-					//	/* Invalid size, exit */
-					//	if (blockSize != sizeof(short)*2)
-					//	{
-					//		error = true;
-					//		break;
-					//	}
+					/* Deprecated... however, we will still read the tile size as new default tile size
+					   So it can be used when we will read the LAYR block. */
+					if (rdPtr->blocks & BLOCK_MAP && version < VER_12)
+					{
+						/* Invalid size, exit */
+						if (blockSize != sizeof(short)*2)
+						{
+							error = true;
+							break;
+						}
 
-					//	/* Tile size */
-					//	fread(&rdPtr->tileWidth, sizeof(short), 1, file);
-					//	fread(&rdPtr->tileHeight, sizeof(short), 1, file);
-					//}
-					//else
+						/* Tile size */
+						fread(&rdPtr->tileWidth, sizeof(short), 1, file);
+						fread(&rdPtr->tileHeight, sizeof(short), 1, file);
+					}
+					else
 					{
 						fseek(file, blockSize, SEEK_CUR);
 					}
@@ -910,6 +915,8 @@ ACTION(
 			/* General settings */
 			fwrite(&layer->width, sizeof(int), 1, file);
 			fwrite(&layer->height, sizeof(int), 1, file);
+			fwrite(&layer->tileWidth, sizeof(short), 1, file);
+			fwrite(&layer->tileHeight, sizeof(short), 1, file);
 			fwrite(&layer->tileset, sizeof(char), 1, file);
 			fwrite(&layer->collision, sizeof(char), 1, file);
 			fwrite(&layer->offsetX, sizeof(int), 1, file);
@@ -1453,7 +1460,7 @@ ACTION(
 
 ACTION(
 	/* ID */			46,
-	/* Name */			"Fill layer with tile (%´0, %1)",
+	/* Name */			"Fill layer with tile (%0, %1)",
 	/* Flags */			0,
 	/* Params */		(2, PARAM_NUMBER,"Tileset X (-1: Empty)", PARAM_NUMBER,"Tileset Y (-1: Empty)")
 ) {
@@ -1534,9 +1541,7 @@ EXPRESSION(
 	unsigned int i = ExParam(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
-	{
 		return (*rdPtr->layers)[i].width;
-	}
 	
 	return 0;
 }
@@ -1550,9 +1555,7 @@ EXPRESSION(
 	unsigned int i = ExParam(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
-	{
 		return (*rdPtr->layers)[i].height;
-	}
 	
 	return 0;
 }
@@ -1566,9 +1569,7 @@ EXPRESSION(
 	unsigned int i = ExParam(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
-	{
 		return (*rdPtr->layers)[i].wrapX;
-	}
 	
 	return 0;
 }
@@ -1582,9 +1583,7 @@ EXPRESSION(
 	unsigned int i = ExParam(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
-	{
 		return (*rdPtr->layers)[i].wrapY;
-	}
 	
 	return 0;
 }
@@ -1598,9 +1597,7 @@ EXPRESSION(
 	unsigned int i = ExParam(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
-	{
 		return (*rdPtr->layers)[i].offsetX;
-	}
 	
 	return 0;
 }
@@ -1614,9 +1611,7 @@ EXPRESSION(
 	unsigned int i = ExParam(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
-	{
 		return (*rdPtr->layers)[i].offsetY;
-	}
 	
 	return 0;
 }
@@ -1630,9 +1625,7 @@ EXPRESSION(
 	unsigned int i = ExParam(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
-	{
 		ReturnFloat((*rdPtr->layers)[i].scrollX);
-	}
 	
 	ReturnFloat(0);
 }
@@ -1646,29 +1639,37 @@ EXPRESSION(
 	unsigned int i = ExParam(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
-	{
 		ReturnFloat((*rdPtr->layers)[i].scrollY);
-	}
 	
 	ReturnFloat(0);
 }
 
 EXPRESSION(
 	/* ID */			10,
-	/* Name */			"TileWidth(",
+	/* Name */			"LayerTileWidth(",
 	/* Flags */			0,
-	/* Params */		(0)
+	/* Params */		(1, EXPPARAM_NUMBER, "Layer index")
 ) {
-	return rdPtr->tileWidth;
+	unsigned int i = ExParam(TYPE_INT);
+
+	if (i < rdPtr->layers->size())
+		return (*rdPtr->layers)[i].tileWidth;
+	
+	return 0;
 }
 
 EXPRESSION(
 	/* ID */			11,
-	/* Name */			"TileHeight(",
+	/* Name */			"LayerTileHeight(",
 	/* Flags */			0,
-	/* Params */		(0)
+	/* Params */		(1, EXPPARAM_NUMBER, "Layer index")
 ) {
-	return rdPtr->tileHeight;
+	unsigned int i = ExParam(TYPE_INT);
+
+	if (i < rdPtr->layers->size())
+		return (*rdPtr->layers)[i].tileHeight;
+	
+	return 0;
 }
 
 EXPRESSION(
@@ -1731,14 +1732,14 @@ EXPRESSION(
 	{
 		Layer* layer = &(*rdPtr->layers)[i];
 
-		if (x >= layer->width || y >= layer->height)
-			return 0;
-
-		Tile* tile = layer->get(x, y);
-		return 1000*tile->x + tile->y;
+		if (x < layer->width && y < layer->height)
+		{
+			Tile* tile = layer->get(x, y);
+			return 1000*tile->x + tile->y;
+		}
 	}
 	
-	return 0;
+	return -1;
 }
 
 EXPRESSION(
@@ -1757,4 +1758,25 @@ EXPRESSION(
 	/* Params */		(0)
 ) {
 	return rdPtr->tilesets->size();
+}
+
+EXPRESSION(
+	/* ID */			17,
+	/* Name */			"LayerTileID(",
+	/* Flags */			0,
+	/* Params */		(3, EXPPARAM_NUMBER, "Layer index", EXPPARAM_NUMBER, "Tile X", EXPPARAM_NUMBER, "Tile Y")
+) {
+	unsigned int i = ExParam(TYPE_INT);
+	unsigned int x = ExParam(TYPE_INT);
+	unsigned int y = ExParam(TYPE_INT);
+
+	if (i < rdPtr->layers->size())
+	{
+		Layer* layer = &(*rdPtr->layers)[i];
+
+		if (x < layer->width && y < layer->height)
+			return layer->get(x, y)->id;
+	}
+	
+	return Tile::EMPTY;
 }

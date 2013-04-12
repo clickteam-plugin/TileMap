@@ -14,7 +14,7 @@ typedef struct tagEDATA_V1
 
 	WORD			tilesets[TILESETCOUNT];
 	char			tilesetCount : 5;
-	bool			blockMap : 1;
+	bool			blockMap : 1; // deprecated
 	bool			blockLayers : 1;
 	bool			blockTilesets : 1;
 

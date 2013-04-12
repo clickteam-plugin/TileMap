@@ -29,9 +29,6 @@
 		ITEM(26, "Set compression level")
 		ITEM(40, "Set block options")
 	SUB_END
-	SUB_START("Map")
-		ITEM(0, "Set tile size")
-	SUB_END
 	SUB_START("Tilesets")
 		ITEM(12, "Add tileset")
 		ITEM(25, "Add tilesets from Surface")
@@ -41,7 +38,6 @@
 		SEPARATOR
 		ITEM(30, "Set current tileset")
 		ITEM(34, "Swap two tilesets")
-		SEPARATOR
 		SUB_START("Set image")
 			ITEM(4, "From file")
 			ITEM(14, "From Surface")
@@ -59,6 +55,7 @@
 		SEPARATOR
 		ITEM(1, "Resize")
 		SEPARATOR
+		ITEM(0, "Set tile size")
 		ITEM(37, "Set tileset")
 		ITEM(15, "Set collision tileset")
 		SEPARATOR
@@ -120,10 +117,6 @@
 #ifdef EXPRESSION_MENU
 
 	SEPARATOR
-	SUB_START("Map")
-		ITEM(10, "Tile width")
-		ITEM(11, "Tile height")
-	SUB_END
 	SUB_START("Tilesets")
 		ITEM(16, "Count")
 		SEPARATOR
@@ -150,10 +143,16 @@
 			ITEM(2, "Width")
 			ITEM(3, "Height")
 		SUB_END
+		SUB_START("Tile size")
+			ITEM(10, "Width")
+			ITEM(11, "Height")
+		SUB_END
 		SEPARATOR
 		SUB_START("Tile at position...")
-			ITEM(12, "Tilset X")
+			ITEM(12, "Tileset X")
 			ITEM(13, "Tileset Y")
+			SEPARATOR
+			ITEM(16, "Tileset ID")
 			ITEM(14, "Compound value")
 		SUB_END
 	SUB_END

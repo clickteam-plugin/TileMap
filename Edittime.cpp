@@ -16,7 +16,7 @@
 PROPS_IDS_START()
 	
 	PROPID_GRP_FILES,
-	PROPID_BLOCKMAP,
+	//PROPID_BLOCKMAP,
 	PROPID_BLOCKTILE,
 	PROPID_BLOCKLAYER,
 
@@ -26,10 +26,10 @@ PROPS_IDS_START()
 	////PROPID_TRANSPCOLOR,
 	//PROPID_BGCOLOR,
 
-	PROPID_GRP_MAP,
-	PROPID_TILESIZE,
+	//PROPID_GRP_MAP,
 
 	PROPID_GRP_DATA,
+	PROPID_TILESIZE,
 	PROPID_TILESETS,
 	PROPID_DELETESETS,
 
@@ -55,7 +55,7 @@ PROPS_DATA_START()
 	//PropData_CheckBox(PROPID_AUTOSCROLL, (int)"Follow MMF camera", (int)"If checked, the Tile Map automatically follows the MMF camera."),
 
 	PropData_Group(PROPID_GRP_FILES, (int)"File blocks", (int)"Set up what kind of data should be loaded from and saved to files."),
-	PropData_CheckBox(PROPID_BLOCKMAP, (int)"Map", (int)"Stores general map information. Right now, this is only includes tile size."),
+	//PropData_CheckBox(PROPID_BLOCKMAP, (int)"Map", (int)"Stores general map information. Right now, this is only includes tile size."),
 	PropData_CheckBox(PROPID_BLOCKLAYER, (int)"Layers", (int)"Stores each layer including its tiles and settings."),
 	PropData_CheckBox(PROPID_BLOCKTILE, (int)"Tilesets", (int)"Stores every tileset with settings and path, but not the image itself."),
 
@@ -218,7 +218,7 @@ BOOL WINAPI DLLExport GetPropCheck(LPMV mV, LPEDATA edPtr, UINT nPropID)
 	{
 	case PROPID_BLOCKLAYER:
 		return edPtr->blockLayers;
-	case PROPID_BLOCKMAP:
+	case PROPID_BLOCKMAP: // deprecated
 		return edPtr->blockMap;
 	case PROPID_BLOCKTILE:
 		return edPtr->blockTilesets;
@@ -287,7 +287,7 @@ void WINAPI DLLExport SetPropCheck(LPMV mV, LPEDATA edPtr, UINT nPropID, BOOL nC
 	case PROPID_BLOCKLAYER:
 		edPtr->blockLayers = nCheck != 0;
 		break;
-	case PROPID_BLOCKMAP:
+	case PROPID_BLOCKMAP: // deprecated
 		edPtr->blockMap = nCheck != 0;
 		break;
 	case PROPID_BLOCKTILE:
