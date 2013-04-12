@@ -40,7 +40,7 @@ struct Tileset
 		return surface != 0 && surface->IsValid();
 	}
 
-	/* For HWA: Need texture and bitmap surface... */
+	// For HWA: Need texture and bitmap surface...
 	void updateTexture()
 	{
 #ifdef HWABETA

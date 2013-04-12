@@ -23,7 +23,7 @@ using namespace std;
 // rTemplate include
 #include	"rTemplate.h"
 
-/* Data block IDs in Tile Map files */
+// Data block IDs in Tile Map files
 enum
 {
 	BLOCK_MAP = 1,

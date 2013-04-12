@@ -82,36 +82,37 @@
 		SEPARATOR
 		ITEM(46, "Fill with tile")
 		ITEM(24, "Fill area with tile")
+	//SUB_END
+		SEPARATOR
+		SUB_START("With cursor")
+			ITEM(6, "Clear tiles")
+			SEPARATOR
+			ITEM(28, "Place tiles")
+			ITEM(32, "Place tiles at position...")
+			SEPARATOR
+			SUB_START("Copy tiles to...")
+				ITEM(16, "Surface")
+			SUB_END
+			SUB_START("Paste tiles from...")
+				ITEM(38, "Another location")
+				SEPARATOR
+				ITEM(17, "Surface")
+			SUB_END
+		SUB_END
 	SUB_END
-	SUB_START("Cursor")
+	SEPARATOR
+	ITEM(0, "~<Tile cursor>")
+	SUB_START("Tileset source")
+		ITEM(36, "Select single")
+		ITEM(20, "Select range")
+		ITEM(5, "Set fill pattern")
+	SUB_END
+	SUB_START("Layer source")
 		ITEM(35, "Move")
 		ITEM(33, "Resize")
-		ITEM(39, "Maximize")
 		SEPARATOR
-		SUB_START("Drawing")
-			SUB_START("Tileset source")
-				ITEM(36, "Select single")
-				ITEM(20, "Select range")
-				ITEM(5, "Set fill pattern")
-			SUB_END
-			SEPARATOR
-			SUB_START("Clear tiles")
-				ITEM(6, "At cursor")
-			SUB_END
-			SUB_START("Place tiles")
-				ITEM(28, "At cursor")
-				ITEM(32, "At position...")
-			SUB_END
-		SUB_END
-		SEPARATOR
-		SUB_START("Copy tiles to...")
-			ITEM(16, "Surface")
-		SUB_END
-		SUB_START("Paste tiles from...")
-			ITEM(38, "Another location")
-			SEPARATOR
-			ITEM(17, "Surface")
-		SUB_END
+		ITEM(47, "Select range")
+		ITEM(39, "Maximize to layer")
 	SUB_END
 	SEPARATOR
 #endif

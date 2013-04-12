@@ -60,7 +60,7 @@ CONDITION(
 // 
 // ============================================================================
 
-/* Place tiles at (x,y) */
+// Place tiles at (x,y)
 short WINAPI DLLExport ActionFunc32(LPRDATA rdPtr, long param1, long param2);
 
 ACTION(
@@ -128,30 +128,30 @@ ACTION(
 ) {
 	if (rdPtr->currentTileset)
 	{
-		/* Load file */
+		// Load file
 		cSurface file;
 		if (!ImportImage(rdPtr->rHo.hoAdRunHeader->rh4.rh4Mv->mvImgFilterMgr, (const char*)param1, &file, 0, 0))
 			return;
 
-		/* Allocate surface */
+		// Allocate surface
 		Tileset* tileset = rdPtr->currentTileset;
 		if (!tileset->surface)
 			tileset->surface = new cSurface;
 		else
 			tileset->surface->Delete();
 
-		/* Create blank surface */
+		// Create blank surface
 		cSurface* proto = getPrototype(rdPtr->depth);
 		tileset->surface->Create(file.GetWidth(), file.GetHeight(), proto);
 		tileset->surface->SetTransparentColor(tileset->transpCol);
 
-		/* Blit file onto surface */
+		// Blit file onto surface
 		copyBlit(file, *tileset->surface);
 
-		/* Update 'texture' surface (trivial in non-hwa) */
+		// Update 'texture' surface (trivial in non-hwa)
 		tileset->updateTexture();
 
-		/* Store relative file path, in case the file is saved */
+		// Store relative file path, in case the file is saved
 		memset(tileset->path, 0, 256);
 		char path[MAX_PATH], workingDir[MAX_PATH];
 		GetCurrentDirectory(MAX_PATH, workingDir);
@@ -159,7 +159,7 @@ ACTION(
 		{
 			strcpy_s(tileset->path, 256, path);
 		}
-		/* Failed to store relative path, use absolute */
+		// Failed to store relative path, use absolute
 		else
 		{
 			strcpy_s(tileset->path, 256, (const char*)param1);
@@ -198,7 +198,7 @@ ACTION(
 	/* ID */			7,
 	/* Name */			"Set layer tile at (%0, %1) to (%2, %3)",
 	/* Flags */			0,
-	/* Params */		(4, PARAM_NUMBER,"Tile X", PARAM_NUMBER,"Tile Y", /*PARAM_NUMBER,"Tileset index (0-99, -1: Empty)",*/
+	/* Params */		(4, PARAM_NUMBER,"Tile X", PARAM_NUMBER,"Tile Y", PARAM_NUMBER,"Tileset index (0-99, -1: Empty)",
 	PARAM_NUMBER,"Tileset X (-1: Empty)", PARAM_NUMBER,"Tileset Y (-1: Empty)")
 ) {
 	if (rdPtr->currentLayer)
@@ -270,11 +270,11 @@ ACTION(
 ) {
 	TMAPVIEW* o = (TMAPVIEW*)objParam();
 
-	/* Assign this Tile Map and redraw */
+	// Assign this Tile Map and redraw
 	o->p = rdPtr;
 	rdPtr->rRd->LPRO_Redraw((LPRO)o);
 
-	/* Add to list */
+	// Add to list
 	rdPtr->viewports->push_back(o);
 }
 
@@ -342,33 +342,33 @@ ACTION(
 				Tile* tile = data + (tlX+x) + width*(tlY+y);
 				//tile->tileset = tilesetID + 1;
 			
-				/* X method */
+				// X method
 				switch(method & (1|4|16|64))
 				{
-				case 1: /* Wrap */
+				case 1: // Wrap
 					tile->x = x1 + ((x2-x1) ? (x % (x2-x1+1)) : 0); break;
-				case 4: /* Repeat */
+				case 4: // Repeat
 					tile->x = max(x1, min(x2, x1+x)); break;
-				case 16: /* Box */
+				case 16: // Box
 					tile->x = x1 + (x ? (1 + x/(brX-tlX)) : 0); break;
-				case 64: /* Random */
+				case 64: // Random
 					tile->x = x1 + ((x2-x1) ? (rand() % (x2-x1+1)) : 0); break;
-				default: /* Undefined */
+				default: // Undefined
 					tile->x = x1 + x;
 				}	
 
-				/* Y method */
+				// Y method
 				switch(method & (2|8|32|128))
 				{
-				case 2: /* Wrap */
+				case 2: // Wrap
 					tile->y = y1 + ((y2-y1) ? (y % (y2-y1+1)) : 0); break;
-				case 8: /* Repeat */
+				case 8: // Repeat
 					tile->y = max(y1, min(y2, y1+y)); break;
-				case 32: /* Box */
+				case 32: // Box
 					tile->y = y1 + (y ? (1 + y/(brY-tlY)) : 0); break;
-				case 128: /* Random */
+				case 128: // Random
 					tile->y = y1 + ((y2-y1) ? (rand() % (y2-y1+1)) : 0); break;
-				default: /* Undefined */
+				default: // Undefined
 					tile->y = y1 + y;
 				}
 
@@ -398,7 +398,7 @@ ACTION(
 		if (!image || !image->IsValid())
 			return;
 
-		/* Allocate surface */
+		// Allocate surface
 		Tileset* tileset = rdPtr->currentTileset;
 		if (!tileset->surface)
 			tileset->surface = new cSurface;
@@ -406,17 +406,17 @@ ACTION(
 			tileset->surface->Delete();
 		memset(tileset->path, 0, 256);
 
-		/* Create blank surface */
+		// Create blank surface
 		cSurface* proto = getPrototype(rdPtr->depth);
 		tileset->surface->Create(image->GetWidth(), image->GetHeight(), proto);
 
-		/* Copy settings */
+		// Copy settings
 		tileset->surface->SetTransparentColor(tileset->transpCol = image->GetTransparentColor());
 
-		/* Blit file onto surface */
+		// Blit file onto surface
 		copyBlit(*image, *tileset->surface);
 
-		/* Trivial in non-hwa */
+		// Trivial in non-hwa
 		tileset->updateTexture();
 
 		rdPtr->redraw = true;
@@ -457,11 +457,11 @@ ACTION(
 		if (!image || !image->IsValid())
 			return;
 
-		/* Get layer size */
+		// Get layer size
 		int layerWidth = layer->width;
 		int layerHeight = layer->height;
 
-		/* Get cursor size */
+		// Get cursor size
 		unsigned int width = rdPtr->cursor.width;
 		unsigned int height = rdPtr->cursor.height;
 
@@ -470,7 +470,7 @@ ACTION(
 		int x2 = x1 + width;
 		int y2 = y1 + height;
 
-		/* Limit area to layer data */
+		// Limit area to layer data
 		x1 = max(0, min(layerWidth-1, x1));
 		y1 = max(0, min(layerHeight-1, y1));
 		x2 = max(0, min(layerWidth, x2));
@@ -483,13 +483,13 @@ ACTION(
 				Tile* tile = layer->get(x+x1, y+y1);
 
 				COLORREF color = 0;
-				color |= tile->x; /* X = red */
-				color |= tile->y << 8; /* Y = green */
+				color |= tile->x; // X = red
+				color |= tile->y << 8; // Y = green
 				image->SetPixel(x, y, color);
 			}
 		}
 
-		/* Redraw surface if necessary */
+		// Redraw surface if necessary
 		if (id == surface->targetId)
 			surface->rc.rcChanged = true;
 	}
@@ -514,11 +514,11 @@ ACTION(
 		if (!image || !image->IsValid())
 			return;
 
-		/* Get layer size */
+		// Get layer size
 		int layerWidth = layer->width;
 		int layerHeight = layer->height;
 
-		/* Get cursor size */
+		// Get cursor size
 		unsigned int width = rdPtr->cursor.width;
 		unsigned int height = rdPtr->cursor.height;
 
@@ -527,7 +527,7 @@ ACTION(
 		int x2 = x1 + width;
 		int y2 = y1 + height;
 
-		/* Limit area to layer data */
+		// Limit area to layer data
 		x1 = max(0, min(layerWidth-1, x1));
 		y1 = max(0, min(layerHeight-1, y1));
 		x2 = max(0, min(layerWidth, x2));
@@ -595,9 +595,9 @@ const char MAGIC[9] = "ACHTUNG!";
 const int TILE = 'ELIT';
 const int MAP_ = ' PAM'; // deprecated
 const int LAYR = 'RYAL';
-const int MAIN = 'NIAM'; /* LAYR sub-block: Main (tile data) */
-const int TSID = 'DIST'; /* LAYR sub-block: Tileset IDs */
-const int VALS = 'SLAV'; /* LAYR sub-block: Alterable values */
+const int MAIN = 'NIAM'; // LAYR sub-block: Main (tile data)
+const int TSID = 'DIST'; // LAYR sub-block: Tileset IDs
+const int VALS = 'SLAV'; // LAYR sub-block: Alterable values
 const short VER_12 = (1<<8) | 2;
 const short VER_11 = (1<<8) | 1;
 const short VER_10 = (1<<8) | 0;
@@ -611,7 +611,7 @@ ACTION(
 ) {
 	const char* path = strParam();
 	
-	/* Start reading file */
+	// Start reading file
 	FILE* file = fopen(path, "rb");
 	if (!file)
 	{
@@ -619,27 +619,27 @@ ACTION(
 		return;
 	}
 
-	/* Keep reading file, allow exit */
+	// Keep reading file, allow exit
 	bool error = true;
 	do
 	{
-		/* Check magic number */
+		// Check magic number
 		char leMagic[8];
 		fread(&leMagic, sizeof(char)*8, 1, file);
 		if (memcmp(leMagic, MAGIC, sizeof(char)*8))
 			break;
 
-		/* Check version */
+		// Check version
 		short version;
 		fread(&version, sizeof(short), 1, file);
 		if (version < VER_10 || version > VER)
 			break;
 		
-		/* Read blocks */
+		// Read blocks
 		error = false;
 		while (!error && !feof(file))
 		{
-			/* Read block identifier + size */
+			// Read block identifier + size
 			int block = 0, blockSize = 0;
 			fread(&block, sizeof(int), 1, file);
 			fread(&blockSize, sizeof(int), 1, file);
@@ -652,14 +652,14 @@ ACTION(
 					   So it can be used when we will read the LAYR block. */
 					if (rdPtr->blocks & BLOCK_MAP && version < VER_12)
 					{
-						/* Invalid size, exit */
+						// Invalid size, exit
 						if (blockSize != sizeof(short)*2)
 						{
 							error = true;
 							break;
 						}
 
-						/* Tile size */
+						// Tile size
 						fread(&rdPtr->tileWidth, sizeof(short), 1, file);
 						fread(&rdPtr->tileHeight, sizeof(short), 1, file);
 					}
@@ -686,16 +686,16 @@ ACTION(
 							rdPtr->tilesets->push_back(Tileset());
 							Tileset* tileset = &rdPtr->tilesets->back();
 
-							/* Read settings */
+							// Read settings
 							fread(&tileset->transpCol, sizeof(COLORREF), 1, file);
 							
-							/* Read path */
+							// Read path
 							unsigned char pathLength = 0;
 							fread(&pathLength, sizeof(char), 1, file);
 							memset(tileset->path, 0, 256);
 							fread(tileset->path, 1, pathLength, file);
 
-							/* If the file exists, try to load image */
+							// If the file exists, try to load image
 							if (GetFileAttributes(tileset->path) != 0xFFFFFFFF)
 							{
 								rdPtr->currentTileset = tileset;
@@ -721,13 +721,13 @@ ACTION(
 						fread(&layerCount, (version < VER_11) ? sizeof(char) : sizeof(short), 1, file);
 						rdPtr->layers->reserve(layerCount);
 
-						/* Load them layers */
+						// Load them layers
 						for (unsigned int i = 0; i < layerCount; ++i)
 						{
 							rdPtr->layers->push_back(Layer());
 							Layer* layer = &rdPtr->layers->back();
 
-							/* Read settings */
+							// Read settings
 							fread(&layer->width, sizeof(int), 1, file);
 							fread(&layer->height, sizeof(int), 1, file);
 
@@ -753,52 +753,52 @@ ACTION(
 							fread(&layer->visible, sizeof(bool), 1, file);
 							fread(&layer->opacity, sizeof(float), 1, file);
 
-							/* Get the number of data bocks */
+							// Get the number of data bocks
 							unsigned char dataBlockCount;
 							fread(&dataBlockCount, sizeof(char), 1, file);
 
-							/* Now, keeps read all the data blocks */
+							// Now, keeps read all the data blocks
 							for (int i = 0; i < dataBlockCount; ++i)
 							{
 								int dataBlock;
 								fread(&dataBlock, sizeof(int), 1, file);
 
-								/* Prepare for the data type */
+								// Prepare for the data type
 								unsigned char* destination = 0;
 
 								switch(dataBlock)
 								{
 									case MAIN:
 
-										/* Try to allocate an array to hold the data */
+										// Try to allocate an array to hold the data
 										layer->resize(layer->width, layer->height);
 
-										/* Allocation succeeded, assign data pointer */
+										// Allocation succeeded, assign data pointer
 										if (layer->isValid())
 											destination = (unsigned char*)layer->data;
 
 										break;
 								}
 
-								/* Read compressed size */
+								// Read compressed size
 								mz_ulong dataSize = 0;
 								fread(&dataSize, sizeof(long), 1, file);
 										
-								/* Recognized data, read it */
+								// Recognized data, read it
 								if (destination)
 								{
-									/* Read the compressed data */
+									// Read the compressed data
 									unsigned char* temp = new unsigned char[dataSize];
 									fread(temp, dataSize, 1, file);
 
-									/* Uncompress data */
+									// Uncompress data
 									mz_ulong dataAlloc = sizeof(Tile) * layer->width * layer->height;
 									mz_uncompress(destination, &dataAlloc, temp, dataSize);
 
-									/* Delete temporary compression buffer */
+									// Delete temporary compression buffer
 									delete[] temp;
 								}
-								/* We can't read this... */
+								// We can't read this...
 								else
 								{
 									fseek(file, dataSize, SEEK_CUR);
@@ -816,13 +816,13 @@ ACTION(
 				default:
 					if (!feof(file))
 					{
-						/* Error occured */
+						// Error occured
 						error = true;
 					}
 					break;
 
-			} /* switch(block) */
-		} /* while (!error && !feof(file)) */
+			} // switch(block)
+		} // while (!error && !feof(file))
 
 	} while (0);
 
@@ -850,7 +850,7 @@ ACTION(
 	unsigned int layerCount = rdPtr->layers->size();
 	unsigned int tilesetCount = rdPtr->tilesets->size();
 
-	/* Open file */
+	// Open file
 	FILE* file = fopen((const char*)param1, "wb");
 	if (!file)
 	{
@@ -858,13 +858,13 @@ ACTION(
 		return;
 	}
 
-	/* Magic number, version, tileset and layer count */
+	// Magic number, version, tileset and layer count
 	fputs(MAGIC, file);
 	fwrite(&VER, sizeof(short), 1, file);
 	
 	int blockSize = 0;
 
-	/* Write map block */
+	// Write map block
 	if (rdPtr->blocks & BLOCK_MAP)
 	{
 		fwrite(&MAP_, sizeof(int), 1, file);
@@ -874,7 +874,7 @@ ACTION(
 		fwrite(&rdPtr->tileHeight, sizeof(short), 1, file);
 	}
 
-	/* Write tileset block */
+	// Write tileset block
 	if (rdPtr->blocks & BLOCK_TILESETS)
 	{
 		fwrite(&TILE, sizeof(int), 1, file);
@@ -897,12 +897,12 @@ ACTION(
 		}
 	}
 
-	/* Write layer block */
+	// Write layer block
 	if (rdPtr->blocks & BLOCK_LAYERS)
 	{
 		fwrite(&LAYR, sizeof(int), 1, file);
 		
-		/* Size will be written later... */
+		// Size will be written later...
 		blockSize = ftell(file);
 		fwrite(&blockSize, sizeof(int), 1, file);
 
@@ -912,7 +912,7 @@ ACTION(
 		{
 			Layer* layer = &(*rdPtr->layers)[i];
 
-			/* General settings */
+			// General settings
 			fwrite(&layer->width, sizeof(int), 1, file);
 			fwrite(&layer->height, sizeof(int), 1, file);
 			fwrite(&layer->tileWidth, sizeof(short), 1, file);
@@ -928,39 +928,39 @@ ACTION(
 			fwrite(&layer->visible, sizeof(bool), 1, file);
 			fwrite(&layer->opacity, sizeof(float), 1, file);
 
-			/* Number of data blocks */
+			// Number of data blocks
 			unsigned char dataBlockCount = 1;
 			fwrite(&dataBlockCount, sizeof(char), 1, file);
 
-			/* Tile data */
+			// Tile data
 			fwrite(&MAIN, sizeof(int), 1, file);
 
 			if (layer->isValid())
 			{
-				/* Compress tile data... */
+				// Compress tile data...
 				mz_ulong dataSize = sizeof(Tile) * layer->width * layer->height;
 				mz_ulong dataAlloc = mz_compressBound(dataSize);
 				unsigned char* temp = new unsigned char[dataAlloc];
 				mz_compress2(temp, &dataAlloc, (const unsigned char*)layer->data, dataSize, rdPtr->compress);
 
-				/* Write compressed size */
+				// Write compressed size
 				fwrite(&dataAlloc, sizeof(int), 1, file);
 
-				/* Write compressed data */
+				// Write compressed data
 				fwrite(temp, dataAlloc, 1, file);
 
-				/* Delete temporary compression buffer */
+				// Delete temporary compression buffer
 				delete[] temp;
 			}
 			else
 			{
-				/* Write empty data */
+				// Write empty data
 				int nullValue = 0;
 				fwrite(&nullValue, sizeof(int), 1, file);
 			}
 		}
 
-		/* Go back and write the block size */
+		// Go back and write the block size
 		int blockSizeAfter = ftell(file);
 		fseek(file, blockSize, SEEK_SET);
 		blockSize = blockSizeAfter - blockSize - sizeof(int);
@@ -986,9 +986,7 @@ ACTION(
 		if (layer->isValid() && x < layer->width && y < layer->height)
 		{
 			Tile* tile = layer->get(x, y);
-			//tile->tileset = 0;
-			tile->x = 0xff;
-			tile->y = 0xff;
+			tile->id = Tile::EMPTY;
 
 			rdPtr->redraw = true;
 		}
@@ -1065,9 +1063,9 @@ ACTION(
 
 	for (int i = 0; i < surface->imageCount(surface); ++i)
 	{
-		/* Add tileset */
+		// Add tileset
 		ActionFunc12(rdPtr, 0, 0);
-		/* Load image into it */
+		// Load image into it
 		ActionFunc14(rdPtr, (long)surface, i);
 	}
 
@@ -1144,11 +1142,11 @@ ACTION(
 ) {
 	TMAPVIEW* o = (TMAPVIEW*)objParam();
 
-	/* Detach parent Tile Map, redraw (to clear) */
+	// Detach parent Tile Map, redraw (to clear)
 	o->p = 0;
 	rdPtr->rRd->LPRO_Redraw((LPRO)o);
 
-	/* Remove... */
+	// Remove...
 	rdPtr->viewports->remove(o);
 }
 
@@ -1161,18 +1159,18 @@ ACTION(
 	Layer* layer = rdPtr->currentLayer;
 	if (layer && layer->isValid())
 	{
-		/* Get layer size */
+		// Get layer size
 		int layerWidth = layer->width;
 		int layerHeight = layer->height;
 
-		/* Get cursor size */
+		// Get cursor size
 		unsigned int width = rdPtr->cursor.width;
 		unsigned int height = rdPtr->cursor.height;
 
 		int x1 = param1;
 		int y1 = param2;
 
-		/* Single tile, avoid loop */
+		// Single tile, avoid loop
 		if (width == 1 && height == 1)
 		{
 			if (x1 >= 0 && y1 >= 0 && x1 < layerWidth && y1 < layerHeight)
@@ -1186,17 +1184,17 @@ ACTION(
 			return;
 		}
 
-		/* Rectangular area */
+		// Rectangular area
 		int x2 = x1 + width-1;
 		int y2 = y1 + height-1	;
 
-		/* Limit area to layer data */
+		// Limit area to layer data
 		x1 = max(0, min(layerWidth-1, x1));
 		y1 = max(0, min(layerHeight-1, y1));
 		x2 = max(0, min(layerWidth-1, x2));
 		y2 = max(0, min(layerHeight-1, y2));
 
-		/* Get tile range and pattern */
+		// Get tile range and pattern
 		TileRange tiles = rdPtr->cursor.tiles;
 		unsigned char patternX = rdPtr->cursor.patternX;
 		unsigned char patternY = rdPtr->cursor.patternY;
@@ -1207,18 +1205,18 @@ ACTION(
 			{
 				Tile* tile = layer->get(x+x1, y+y1);
 
-				/* X value */
+				// X value
 				if (tiles.b.x-tiles.a.x)
 				{
 					switch(patternX)
 					{
-						case 1: /* Repeat */
+						case 1: // Repeat
 							tile->x = min(tiles.b.x, x + tiles.a.x); break;
-						case 2: /* Box */
+						case 2: // Box
 							tile->x = tiles.a.x + (x ? (1 + x/(x2-x1)) : 0); break;
-						case 3: /* Random */
+						case 3: // Random
 							tile->x = tiles.a.x + rand() % (tiles.b.x-tiles.a.x+1); break;
-						default: /* Wrap */
+						default: // Wrap
 							tile->x = tiles.a.x + x % (tiles.b.x-tiles.a.x+1);
 					}
 				}
@@ -1227,18 +1225,18 @@ ACTION(
 					tile->x = tiles.a.x;
 				}
 
-				/* Y value */
+				// Y value
 				if (tiles.b.y-tiles.a.y)
 				{
 					switch(patternY)
 					{
-						case 1: /* Repeat */
+						case 1: // Repeat
 							tile->y = min(tiles.b.y, y + tiles.a.y); break;
-						case 2: /* Box */
+						case 2: // Box
 							tile->y = tiles.a.y + (y ? (1 + y/(y2-y1)) : 0); break;
-						case 3: /* Random */
+						case 3: // Random
 							tile->y = tiles.a.y + rand() % (tiles.b.y-tiles.a.y+1); break;
-						default: /* Wrap */
+						default: // Wrap
 							tile->y = tiles.a.y + y % (tiles.b.y-tiles.a.y+1);
 					}
 				}
@@ -1323,27 +1321,27 @@ ACTION(
 	Layer* layer = rdPtr->currentLayer;
 	if (layer && layer->isValid())
 	{
-		/* Get layer size */
+		// Get layer size
 		int layerWidth = layer->width;
 		int layerHeight = layer->height;
 
-		/* Get cursor size */
+		// Get cursor size
 		unsigned int width = rdPtr->cursor.width;
 		unsigned int height = rdPtr->cursor.height;
 
-		/* Limit cursor size to rectangle */
+		// Limit cursor size to rectangle
 		int srcX = intParam();
 		int srcY = intParam();
 		width = min((unsigned)layerWidth-srcX, width);
 		height = min((unsigned)layerHeight-srcY, height);
 
-		/* Get rectangle */
+		// Get rectangle
 		int x1 = rdPtr->cursor.x;
 		int y1 = rdPtr->cursor.y;
 		int x2 = x1 + width;
 		int y2 = y1 + height;
 
-		/* Limit area to layer data */
+		// Limit area to layer data
 		x1 = max(0, min(layerWidth-1, x1));
 		y1 = max(0, min(layerHeight-1, y1));
 		x2 = max(0, min(layerWidth, x2));
@@ -1454,7 +1452,7 @@ ACTION(
 ) {
 	if (rdPtr->currentLayer && rdPtr->currentLayer->isValid())
 	{
-		memset(rdPtr->currentLayer->data, -1, rdPtr->currentLayer->width*rdPtr->currentLayer->height*sizeof(Tile));
+		memset(rdPtr->currentLayer->data, Tile::EMPTY & 0xff, rdPtr->currentLayer->width*rdPtr->currentLayer->height*sizeof(Tile));
 	}
 }
 
@@ -1491,6 +1489,18 @@ ACTION(
 	}
 }
 
+ACTION(
+	/* ID */			47,
+	/* Name */			"Select (%0, %1) => (%2, %3) with cursor",
+	/* Flags */			0,
+	/* Params */		(4, PARAM_NUMBER, "Top-left tile X", PARAM_NUMBER, "Top-left tile Y",
+							PARAM_NUMBER, "Bottom-right tile X", PARAM_NUMBER, "Bottom-right tile Y")
+) {
+	rdPtr->cursor.x = intParam();
+	rdPtr->cursor.y = intParam();
+	rdPtr->cursor.width = intParam() - rdPtr->cursor.x;
+	rdPtr->cursor.height = intParam() - rdPtr->cursor.y;
+}
 
 // ============================================================================
 //
@@ -1625,7 +1635,10 @@ EXPRESSION(
 	unsigned int i = ExParam(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
+	{
+		// Stupid macro that expands to TWO lines!
 		ReturnFloat((*rdPtr->layers)[i].scrollX);
+	}
 	
 	ReturnFloat(0);
 }
@@ -1639,7 +1652,10 @@ EXPRESSION(
 	unsigned int i = ExParam(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
+	{
+		// Stupid macro that expands to TWO lines!
 		ReturnFloat((*rdPtr->layers)[i].scrollY);
+	}
 	
 	ReturnFloat(0);
 }

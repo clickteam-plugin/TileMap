@@ -1221,7 +1221,7 @@ void WINAPI InitParameter(mv _far *mV, short code, paramExt* pExt)
 }
 
 // Example of custom parameter setup proc
-// --------------------------------------
+// --------------------------------------	
 /*
 #if !RUN_ONLY
 BOOL CALLBACK DLLExport SetupProc(HWND hDlg, UINT msgType, WPARAM wParam, LPARAM lParam)

@@ -48,11 +48,11 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
 
 	LPRH rhPtr = rdPtr->rHo.hoAdRunHeader;
 
-	/* Attached viewports */
+	// Attached viewports
 	rdPtr->viewports = new list<TMAPVIEW*>;
 	rdPtr->redraw = false;
 
-	/* Create surface, get MMF depth.. */
+	// Create surface, get MMF depth..
 	cSurface *ps = WinGetSurface((int)rdPtr->rHo.hoAdRunHeader->rhIdEditWin);
 
 	if (!ps)
@@ -61,19 +61,19 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
 	rdPtr->depth = ps->GetDepth();
 	cSurface* proto = getPrototype(rdPtr->depth);
 
-	/* Database */
+	// Database
 	rdPtr->layers = new vector<Layer>;
 	rdPtr->tilesets = new vector<Tileset>;
 	rdPtr->currentLayer = 0;
 	rdPtr->currentTileset = 0;
 	
-	/* Load edit tilesets */
+	// Load edit tilesets
 	Tileset tileset;
 	cSurface is;
 
 	for (int i = 0; i < edPtr->tilesetCount; ++i)
 	{
-		/* Create a tileset for each image */
+		// Create a tileset for each image
 		if (LockImageSurface(rhPtr->rhIdAppli, edPtr->tilesets[i], is))
 		{
 			tileset.transpCol = is.GetTransparentColor();
@@ -93,16 +93,16 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
 		tileset.surface = 0;
 	}
 
-	/* Tileset settings */
+	// Tileset settings
 	rdPtr->tileWidth = edPtr->tileWidth;
 	rdPtr->tileHeight = edPtr->tileHeight;
 
 	rdPtr->blocks = (edPtr->blockMap ? BLOCK_MAP : 0) | (edPtr->blockLayers ? BLOCK_LAYERS : 0) | (edPtr->blockTilesets ? BLOCK_TILESETS : 0);
 
-	/* Default compression level */
+	// Default compression level
 	rdPtr->compress = 6;
 
-	/* Set up tile cursor */
+	// Set up tile cursor
 	rdPtr->cursor.x = 0;
 	rdPtr->cursor.y = 0;
 	rdPtr->cursor.width = 1;
@@ -126,7 +126,7 @@ short WINAPI DLLExport DestroyRunObject(LPRDATA rdPtr, long fast)
 	list<TMAPVIEW*>::iterator it;
 	for (it = rdPtr->viewports->begin(); it != rdPtr->viewports->end(); ++it)
 	{
-		/* Detach Tile Map */
+		// Detach Tile Map
 		(*it)->p = 0;
 	}
 	delete rdPtr->layers;
@@ -146,7 +146,7 @@ short WINAPI DLLExport HandleRunObject(LPRDATA rdPtr)
 {
 	if (rdPtr->redraw)
 	{
-		/* Redraw all attached viewports */
+		// Redraw all attached viewports
 		list<TMAPVIEW*>::iterator it;
 		for (it = rdPtr->viewports->begin(); it != rdPtr->viewports->end(); ++it)
 		{
@@ -181,7 +181,7 @@ short WINAPI DLLExport DisplayRunObject(LPRDATA rdPtr)
 // in DisplayRunObject too, but this is automatically done if you implement
 // GetRunObjectSurface (MMF applies the ink effect to the transition).
 //
-// Note: do not forget to enable the function in the .def file 
+// Note: do not forget to enable the function in the .def file
 // if you remove the comments below.
 
 //cSurface* WINAPI DLLExport GetRunObjectSurface(LPRDATA rdPtr)
@@ -198,7 +198,7 @@ short WINAPI DLLExport DisplayRunObject(LPRDATA rdPtr)
 //
 // Should return NULL if the object is not transparent.
 //
-// Note: do not forget to enable the function in the .def file 
+// Note: do not forget to enable the function in the .def file
 // if you remove the comments below.
 //
 /*
@@ -338,7 +338,7 @@ void WINAPI DLLExport EndFrame(mv _far *mV, DWORD dwReserved, int nFrameIndex)
 // 
 /*
 
-  // Note: do not forget to enable the functions in the .def file 
+  // Note: do not forget to enable the functions in the .def file
   // if you remove the comments below.
 
 void WINAPI GetRunObjectFont(LPRDATA rdPtr, LOGFONT* pLf)
