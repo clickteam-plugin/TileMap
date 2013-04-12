@@ -218,8 +218,8 @@ BOOL WINAPI DLLExport GetPropCheck(LPMV mV, LPEDATA edPtr, UINT nPropID)
 	{
 	case PROPID_BLOCKLAYER:
 		return edPtr->blockLayers;
-	case PROPID_BLOCKMAP: // deprecated
-		return edPtr->blockMap;
+	//case PROPID_BLOCKMAP:
+	//	return edPtr->blockMap;
 	case PROPID_BLOCKTILE:
 		return edPtr->blockTilesets;
 	}
@@ -287,9 +287,9 @@ void WINAPI DLLExport SetPropCheck(LPMV mV, LPEDATA edPtr, UINT nPropID, BOOL nC
 	case PROPID_BLOCKLAYER:
 		edPtr->blockLayers = nCheck != 0;
 		break;
-	case PROPID_BLOCKMAP: // deprecated
-		edPtr->blockMap = nCheck != 0;
-		break;
+	//case PROPID_BLOCKMAP: // deprecated
+	//	edPtr->blockMap = nCheck != 0;
+	//	break;
 	case PROPID_BLOCKTILE:
 		edPtr->blockTilesets = nCheck != 0;
 		break;
