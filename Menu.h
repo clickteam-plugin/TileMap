@@ -18,10 +18,11 @@
 
 #ifdef ACTION_MENU
 
-	SEPARATOR
+	//SEPARATOR
 	ITEM(11, "Attach viewport")
 	ITEM(31, "Detach viewport")
 	SEPARATOR
+	ITEM(0, "~<Map>")
 	SUB_START("Input / Output")
 		ITEM(21, "Load from file")
 		ITEM(22, "Save to file")
@@ -38,12 +39,6 @@
 		SEPARATOR
 		ITEM(30, "Set current tileset")
 		ITEM(34, "Swap two tilesets")
-		SUB_START("Set image")
-			ITEM(4, "From file")
-			ITEM(14, "From Surface")
-		SUB_END
-		ITEM(27, "Set transparent color")
-		//ITEM(3, "Assign file path")
 	SUB_END
 	SUB_START("Layers")
 		ITEM(29, "Add layer")
@@ -52,21 +47,33 @@
 		ITEM(44, "Delete all layers")
 		SEPARATOR
 		ITEM(8,"Set current layer")
+	SUB_END
+	SEPARATOR
+	ITEM(0, "~<Current tileset>")
+	SUB_START("Settings")
+		ITEM(4, "Set image from file")
+		ITEM(14, "Set image from Surface")
 		SEPARATOR
+		ITEM(27, "Set transparent color")
+		//ITEM(3, "Assign file path")
+	SUB_END
+	SEPARATOR
+	ITEM(0, "~<Current layer>")
+	SUB_START("Settings")
 		ITEM(1, "Resize")
-		SEPARATOR
 		ITEM(0, "Set tile size")
+		SEPARATOR
 		ITEM(37, "Set tileset")
 		ITEM(15, "Set collision tileset")
 		SEPARATOR
 		ITEM(18, "Set visible")
 		ITEM(19, "Set opacity")
 		SEPARATOR
-		ITEM(10, "Set offset")
+		ITEM(10, "Set offset")	
 		ITEM(2, "Set scroll speed")
+		SEPARATOR
 		ITEM(9, "Set wrapping")
 	SUB_END
-	SEPARATOR
 	SUB_START("Tiles")
 		ITEM(45, "Clear layer")
 		SEPARATOR

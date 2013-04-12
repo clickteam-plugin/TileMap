@@ -1383,7 +1383,7 @@ ACTION(
 	/* ID */			40,
 	/* Name */			"Set file block options to %0",
 	/* Flags */			0,
-	/* Params */		(1, PARAM_NUMBER, "Blocks to load/save, add together (1: Map, 2: Layers, 4: Tilesets, Default: 2)")
+	/* Params */		(1, PARAM_NUMBER, "Blocks to load/save, add together (1: *Unused*, 2: Layers, 4: Tilesets, Default: 2)")
 ) {
 	rdPtr->blocks = param1;
 }

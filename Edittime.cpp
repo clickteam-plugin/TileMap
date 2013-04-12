@@ -917,13 +917,20 @@ void menucpy(HMENU hTargetMenu, HMENU hSourceMenu)
 		else
 		{
 			GetMenuString(hSourceMenu, n, strBuf, 80, MF_BYPOSITION);
-			if (id != -1)
-				AppendMenu(hTargetMenu, GetMenuState(hSourceMenu, n, MF_BYPOSITION), id, strBuf);
+			if (strBuf[0] == '~')
+			{
+				AppendMenu(hTargetMenu, MF_DISABLED /*| MF_GRAYED*/, id, strBuf+1);
+			}
 			else
 			{
-				hSubMenu = CreatePopupMenu();
-				AppendMenu(hTargetMenu, MF_POPUP | MF_STRING, (uint)hSubMenu, strBuf);
-				menucpy(hSubMenu, GetSubMenu(hSourceMenu, n));
+				if (id != -1)
+					AppendMenu(hTargetMenu, GetMenuState(hSourceMenu, n, MF_BYPOSITION), id, strBuf);
+				else
+				{
+					hSubMenu = CreatePopupMenu();
+					AppendMenu(hTargetMenu, MF_POPUP | MF_STRING, (uint)hSubMenu, strBuf);
+					menucpy(hSubMenu, GetSubMenu(hSourceMenu, n));
+				}
 			}
 		}
 	}
