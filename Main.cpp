@@ -1703,12 +1703,14 @@ EXPRESSION(
 		Layer* layer = &(*rdPtr->layers)[i];
 
 		if (x >= layer->width || y >= layer->height)
-			return 0;
+			return -1;
+		
+		Tile* tile = layer->get(x, y);
 
 		if(tile->id == Tile::EMPTY)
 			return -1;
 
-		return layer->get(x, y)->x;
+		return tile->x;
 	}
 	
 	return -1;
@@ -1729,12 +1731,14 @@ EXPRESSION(
 		Layer* layer = &(*rdPtr->layers)[i];
 
 		if (x >= layer->width || y >= layer->height)
-			return 0;
+			return -1;
 		
+		Tile* tile = layer->get(x, y);
+
 		if(tile->id == Tile::EMPTY)
 			return -1;
 
-		return layer->get(x, y)->y;
+		return tile->y;
 	}
 	
 	return -1;
