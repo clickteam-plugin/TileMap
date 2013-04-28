@@ -1705,10 +1705,13 @@ EXPRESSION(
 		if (x >= layer->width || y >= layer->height)
 			return 0;
 
+		if(tile->id == Tile::EMPTY)
+			return -1;
+
 		return layer->get(x, y)->x;
 	}
 	
-	return 0;
+	return -1;
 }
 
 EXPRESSION(
@@ -1727,11 +1730,14 @@ EXPRESSION(
 
 		if (x >= layer->width || y >= layer->height)
 			return 0;
+		
+		if(tile->id == Tile::EMPTY)
+			return -1;
 
 		return layer->get(x, y)->y;
 	}
 	
-	return 0;
+	return -1;
 }
 
 EXPRESSION(
@@ -1751,6 +1757,10 @@ EXPRESSION(
 		if (x < layer->width && y < layer->height)
 		{
 			Tile* tile = layer->get(x, y);
+
+			if(tile->id == Tile::EMPTY)
+				return -1;
+
 			return 1000*tile->x + tile->y;
 		}
 	}
