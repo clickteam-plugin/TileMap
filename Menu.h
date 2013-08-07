@@ -128,8 +128,8 @@
 	SUB_START("Tilesets")
 		ITEM(16, "Count")
 		SEPARATOR
-		ITEM(0, "Column count")
-		ITEM(1, "Row count")
+		ITEM(0, "Width")
+		ITEM(1, "Height")
 	SUB_END
 	SUB_START("Layer")
 		ITEM(15, "Count")

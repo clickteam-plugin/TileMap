@@ -298,85 +298,86 @@ ACTION(
 	PARAM_NUMBER,"Top-left tileset X", PARAM_NUMBER,"Top-left tileset Y", PARAM_NUMBER,"Bottom-right tileset X", PARAM_NUMBER,"Bottom-right tileset Y",
 	PARAM_NUMBER,"Method, add one of X (1: Wrap, 4: Repeat, 16: Box, 64: Random) and Y (2: Wrap, 8: Repeat, 32: Box, 128: Random)")
 ) {
+	// Currently unused
 
-	if (rdPtr->currentLayer)
-	{
-		if (!rdPtr->currentLayer->isValid())
-			return;
+	//if (rdPtr->currentLayer)
+	//{
+	//	if (!rdPtr->currentLayer->isValid())
+	//		return;
 
-		int tlX = intParam();
-		int tlY = intParam();
-		int brX = intParam();
-		int brY = intParam();
+	//	int tlX = intParam();
+	//	int tlY = intParam();
+	//	int brX = intParam();
+	//	int brY = intParam();
 
-		//int tilesetID = intParam();
+	//	//int tilesetID = intParam();
 
-		int x1 = intParam();
-		int y1 = intParam();
-		int x2 = intParam();
-		int y2 = intParam();
+	//	int x1 = intParam();
+	//	int y1 = intParam();
+	//	int x2 = intParam();
+	//	int y2 = intParam();
 
-		int method = intParam();
+	//	int method = intParam();
 
-		int width = rdPtr->currentLayer->width;
-		int height = rdPtr->currentLayer->height;
+	//	int width = rdPtr->currentLayer->width;
+	//	int height = rdPtr->currentLayer->height;
 
-		if (tlX < 0) tlX += width;
-		if (tlY < 0) tlY += height;
-		if (brX < 0) brX += width;
-		if (brY < 0) brY += height;
+	//	if (tlX < 0) tlX += width;
+	//	if (tlY < 0) tlY += height;
+	//	if (brX < 0) brX += width;
+	//	if (brY < 0) brY += height;
 
-		tlX = max(0, min(width-1, tlX));
-		brX = max(0, min(width-1, brX));
-		tlY = max(0, min(height-1, tlY));
-		brY = max(0, min(height-1, brY));
+	//	tlX = max(0, min(width-1, tlX));
+	//	brX = max(0, min(width-1, brX));
+	//	tlY = max(0, min(height-1, tlY));
+	//	brY = max(0, min(height-1, brY));
 
-		if (brX-tlX < 0 || brY-tlY < 0)
-			return;
+	//	if (brX-tlX < 0 || brY-tlY < 0)
+	//		return;
 
-		Tile* data = rdPtr->currentLayer->data;
-		for (int x = 0; x <= brX-tlX; ++x)
-		{
-			for (int y = 0; y <= brY-tlY; ++y)
-			{
-				Tile* tile = data + (tlX+x) + width*(tlY+y);
-				//tile->tileset = tilesetID + 1;
-			
-				// X method
-				switch(method & (1|4|16|64))
-				{
-				case 1: // Wrap
-					tile->x = x1 + ((x2-x1) ? (x % (x2-x1+1)) : 0); break;
-				case 4: // Repeat
-					tile->x = max(x1, min(x2, x1+x)); break;
-				case 16: // Box
-					tile->x = x1 + (x ? (1 + x/(brX-tlX)) : 0); break;
-				case 64: // Random
-					tile->x = x1 + ((x2-x1) ? (rand() % (x2-x1+1)) : 0); break;
-				default: // Undefined
-					tile->x = x1 + x;
-				}	
+	//	Tile* data = rdPtr->currentLayer->data;
+	//	for (int x = 0; x <= brX-tlX; ++x)
+	//	{
+	//		for (int y = 0; y <= brY-tlY; ++y)
+	//		{
+	//			Tile* tile = data + (tlX+x) + width*(tlY+y);
+	//			//tile->tileset = tilesetID + 1;
+	//		
+	//			// X method
+	//			switch(method & (1|4|16|64))
+	//			{
+	//			case 1: // Wrap
+	//				tile->x = x1 + ((x2-x1) ? (x % (x2-x1+1)) : 0); break;
+	//			case 4: // Repeat
+	//				tile->x = max(x1, min(x2, x1+x)); break;
+	//			case 16: // Box
+	//				tile->x = x1 + (x ? (1 + x/(brX-tlX)) : 0); break;
+	//			case 64: // Random
+	//				tile->x = x1 + ((x2-x1) ? (rand() % (x2-x1+1)) : 0); break;
+	//			default: // Undefined
+	//				tile->x = x1 + x;
+	//			}	
 
-				// Y method
-				switch(method & (2|8|32|128))
-				{
-				case 2: // Wrap
-					tile->y = y1 + ((y2-y1) ? (y % (y2-y1+1)) : 0); break;
-				case 8: // Repeat
-					tile->y = max(y1, min(y2, y1+y)); break;
-				case 32: // Box
-					tile->y = y1 + (y ? (1 + y/(brY-tlY)) : 0); break;
-				case 128: // Random
-					tile->y = y1 + ((y2-y1) ? (rand() % (y2-y1+1)) : 0); break;
-				default: // Undefined
-					tile->y = y1 + y;
-				}
+	//			// Y method
+	//			switch(method & (2|8|32|128))
+	//			{
+	//			case 2: // Wrap
+	//				tile->y = y1 + ((y2-y1) ? (y % (y2-y1+1)) : 0); break;
+	//			case 8: // Repeat
+	//				tile->y = max(y1, min(y2, y1+y)); break;
+	//			case 32: // Box
+	//				tile->y = y1 + (y ? (1 + y/(brY-tlY)) : 0); break;
+	//			case 128: // Random
+	//				tile->y = y1 + ((y2-y1) ? (rand() % (y2-y1+1)) : 0); break;
+	//			default: // Undefined
+	//				tile->y = y1 + y;
+	//			}
 
-			}
-		}
+	//		}
+	//	}
 
-		rdPtr->redraw = true;
-	}
+	//	rdPtr->redraw = true;
+	//}
 }
 
 
@@ -1117,6 +1118,8 @@ ACTION(
 ) {
 	rdPtr->layers->push_back(Layer());
 	rdPtr->currentLayer = &rdPtr->layers->back();
+	rdPtr->currentLayer->tileWidth = rdPtr->tileWidth;
+	rdPtr->currentLayer->tileHeight = rdPtr->tileHeight;
 	ActionFunc1(rdPtr, param1, param2);
 }
 
@@ -1432,6 +1435,7 @@ ACTION(
 ) {
 	rdPtr->tilesets->clear();
 	rdPtr->currentTileset = 0;
+	rdPtr->redraw = true;
 }
 
 ACTION(
@@ -1442,6 +1446,7 @@ ACTION(
 ) {
 	rdPtr->layers->clear();
 	rdPtr->currentLayer = 0;
+	rdPtr->redraw = true;
 }
 
 ACTION(
@@ -1453,6 +1458,7 @@ ACTION(
 	if (rdPtr->currentLayer && rdPtr->currentLayer->isValid())
 	{
 		memset(rdPtr->currentLayer->data, Tile::EMPTY & 0xff, rdPtr->currentLayer->width*rdPtr->currentLayer->height*sizeof(Tile));
+		rdPtr->redraw = true;
 	}
 }
 
@@ -1510,7 +1516,7 @@ ACTION(
 
 EXPRESSION(
 	/* ID */			0,
-	/* Name */			"TilesetCols(",
+	/* Name */			"TilesetWidth(",
 	/* Flags */			0,
 	/* Params */		(1, EXPPARAM_NUMBER, "Tileset index")
 ) {
@@ -1519,7 +1525,7 @@ EXPRESSION(
 	if (i < rdPtr->tilesets->size())
 	{
 		if ((*rdPtr->tilesets)[i].isValid())
-			return (*rdPtr->tilesets)[i].surface->GetWidth() / rdPtr->tileWidth;
+			return (*rdPtr->tilesets)[i].surface->GetWidth(); // / rdPtr->tileWidth;
 	}
 	
 	return 0;
@@ -1527,7 +1533,7 @@ EXPRESSION(
 
 EXPRESSION(
 	/* ID */			1,
-	/* Name */			"TilesetRows(",
+	/* Name */			"TilesetHeight(",
 	/* Flags */			0,
 	/* Params */		(1, EXPPARAM_NUMBER, "Tileset index")
 ) {
@@ -1536,7 +1542,7 @@ EXPRESSION(
 	if (i < rdPtr->tilesets->size())
 	{
 		if ((*rdPtr->tilesets)[i].isValid())
-			return (*rdPtr->tilesets)[i].surface->GetHeight() / rdPtr->tileHeight;
+			return (*rdPtr->tilesets)[i].surface->GetHeight(); /// rdPtr->tileHeight;
 	}
 	
 	return 0;

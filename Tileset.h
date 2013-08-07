@@ -12,7 +12,13 @@ struct Tileset
 		path[0] = 0;
 	}
 
-	~Tileset() { delete surface; }
+	~Tileset()
+	{
+		delete surface;
+#ifdef HWABETA
+		delete texture;
+#endif
+	}
 
 	Tileset(const Tileset& src)
 	{
