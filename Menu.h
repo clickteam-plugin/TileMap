@@ -100,6 +100,13 @@
 			SUB_END
 		SUB_END
 	SUB_END
+	SUB_START("Sub-layers")
+		ITEM(48, "Add sub-layer")
+		SEPARATOR
+		SUB_START("With cursor")
+			ITEM(49, "Fill with value")
+		SUB_END
+	SUB_END
 	SEPARATOR
 	ITEM(0, "~<Tile cursor>")
 	SUB_START("Tileset source")

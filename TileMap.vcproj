@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="TileMap"
 	ProjectGUID="{6F17931E-377D-481D-AB1B-8A316017F723}"
 	TargetFrameworkVersion="0"
@@ -172,7 +172,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib mmfs2.lib"
-				OutputFile="./MFX/Extensions/TileMap.mfx"
+				OutputFile="c:/mmf2/Extensions/TileMap.mfx"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\lib\"
@@ -1175,6 +1175,10 @@
 				>
 				<File
 					RelativePath=".\Layer.h"
+					>
+				</File>
+				<File
+					RelativePath=".\SubLayer.h"
 					>
 				</File>
 				<File

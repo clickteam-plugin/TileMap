@@ -1,5 +1,21 @@
-struct Layer
+#pragma once
+#include <vector>
+#include "SubLayer.h"
+
+class Layer
 {
+	// Tile data
+	Tile*					data;
+	
+	// Tile count (map size)
+	unsigned int	width;
+	unsigned int	height;
+
+public:
+
+	// Sub-layers
+	std::vector<SubLayer>	subLayers;
+
 	// Scrolling offset in pixels
 	int				offsetX;
 	int				offsetY;
@@ -24,13 +40,6 @@ struct Layer
 	unsigned short	tileWidth;
 	unsigned short	tileHeight;
 
-	// Tile count (map size)
-	unsigned int	width;
-	unsigned int	height;
-
-	// Tile data
-	Tile*			data;
-
 	// Constructor/destructor
 	Layer() : offsetX(0), offsetY(0), scrollX(1.0), scrollY(1.0), wrapX(false), wrapY(false),
 		visible(true), opacity(1.0), tileset(0), collision(-1),
@@ -38,7 +47,7 @@ struct Layer
 	{
 	}
 
-	Layer(const Layer& src)
+	Layer(const Layer& src) : data(0)
 	{
 		offsetX = src.offsetX;
 		offsetY = src.offsetY;
@@ -55,10 +64,10 @@ struct Layer
 		tileset = src.tileset;
 		collision = src.collision;
 
-		if(src.data)
+		if (src.data)
 		{
-			data = new Tile[width*height];
-			if(!data)
+			data = new Tile[width * height];
+			if (!data)
 			{
 				width = 0;
 				height = 0;
@@ -66,37 +75,61 @@ struct Layer
 			}
 
 			// Copy the source data
-			memcpy(data, src.data, width*height*sizeof(Tile));
+			memcpy(data, src.data, width * height * sizeof(Tile));
 		}
-		else
-		{
-			data = 0;
-		}
+
+		// Copy sub-layers...
+		subLayers = src.subLayers;
 	}
 
 	~Layer()
 	{
-		delete data;
+		delete[] data;
 	}
 
 	// Check if a layer is usable
-	inline bool isValid()
+	inline bool isValid() const
 	{
 		return width > 0 && height > 0 && tileWidth > 0 && tileHeight > 0 && data != 0;
 	}
 
+	// Check if a coordinate is valid
+	inline bool isValid(unsigned int x, unsigned int y) const
+	{
+		return isValid() && x < width && y < height;
+	}
+
 	// Get a tile within the layer array
-	inline Tile* get(int x, int y)
+	inline Tile* getTile(unsigned int x = 0, unsigned int y = 0)
 	{
 		return data + x + width*y;
+	}
+
+	inline unsigned int getWidth() const
+	{
+		return width;
+	}
+
+	inline unsigned int getHeight() const
+	{
+		return height;
+	}
+
+	inline unsigned int getByteSize() const
+	{
+		return width * height * sizeof(Tile);
 	}
 
 	// Resize layer, new tiles are empty
 	void resize(unsigned int newWidth, unsigned int newHeight)
 	{
-		if(newWidth == 0 || newHeight == 0)
+		// Nothing to do...
+		if (width == newWidth && height == newHeight)
+			return;
+
+		if (newWidth == 0 || newHeight == 0)
 		{
-			delete data;
+			delete[] data;
 			data = 0;
 			width = 0;
 			height = 0;
@@ -105,7 +138,7 @@ struct Layer
 
 		// Allocate a new array
 		Tile* newData = new Tile[newWidth*newHeight];
-		if(!newData)
+		if (!newData)
 		{
 			width = 0;
 			height = 0;
@@ -116,23 +149,23 @@ struct Layer
 		memset(newData, 0xff, sizeof(Tile)*newWidth*newHeight);
 
 		// Copy old data
-		if(data)
+		if (data)
 		{
 			// Get the size of the rectangle to copy
 			int copyWidth = min(width, newWidth);
 			int copyHeight = min(height, newHeight);
 
 			// Copy the old tiles
-			for(int x = 0; x < copyWidth; ++x)
+			for (int x = 0; x < copyWidth; ++x)
 			{
-				for(int y = 0; y < copyHeight; ++y)
+				for (int y = 0; y < copyHeight; ++y)
 				{
 					newData[x+y*newWidth] = data[x+y*width];
 				}
 			}
 
 			// Delete the old array
-			delete data;
+			delete[] data;
 		}
 
 		// Assign the new array
@@ -140,5 +173,17 @@ struct Layer
 
 		width = newWidth;
 		height = newHeight;
+	}
+
+	// For viewport rendering
+	inline int getScreenX(int cameraX)
+	{
+		return (int)((offsetX - cameraX) * scrollX);
+	}
+
+	// For viewport rendering
+	inline int getScreenY(int cameraY)
+	{
+		return (int)((offsetY - cameraY) * scrollY);
 	}
 };

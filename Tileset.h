@@ -1,3 +1,4 @@
+#pragma once
 #include "HWASurface.h"
 
 struct Tileset
@@ -12,26 +13,24 @@ struct Tileset
 		path[0] = 0;
 	}
 
-	~Tileset() { delete surface; }
+	~Tileset()
+	{
+		delete surface;
+	}
 
-	Tileset(const Tileset& src)
+	Tileset(const Tileset& src) : surface(0), texture(0)
 	{
 		int n = min(254, strlen(src.path));
 		strncpy(path, src.path, n);
 		path[n] = 0;
 		transpCol = src.transpCol;
 		
-		if(src.surface)
+		if (src.surface)
 		{
 			surface = new cSurface;
 			surface->Clone(*src.surface);
 			texture = 0;
 			updateTexture();
-		}
-		else
-		{
-			surface = 0;
-			texture = 0;
 		}
 	}
 

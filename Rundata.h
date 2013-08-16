@@ -79,8 +79,8 @@ struct TMAPVIEW
 	bool			autoScroll;
 
 	// Layer boundaries to draw
-	int				minLayer;
-	int				maxLayer;
+	unsigned		minLayer;
+	unsigned		maxLayer;
 
 	// Misc. settings
 	bool			outsideColl;
@@ -116,7 +116,7 @@ struct TMAPVIEW
 		float		opacity;
 		int			offsetX;
 		int			offsetY;
-		Tile		tile;
+		Tile*		tile;
 
 		// HWA specific
 		COLORREF	tint;

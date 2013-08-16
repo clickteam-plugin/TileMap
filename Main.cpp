@@ -89,6 +89,12 @@ ACTION(
 		int height = intParam();
 
 		rdPtr->currentLayer->resize(width, height);
+
+		for (std::vector<SubLayer>::iterator it = rdPtr->currentLayer->subLayers.begin(); it != rdPtr->currentLayer->subLayers.end(); ++it)
+		{
+			(*it).resize(width, height);
+		}
+
 		rdPtr->redraw = true;
 	}
 }
@@ -209,9 +215,9 @@ ACTION(
 		unsigned char tileY = (unsigned char)intParam();
 
 		Layer* layer = rdPtr->currentLayer;
-		if (layer->isValid() && x < layer->width && y < layer->height)
+		if (layer->isValid(x, y))
 		{
-			Tile* tile = layer->get(x, y);
+			Tile* tile = layer->getTile(x, y);
 			tile->x = tileX;
 			tile->y = tileY;
 		}
@@ -318,8 +324,8 @@ ACTION(
 
 		int method = intParam();
 
-		int width = rdPtr->currentLayer->width;
-		int height = rdPtr->currentLayer->height;
+		int width = rdPtr->currentLayer->getWidth();
+		int height = rdPtr->currentLayer->getHeight();
 
 		if (tlX < 0) tlX += width;
 		if (tlY < 0) tlY += height;
@@ -334,7 +340,7 @@ ACTION(
 		if (brX-tlX < 0 || brY-tlY < 0)
 			return;
 
-		Tile* data = rdPtr->currentLayer->data;
+		Tile* data = rdPtr->currentLayer->getTile();
 		for (int x = 0; x <= brX-tlX; ++x)
 		{
 			for (int y = 0; y <= brY-tlY; ++y)
@@ -458,8 +464,8 @@ ACTION(
 			return;
 
 		// Get layer size
-		int layerWidth = layer->width;
-		int layerHeight = layer->height;
+		int layerWidth = layer->getWidth();
+		int layerHeight = layer->getHeight();
 
 		// Get cursor size
 		unsigned int width = rdPtr->cursor.width;
@@ -480,7 +486,7 @@ ACTION(
 		{
 			for (int y = 0; y < y2-y1; ++y)
 			{
-				Tile* tile = layer->get(x+x1, y+y1);
+				Tile* tile = layer->getTile(x+x1, y+y1);
 
 				COLORREF color = 0;
 				color |= tile->x; // X = red
@@ -515,8 +521,8 @@ ACTION(
 			return;
 
 		// Get layer size
-		int layerWidth = layer->width;
-		int layerHeight = layer->height;
+		int layerWidth = layer->getWidth();
+		int layerHeight = layer->getHeight();
 
 		// Get cursor size
 		unsigned int width = rdPtr->cursor.width;
@@ -537,7 +543,7 @@ ACTION(
 		{
 			for (int y = 0; y < y2-y1; ++y)
 			{
-				Tile* tile = layer->get(x+x1, y+y1);
+				Tile* tile = layer->getTile(x+x1, y+y1);
 
 				COLORREF color = 0;
 				image->GetPixel(x, y, color);
@@ -648,8 +654,8 @@ ACTION(
 			{
 				case MAP_:
 
-					/* Deprecated... however, we will still read the tile size as new default tile size
-					   So it can be used when we will read the LAYR block. */
+					// Deprecated... however, we will still read the tile size as new default tile size
+					// So it can be used when we will read the LAYR block.
 					if (rdPtr->blocks & BLOCK_MAP && version < VER_12)
 					{
 						// Invalid size, exit
@@ -724,12 +730,14 @@ ACTION(
 						// Load them layers
 						for (unsigned int i = 0; i < layerCount; ++i)
 						{
+
 							rdPtr->layers->push_back(Layer());
 							Layer* layer = &rdPtr->layers->back();
 
 							// Read settings
-							fread(&layer->width, sizeof(int), 1, file);
-							fread(&layer->height, sizeof(int), 1, file);
+							unsigned int width, height;
+							fread(&width, sizeof(int), 1, file);
+							fread(&height, sizeof(int), 1, file);
 
 							if (version >= VER_12)
 							{
@@ -771,11 +779,11 @@ ACTION(
 									case MAIN:
 
 										// Try to allocate an array to hold the data
-										layer->resize(layer->width, layer->height);
+										layer->resize(width, height);
 
 										// Allocation succeeded, assign data pointer
 										if (layer->isValid())
-											destination = (unsigned char*)layer->data;
+											destination = (unsigned char*)layer->getTile();
 
 										break;
 								}
@@ -792,7 +800,7 @@ ACTION(
 									fread(temp, dataSize, 1, file);
 
 									// Uncompress data
-									mz_ulong dataAlloc = sizeof(Tile) * layer->width * layer->height;
+									mz_ulong dataAlloc = sizeof(Tile) * layer->getWidth() * layer->getHeight();
 									mz_uncompress(destination, &dataAlloc, temp, dataSize);
 
 									// Delete temporary compression buffer
@@ -850,7 +858,7 @@ ACTION(
 	unsigned int layerCount = rdPtr->layers->size();
 	unsigned int tilesetCount = rdPtr->tilesets->size();
 
-	// Open file
+	//  
 	FILE* file = fopen((const char*)param1, "wb");
 	if (!file)
 	{
@@ -913,8 +921,10 @@ ACTION(
 			Layer* layer = &(*rdPtr->layers)[i];
 
 			// General settings
-			fwrite(&layer->width, sizeof(int), 1, file);
-			fwrite(&layer->height, sizeof(int), 1, file);
+			unsigned int width = layer->getWidth();
+			unsigned int height = layer->getHeight();
+			fwrite(&width, sizeof(int), 1, file);
+			fwrite(&height, sizeof(int), 1, file);
 			fwrite(&layer->tileWidth, sizeof(short), 1, file);
 			fwrite(&layer->tileHeight, sizeof(short), 1, file);
 			fwrite(&layer->tileset, sizeof(char), 1, file);
@@ -938,10 +948,10 @@ ACTION(
 			if (layer->isValid())
 			{
 				// Compress tile data...
-				mz_ulong dataSize = sizeof(Tile) * layer->width * layer->height;
+				mz_ulong dataSize = layer->getByteSize();
 				mz_ulong dataAlloc = mz_compressBound(dataSize);
 				unsigned char* temp = new unsigned char[dataAlloc];
-				mz_compress2(temp, &dataAlloc, (const unsigned char*)layer->data, dataSize, rdPtr->compress);
+				mz_compress2(temp, &dataAlloc, (const unsigned char*)layer->getTile(), dataSize, rdPtr->compress);
 
 				// Write compressed size
 				fwrite(&dataAlloc, sizeof(int), 1, file);
@@ -983,9 +993,9 @@ ACTION(
 		unsigned int y = intParam();
 
 		Layer* layer = rdPtr->currentLayer;
-		if (layer->isValid() && x < layer->width && y < layer->height)
+		if (layer->isValid(x, y))
 		{
-			Tile* tile = layer->get(x, y);
+			Tile* tile = layer->getTile(x, y);
 			tile->id = Tile::EMPTY;
 
 			rdPtr->redraw = true;
@@ -1017,8 +1027,8 @@ ACTION(
 		int tileX = intParam();
 		int tileY = intParam();
 
-		int width = rdPtr->currentLayer->width;
-		int height = rdPtr->currentLayer->height;
+		int width = rdPtr->currentLayer->getWidth();
+		int height = rdPtr->currentLayer->getHeight();
 
 		if (tlX < 0) tlX += width;
 		if (tlY < 0) tlY += height;
@@ -1033,7 +1043,7 @@ ACTION(
 		if (brX-tlX < 0 || brY-tlY < 0)
 			return;
 
-		Tile* data = rdPtr->currentLayer->data;
+		Tile* data = rdPtr->currentLayer->getTile();
 		for (int x = 0; x <= brX-tlX; ++x)
 		{
 			for (int y = 0; y <= brY-tlY; ++y)
@@ -1160,8 +1170,8 @@ ACTION(
 	if (layer && layer->isValid())
 	{
 		// Get layer size
-		int layerWidth = layer->width;
-		int layerHeight = layer->height;
+		int layerWidth = layer->getWidth();
+		int layerHeight = layer->getHeight();
 
 		// Get cursor size
 		unsigned int width = rdPtr->cursor.width;
@@ -1175,7 +1185,7 @@ ACTION(
 		{
 			if (x1 >= 0 && y1 >= 0 && x1 < layerWidth && y1 < layerHeight)
 			{
-				Tile* tile = layer->get(x1, y1);
+				Tile* tile = layer->getTile(x1, y1);
 				tile->x = rdPtr->cursor.tiles.a.x;
 				tile->y = rdPtr->cursor.tiles.b.y;
 			}
@@ -1203,7 +1213,7 @@ ACTION(
 		{
 			for (int y = 0; y <= y2-y1; ++y)
 			{
-				Tile* tile = layer->get(x+x1, y+y1);
+				Tile* tile = layer->getTile(x+x1, y+y1);
 
 				// X value
 				if (tiles.b.x-tiles.a.x)
@@ -1322,8 +1332,8 @@ ACTION(
 	if (layer && layer->isValid())
 	{
 		// Get layer size
-		int layerWidth = layer->width;
-		int layerHeight = layer->height;
+		int layerWidth = layer->getWidth();
+		int layerHeight = layer->getHeight();
 
 		// Get cursor size
 		unsigned int width = rdPtr->cursor.width;
@@ -1351,8 +1361,8 @@ ACTION(
 		{
 			for (int y = 0; y < y2-y1; ++y)
 			{
-				Tile* tile = layer->get(x+x1, y+y1);
-				Tile* src = layer->get(x+srcX, y+srcY);
+				Tile* tile = layer->getTile(x+x1, y+y1);
+				Tile* src = layer->getTile(x+srcX, y+srcY);
 				tile->x = src->x;
 				tile->y = src->y;
 			}
@@ -1372,8 +1382,8 @@ ACTION(
 	{
 		rdPtr->cursor.x = 0;
 		rdPtr->cursor.y = 0;
-		rdPtr->cursor.width = rdPtr->currentLayer->width;
-		rdPtr->cursor.height = rdPtr->currentLayer->height;
+		rdPtr->cursor.width = rdPtr->currentLayer->getWidth();
+		rdPtr->cursor.height = rdPtr->currentLayer->getHeight();
 	}
 }
 
@@ -1452,7 +1462,7 @@ ACTION(
 ) {
 	if (rdPtr->currentLayer && rdPtr->currentLayer->isValid())
 	{
-		memset(rdPtr->currentLayer->data, Tile::EMPTY & 0xff, rdPtr->currentLayer->width*rdPtr->currentLayer->height*sizeof(Tile));
+		memset(rdPtr->currentLayer->getTile(), Tile::EMPTY & 0xff, rdPtr->currentLayer->getWidth()*rdPtr->currentLayer->getHeight()*sizeof(Tile));
 	}
 }
 
@@ -1471,10 +1481,10 @@ ACTION(
 		int tileX = intParam();
 		int tileY = intParam();
 
-		int width = rdPtr->currentLayer->width;
-		int height = rdPtr->currentLayer->height;
+		int width = rdPtr->currentLayer->getWidth();
+		int height = rdPtr->currentLayer->getHeight();
 
-		Tile* data = rdPtr->currentLayer->data;
+		Tile* data = rdPtr->currentLayer->getTile();
 		for (int x = 0; x < width; ++x)
 		{
 			for (int y = 0; y < height; ++y)
@@ -1502,6 +1512,65 @@ ACTION(
 	rdPtr->cursor.height = intParam() - rdPtr->cursor.y;
 }
 
+ACTION(
+	/* ID */			48,
+	/* Name */			"Add sub-layer",
+	/* Flags */			0,
+	/* Params */		(0)
+) {
+	if (rdPtr->currentLayer)
+	{
+		rdPtr->currentLayer->subLayers.push_back(SubLayer());
+		rdPtr->currentLayer->subLayers.back().resize(
+			rdPtr->currentLayer->getWidth(),
+			rdPtr->currentLayer->getHeight()
+		);
+	}
+}
+
+ACTION(
+	/* ID */			49,
+	/* Name */			"Fill sub-layer cells at cursor with %0",
+	/* Flags */			0,
+	/* Params */		(1, PARAM_NUMBER, "Value")
+) {
+	int value = intParam();
+
+	Layer* layer = rdPtr->currentLayer;
+	if (layer && layer->isValid() && layer->subLayers.size() && layer->subLayers[0].isValid())
+	{
+		SubLayer& sub = layer->subLayers[0];
+
+		// Get layer size
+		int layerWidth = layer->getWidth();
+		int layerHeight = layer->getHeight();
+
+		// Get cursor size
+		unsigned int width = rdPtr->cursor.width;
+		unsigned int height = rdPtr->cursor.height;
+
+		int x1 = rdPtr->cursor.x;
+		int y1 = rdPtr->cursor.y;
+
+		// Rectangular area
+		int x2 = x1 + width-1;
+		int y2 = y1 + height-1;
+
+		// Limit area to layer data
+		x1 = max(0, min(layerWidth-1, x1));
+		y1 = max(0, min(layerHeight-1, y1));
+		x2 = max(0, min(layerWidth-1, x2));
+		y2 = max(0, min(layerHeight-1, y2));
+
+		for (int x = 0; x <= x2-x1; ++x)
+		{
+			for (int y = 0; y <= y2-y1; ++y)
+			{
+				*(sub.getCell(x+x1, y+y1)) = value;
+			}
+		}
+	}
+}
 // ============================================================================
 //
 // EXPRESSIONS
@@ -1551,7 +1620,7 @@ EXPRESSION(
 	unsigned int i = ExParam(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
-		return (*rdPtr->layers)[i].width;
+		return (*rdPtr->layers)[i].getWidth();
 	
 	return 0;
 }
@@ -1565,7 +1634,7 @@ EXPRESSION(
 	unsigned int i = ExParam(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
-		return (*rdPtr->layers)[i].height;
+		return (*rdPtr->layers)[i].getHeight();
 	
 	return 0;
 }
@@ -1702,10 +1771,10 @@ EXPRESSION(
 	{
 		Layer* layer = &(*rdPtr->layers)[i];
 
-		if (x >= layer->width || y >= layer->height)
+		if (x >= layer->getWidth() || y >= layer->getHeight())
 			return 0;
 
-		return layer->get(x, y)->x;
+		return layer->getTile(x, y)->x;
 	}
 	
 	return 0;
@@ -1725,10 +1794,10 @@ EXPRESSION(
 	{
 		Layer* layer = &(*rdPtr->layers)[i];
 
-		if (x >= layer->width || y >= layer->height)
+		if (x >= layer->getWidth() || y >= layer->getHeight())
 			return 0;
 
-		return layer->get(x, y)->y;
+		return layer->getTile(x, y)->y;
 	}
 	
 	return 0;
@@ -1748,9 +1817,9 @@ EXPRESSION(
 	{
 		Layer* layer = &(*rdPtr->layers)[i];
 
-		if (x < layer->width && y < layer->height)
+		if (x < layer->getWidth() && y < layer->getHeight())
 		{
-			Tile* tile = layer->get(x, y);
+			Tile* tile = layer->getTile(x, y);
 			return 1000*tile->x + tile->y;
 		}
 	}
@@ -1790,8 +1859,8 @@ EXPRESSION(
 	{
 		Layer* layer = &(*rdPtr->layers)[i];
 
-		if (x < layer->width && y < layer->height)
-			return layer->get(x, y)->id;
+		if (x < layer->getWidth() && y < layer->getHeight())
+			return layer->getTile(x, y)->id;
 	}
 	
 	return Tile::EMPTY;

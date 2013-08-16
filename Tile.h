@@ -1,3 +1,5 @@
+#pragma once
+
 union Tile
 {
 	static const unsigned short EMPTY = 0xffff; 
