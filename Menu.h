@@ -53,9 +53,9 @@
 	SUB_START("Settings")
 		ITEM(4, "Set image from file")
 		ITEM(14, "Set image from Surface")
+		ITEM(3, "Assign image path")
 		SEPARATOR
 		ITEM(27, "Set transparent color")
-		//ITEM(3, "Assign file path")
 	SUB_END
 	SEPARATOR
 	ITEM(0, "~<Current layer>")

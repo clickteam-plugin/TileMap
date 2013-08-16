@@ -157,19 +157,8 @@ ACTION(
 		// Update 'texture' surface (trivial in non-hwa)
 		tileset->updateTexture();
 
-		// Store relative file path, in case the file is saved
-		memset(tileset->path, 0, 256);
-		char path[MAX_PATH], workingDir[MAX_PATH];
-		GetCurrentDirectory(MAX_PATH, workingDir);
-		if (PathRelativePathTo(path, workingDir, FILE_ATTRIBUTE_DIRECTORY, (const char*)param1, 0))
-		{
-			strcpy_s(tileset->path, 256, path);
-		}
-		// Failed to store relative path, use absolute
-		else
-		{
-			strcpy_s(tileset->path, 256, (const char*)param1);
-		}
+		// Store file path, in case tileset data blocks are saved
+		strcpy_s(tileset->path, 256, (const char*)param1);
 
 		rdPtr->redraw = true;
 	}
@@ -615,10 +604,11 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(1, PARAM_FILENAME2, "File")
 ) {
-	const char* path = strParam();
-	
+	char mapPath[256] = {};
+	strcpy_s(mapPath, 256, strParam());
+
 	// Start reading file
-	FILE* file = fopen(path, "rb");
+	FILE* file = fopen(mapPath, "rb");
 	if (!file)
 	{
 		rdPtr->rRd->GenerateEvent(2);
@@ -686,7 +676,9 @@ ACTION(
 						fread(&tilesetCount, sizeof(char), 1, file);
 						rdPtr->tilesets->reserve(tilesetCount);
 
-						Tileset* oldTileset = rdPtr->currentTileset;
+						// Need to store a copy to the current tileset because we will temporarily change it
+						Tileset* currentTileset = rdPtr->currentTileset;
+
 						for (int i = 0; i < tilesetCount; ++i)
 						{
 							rdPtr->tilesets->push_back(Tileset());
@@ -695,21 +687,37 @@ ACTION(
 							// Read settings
 							fread(&tileset->transpCol, sizeof(COLORREF), 1, file);
 							
-							// Read path
+							// Read relative path
+							char relativeTilesetPath[256] = {};
 							unsigned char pathLength = 0;
 							fread(&pathLength, sizeof(char), 1, file);
-							memset(tileset->path, 0, 256);
-							fread(tileset->path, 1, pathLength, file);
+							fread(relativeTilesetPath, 1, pathLength, file);
+
+							// Now make this path absolute. First, we'll have to get the directoy of the map path
+							char* slash;
+							if ((slash = strrchr(mapPath, '\\')) || (slash = strrchr(mapPath, '/')))
+								slash[1] = 0;
+
+
+							MessageBox(0, mapPath, "map", 0);
+							MessageBox(0, relativeTilesetPath, "relative tileset", 0);
+
+							if (!PathCombine(tileset->path, mapPath, relativeTilesetPath))
+								strcpy_s(tileset->path, 256, relativeTilesetPath);
+
+							MessageBox(0, tileset->path, "output tileset", 0);
 
 							// If the file exists, try to load image
 							if (GetFileAttributes(tileset->path) != 0xFFFFFFFF)
 							{
 								rdPtr->currentTileset = tileset;
-								ActionFunc6(rdPtr, (long)&tileset->path[0], 0);
+								char tempPath[256] = {};
+								strcpy_s(tempPath, 256, tileset->path);
+								ActionFunc4(rdPtr, (long)&tempPath[0], 0);
 							}
 						}
 						
-						rdPtr->currentTileset = oldTileset;
+						rdPtr->currentTileset = currentTileset;
 					}
 					else
 					{
@@ -800,7 +808,7 @@ ACTION(
 									fread(temp, dataSize, 1, file);
 
 									// Uncompress data
-									mz_ulong dataAlloc = sizeof(Tile) * layer->getWidth() * layer->getHeight();
+									mz_ulong dataAlloc = layer->getByteSize();
 									mz_uncompress(destination, &dataAlloc, temp, dataSize);
 
 									// Delete temporary compression buffer
@@ -858,8 +866,8 @@ ACTION(
 	unsigned int layerCount = rdPtr->layers->size();
 	unsigned int tilesetCount = rdPtr->tilesets->size();
 
-	//  
-	FILE* file = fopen((const char*)param1, "wb");
+	const char* mapPath = strParam();
+	FILE* file = fopen(mapPath, "wb");
 	if (!file)
 	{
 		rdPtr->rRd->GenerateEvent(3);
@@ -900,8 +908,16 @@ ACTION(
 		{
 			Tileset* tileset = &(*rdPtr->tilesets)[i];
 			fwrite(&tileset->transpCol, sizeof(COLORREF), 1, file);
-			fputc(strlen(tileset->path), file);
-			fputs(tileset->path, file);
+
+			// Store relative file path (or absolute if relative fails)
+			char path[MAX_PATH] = {};
+			if (!PathRelativePathTo(path, mapPath, 0, tileset->path, 0))
+			{
+				strcpy_s(path, 256, tileset->path);
+			}
+
+			fputc(strlen(path), file);
+			fputs(path, file);
 		}
 	}
 
