@@ -9,6 +9,16 @@ using namespace std;
 #include "Tile.h"
 #include "Layer.h"
 
+// Tileset path mode
+enum TSPMODE
+{
+	TSPM_UNTREATED, // The path is taken as-is
+	TSPM_APP_PATH,	// The path is relative to the exe file
+	TSPM_MAP_PATH,	// The path is relative to the TileMap file it is referenced in
+	TSPM_USER_PATH,	// The path is relative to a user-specified path
+	TSPM_CUSTOM,	// The path is an identifier that cannot be loaded directly from the disk
+};
+
 struct TMAPVIEW;
 struct TILEMAP
 {
@@ -37,6 +47,11 @@ struct TILEMAP
 	// Compression level 0-10 for saving
 	char			compress;
 	int				blocks;
+
+	// Location of the root folder of tilesets (saved tileset paths will be relative to this)
+	TSPMODE			tilesetPathMode;
+	char			tilesetUserPath[256];
+	char			appPath[256]; // Used for APP_PATH mode
 
 	// Pen used for more flexible tile drawing
 	struct

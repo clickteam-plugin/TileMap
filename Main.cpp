@@ -121,8 +121,7 @@ ACTION(
 ) {
 	if (rdPtr->currentTileset)
 	{
-		memset(rdPtr->currentTileset->path, 0, 256);
-		strncpy(rdPtr->currentTileset->path, strParam(), 255);
+		rdPtr->currentTileset->setPath((const char*)param1);
 	}
 }
 
@@ -132,11 +131,13 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(1, PARAM_FILENAME2,"File path")
 ) {
+	const char* filePath = (const char*)param1;
+
 	if (rdPtr->currentTileset)
 	{
 		// Load file
 		cSurface file;
-		if (!ImportImage(rdPtr->rHo.hoAdRunHeader->rh4.rh4Mv->mvImgFilterMgr, (const char*)param1, &file, 0, 0))
+		if (!ImportImage(rdPtr->rHo.hoAdRunHeader->rh4.rh4Mv->mvImgFilterMgr, filePath, &file, 0, 0))
 			return;
 
 		// Allocate surface
@@ -158,7 +159,7 @@ ACTION(
 		tileset->updateTexture();
 
 		// Store file path, in case tileset data blocks are saved
-		strcpy_s(tileset->path, 256, (const char*)param1);
+		rdPtr->currentTileset->setPath(filePath);
 
 		rdPtr->redraw = true;
 	}
@@ -198,8 +199,8 @@ ACTION(
 ) {
 	if (rdPtr->currentLayer)
 	{
-		unsigned int x = intParam();
-		unsigned int y = intParam();
+		unsigned x = intParam();
+		unsigned y = intParam();
 		unsigned char tileX = (unsigned char)intParam();
 		unsigned char tileY = (unsigned char)intParam();
 
@@ -221,7 +222,7 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(1, PARAM_NUMBER,"Layer index")
 ) {
-	unsigned int id = intParam();
+	unsigned id = intParam();
 
 	if (id < rdPtr->layers->size())
 		rdPtr->currentLayer = &(*rdPtr->layers)[id];
@@ -399,7 +400,7 @@ ACTION(
 			tileset->surface = new cSurface;
 		else
 			tileset->surface->Delete();
-		memset(tileset->path, 0, 256);
+		rdPtr->currentTileset->setPath("");
 
 		// Create blank surface
 		cSurface* proto = getPrototype(rdPtr->depth);
@@ -457,8 +458,8 @@ ACTION(
 		int layerHeight = layer->getHeight();
 
 		// Get cursor size
-		unsigned int width = rdPtr->cursor.width;
-		unsigned int height = rdPtr->cursor.height;
+		unsigned width = rdPtr->cursor.width;
+		unsigned height = rdPtr->cursor.height;
 
 		int x1 = rdPtr->cursor.x;
 		int y1 = rdPtr->cursor.y;
@@ -514,8 +515,8 @@ ACTION(
 		int layerHeight = layer->getHeight();
 
 		// Get cursor size
-		unsigned int width = rdPtr->cursor.width;
-		unsigned int height = rdPtr->cursor.height;
+		unsigned width = rdPtr->cursor.width;
+		unsigned height = rdPtr->cursor.height;
 
 		int x1 = rdPtr->cursor.x;
 		int y1 = rdPtr->cursor.y;
@@ -605,7 +606,7 @@ ACTION(
 	/* Params */		(1, PARAM_FILENAME2, "File")
 ) {
 	char mapPath[256] = {};
-	strcpy_s(mapPath, 256, strParam());
+	strcpy_s(mapPath, 256, (const char*)param1);
 
 	// Start reading file
 	FILE* file = fopen(mapPath, "rb");
@@ -693,27 +694,38 @@ ACTION(
 							fread(&pathLength, sizeof(char), 1, file);
 							fread(relativeTilesetPath, 1, pathLength, file);
 
-							// Now make this path absolute. First, we'll have to get the directoy of the map path
-							char* slash;
-							if ((slash = strrchr(mapPath, '\\')) || (slash = strrchr(mapPath, '/')))
-								slash[1] = 0;
+							// Make this path absolute
 
+							switch (rdPtr->tilesetPathMode)
+							{
+								case TSPM_APP_PATH:
+									tileset->setPathFromRelative(rdPtr->appPath, relativeTilesetPath);
+									break;
 
-							MessageBox(0, mapPath, "map", 0);
-							MessageBox(0, relativeTilesetPath, "relative tileset", 0);
+								case TSPM_MAP_PATH:
+									// We'll have to get the directory of the map path (excluding the file name)
+									char* slash;
+									if ((slash = strrchr(mapPath, '\\')) || (slash = strrchr(mapPath, '/')))
+										slash[1] = 0;
+									tileset->setPathFromRelative(mapPath, relativeTilesetPath);
+									break;
 
-							if (!PathCombine(tileset->path, mapPath, relativeTilesetPath))
-								strcpy_s(tileset->path, 256, relativeTilesetPath);
+								case TSPM_USER_PATH:
+									tileset->setPathFromRelative(rdPtr->tilesetUserPath, relativeTilesetPath);
+									break;
 
-							MessageBox(0, tileset->path, "output tileset", 0);
+								default:
+									tileset->setPath(relativeTilesetPath);
+							}
 
 							// If the file exists, try to load image
-							if (GetFileAttributes(tileset->path) != 0xFFFFFFFF)
+							if (rdPtr->tilesetPathMode != TSPM_CUSTOM
+							&&	GetFileAttributes(tileset->getPath()) != 0xFFFFFFFF)
 							{
 								rdPtr->currentTileset = tileset;
-								char tempPath[256] = {};
-								strcpy_s(tempPath, 256, tileset->path);
-								ActionFunc4(rdPtr, (long)&tempPath[0], 0);
+								char tilesetPath[256] = {};
+								strcpy_s(tilesetPath, 256, tileset->getPath());
+								ActionFunc4(rdPtr, (long)&tilesetPath[0], 0);
 							}
 						}
 						
@@ -731,19 +743,19 @@ ACTION(
 					{
 						rdPtr->layers->clear();
 
-						unsigned int layerCount = 0;
+						unsigned layerCount = 0;
 						fread(&layerCount, (version < VER_11) ? sizeof(char) : sizeof(short), 1, file);
 						rdPtr->layers->reserve(layerCount);
 
 						// Load them layers
-						for (unsigned int i = 0; i < layerCount; ++i)
+						for (unsigned i = 0; i < layerCount; ++i)
 						{
 
 							rdPtr->layers->push_back(Layer());
 							Layer* layer = &rdPtr->layers->back();
 
 							// Read settings
-							unsigned int width, height;
+							unsigned width, height;
 							fread(&width, sizeof(int), 1, file);
 							fread(&height, sizeof(int), 1, file);
 
@@ -863,10 +875,10 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(1, PARAM_FILENAME2,"File")
 ) {
-	unsigned int layerCount = rdPtr->layers->size();
-	unsigned int tilesetCount = rdPtr->tilesets->size();
+	unsigned layerCount = rdPtr->layers->size();
+	unsigned tilesetCount = rdPtr->tilesets->size();
 
-	const char* mapPath = strParam();
+	const char* mapPath = (const char*)param1;
 	FILE* file = fopen(mapPath, "wb");
 	if (!file)
 	{
@@ -895,25 +907,39 @@ ACTION(
 	{
 		fwrite(&TILE, sizeof(int), 1, file);
 		blockSize = sizeof(char);
-		for (unsigned int i = 0; i < tilesetCount; ++i)
+		for (unsigned i = 0; i < tilesetCount; ++i)
 		{
 			blockSize += sizeof(COLORREF);
 			blockSize += sizeof(char);
-			blockSize += strlen((&(*rdPtr->tilesets)[i])->path);
+			blockSize += strlen((&(*rdPtr->tilesets)[i])->getPath());
 		}
 		fwrite(&blockSize, sizeof(int), 1, file);
 		fwrite(&tilesetCount, sizeof(char), 1, file);
 
-		for (unsigned int i = 0; i < tilesetCount; ++i)
+		for (unsigned i = 0; i < tilesetCount; ++i)
 		{
 			Tileset* tileset = &(*rdPtr->tilesets)[i];
 			fwrite(&tileset->transpCol, sizeof(COLORREF), 1, file);
 
-			// Store relative file path (or absolute if relative fails)
+			// Store file path (relative to app, map or absolute)
 			char path[MAX_PATH] = {};
-			if (!PathRelativePathTo(path, mapPath, 0, tileset->path, 0))
+
+			switch (rdPtr->tilesetPathMode)
 			{
-				strcpy_s(path, 256, tileset->path);
+				case TSPM_APP_PATH:
+					tileset->getPathRelativeTo(rdPtr->appPath, path);
+					break;
+
+				case TSPM_MAP_PATH:
+					tileset->getPathRelativeTo(mapPath, path, true);
+					break;
+
+				case TSPM_USER_PATH:
+					tileset->getPathRelativeTo(rdPtr->tilesetUserPath, path);
+					break;
+
+				default:
+					strcpy_s(path, 256, tileset->getPath());
 			}
 
 			fputc(strlen(path), file);
@@ -932,13 +958,13 @@ ACTION(
 
 		fwrite(&layerCount, sizeof(short), 1, file);
 
-		for (unsigned int i = 0; i < layerCount; ++i)
+		for (unsigned i = 0; i < layerCount; ++i)
 		{
 			Layer* layer = &(*rdPtr->layers)[i];
 
 			// General settings
-			unsigned int width = layer->getWidth();
-			unsigned int height = layer->getHeight();
+			unsigned width = layer->getWidth();
+			unsigned height = layer->getHeight();
 			fwrite(&width, sizeof(int), 1, file);
 			fwrite(&height, sizeof(int), 1, file);
 			fwrite(&layer->tileWidth, sizeof(short), 1, file);
@@ -1005,8 +1031,8 @@ ACTION(
 ) {
 	if (rdPtr->currentLayer)
 	{
-		unsigned int x = intParam();
-		unsigned int y = intParam();
+		unsigned x = intParam();
+		unsigned y = intParam();
 
 		Layer* layer = rdPtr->currentLayer;
 		if (layer->isValid(x, y))
@@ -1153,7 +1179,7 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(1, PARAM_NUMBER,"Tileset index")
 ) {
-	unsigned int id = intParam();
+	unsigned id = intParam();
 
 	if (id < rdPtr->tilesets->size())
 		rdPtr->currentTileset = &(*rdPtr->tilesets)[id];
@@ -1191,8 +1217,8 @@ ACTION(
 		int layerHeight = layer->getHeight();
 
 		// Get cursor size
-		unsigned int width = rdPtr->cursor.width;
-		unsigned int height = rdPtr->cursor.height;
+		unsigned width = rdPtr->cursor.width;
+		unsigned height = rdPtr->cursor.height;
 
 		int x1 = param1;
 		int y1 = param2;
@@ -1294,7 +1320,7 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(2, PARAM_NUMBER, "Tileset A (0-99)", PARAM_NUMBER, "Tileset B (0-99)")
 ) {
-	unsigned int a = intParam(), b = intParam();
+	unsigned a = intParam(), b = intParam();
 	if (a < rdPtr->tilesets->size() && b < rdPtr->tilesets->size())
 	{
 		swap(rdPtr->tilesets->at(a), rdPtr->tilesets->at(b));
@@ -1352,8 +1378,8 @@ ACTION(
 		int layerHeight = layer->getHeight();
 
 		// Get cursor size
-		unsigned int width = rdPtr->cursor.width;
-		unsigned int height = rdPtr->cursor.height;
+		unsigned width = rdPtr->cursor.width;
+		unsigned height = rdPtr->cursor.height;
 
 		// Limit cursor size to rectangle
 		int srcX = intParam();
@@ -1418,7 +1444,7 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(1, PARAM_NUMBER, "Tileset index")
 ) {
-	unsigned int i = Param(TYPE_INT);
+	unsigned i = Param(TYPE_INT);
 
 	if (i < rdPtr->tilesets->size())
 	{
@@ -1437,7 +1463,7 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(1, PARAM_NUMBER, "Layer index")
 ) {
-	unsigned int i = Param(TYPE_INT);
+	unsigned i = Param(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
 	{
@@ -1561,8 +1587,8 @@ ACTION(
 		int layerHeight = layer->getHeight();
 
 		// Get cursor size
-		unsigned int width = rdPtr->cursor.width;
-		unsigned int height = rdPtr->cursor.height;
+		unsigned width = rdPtr->cursor.width;
+		unsigned height = rdPtr->cursor.height;
 
 		int x1 = rdPtr->cursor.x;
 		int y1 = rdPtr->cursor.y;
@@ -1586,6 +1612,25 @@ ACTION(
 		}
 	}
 }
+
+ACTION(
+	/* ID */			50,
+	/* Name */			"Set tileset path mode to %0",
+	/* Flags */			0,
+	/* Params */		(1, PARAM_NUMBER, "Path mode (0: Untreated, 1: Application folder, 2: Map file folder, 3: User path, 4: Custom (no physical file)")
+) {
+	rdPtr->tilesetPathMode = (TSPMODE)param1;
+}
+
+ACTION(
+	/* ID */			51	,
+	/* Name */			"Set tileset user path to %0",
+	/* Flags */			0,
+	/* Params */		(1, PARAM_STRING, "User path (used for the 'User path' tileset path mode)")
+) {
+	strcpy_s(rdPtr->tilesetUserPath, 256, (const char*)param1);
+}
+
 // ============================================================================
 //
 // EXPRESSIONS
@@ -1594,16 +1639,16 @@ ACTION(
 
 EXPRESSION(
 	/* ID */			0,
-	/* Name */			"TilesetCols(",
+	/* Name */			"TilesetWidth(",
 	/* Flags */			0,
 	/* Params */		(1, EXPPARAM_NUMBER, "Tileset index")
 ) {
-	unsigned int i = ExParam(TYPE_INT);
+	unsigned i = ExParam(TYPE_INT);
 
 	if (i < rdPtr->tilesets->size())
 	{
 		if ((*rdPtr->tilesets)[i].isValid())
-			return (*rdPtr->tilesets)[i].surface->GetWidth() / rdPtr->tileWidth;
+			return (*rdPtr->tilesets)[i].surface->GetWidth();
 	}
 	
 	return 0;
@@ -1611,16 +1656,16 @@ EXPRESSION(
 
 EXPRESSION(
 	/* ID */			1,
-	/* Name */			"TilesetRows(",
+	/* Name */			"TilesetHeight(",
 	/* Flags */			0,
 	/* Params */		(1, EXPPARAM_NUMBER, "Tileset index")
 ) {
-	unsigned int i = ExParam(TYPE_INT);
+	unsigned i = ExParam(TYPE_INT);
 
 	if (i < rdPtr->tilesets->size())
 	{
 		if ((*rdPtr->tilesets)[i].isValid())
-			return (*rdPtr->tilesets)[i].surface->GetHeight() / rdPtr->tileHeight;
+			return (*rdPtr->tilesets)[i].surface->GetHeight();
 	}
 	
 	return 0;
@@ -1632,7 +1677,7 @@ EXPRESSION(
 	/* Flags */			0,
 	/* Params */		(1, EXPPARAM_NUMBER, "Layer index")
 ) {
-	unsigned int i = ExParam(TYPE_INT);
+	unsigned i = ExParam(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
 		return (*rdPtr->layers)[i].getWidth();
@@ -1646,7 +1691,7 @@ EXPRESSION(
 	/* Flags */			0,
 	/* Params */		(1, EXPPARAM_NUMBER, "Layer index")
 ) {
-	unsigned int i = ExParam(TYPE_INT);
+	unsigned i = ExParam(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
 		return (*rdPtr->layers)[i].getHeight();
@@ -1660,7 +1705,7 @@ EXPRESSION(
 	/* Flags */			0,
 	/* Params */		(1, EXPPARAM_NUMBER, "Layer index")
 ) {
-	unsigned int i = ExParam(TYPE_INT);
+	unsigned i = ExParam(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
 		return (*rdPtr->layers)[i].wrapX;
@@ -1674,7 +1719,7 @@ EXPRESSION(
 	/* Flags */			0,
 	/* Params */		(1, EXPPARAM_NUMBER, "Layer index")
 ) {
-	unsigned int i = ExParam(TYPE_INT);
+	unsigned i = ExParam(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
 		return (*rdPtr->layers)[i].wrapY;
@@ -1688,7 +1733,7 @@ EXPRESSION(
 	/* Flags */			0,
 	/* Params */		(1, EXPPARAM_NUMBER, "Layer index")
 ) {
-	unsigned int i = ExParam(TYPE_INT);
+	unsigned i = ExParam(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
 		return (*rdPtr->layers)[i].offsetX;
@@ -1702,7 +1747,7 @@ EXPRESSION(
 	/* Flags */			0,
 	/* Params */		(1, EXPPARAM_NUMBER, "Layer index")
 ) {
-	unsigned int i = ExParam(TYPE_INT);
+	unsigned i = ExParam(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
 		return (*rdPtr->layers)[i].offsetY;
@@ -1716,7 +1761,7 @@ EXPRESSION(
 	/* Flags */			EXPFLAG_DOUBLE,
 	/* Params */		(1, EXPPARAM_NUMBER, "Layer index")
 ) {
-	unsigned int i = ExParam(TYPE_INT);
+	unsigned i = ExParam(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
 	{
@@ -1733,7 +1778,7 @@ EXPRESSION(
 	/* Flags */			EXPFLAG_DOUBLE,
 	/* Params */		(1, EXPPARAM_NUMBER, "Layer index")
 ) {
-	unsigned int i = ExParam(TYPE_INT);
+	unsigned i = ExParam(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
 	{
@@ -1750,7 +1795,7 @@ EXPRESSION(
 	/* Flags */			0,
 	/* Params */		(1, EXPPARAM_NUMBER, "Layer index")
 ) {
-	unsigned int i = ExParam(TYPE_INT);
+	unsigned i = ExParam(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
 		return (*rdPtr->layers)[i].tileWidth;
@@ -1764,7 +1809,7 @@ EXPRESSION(
 	/* Flags */			0,
 	/* Params */		(1, EXPPARAM_NUMBER, "Layer index")
 ) {
-	unsigned int i = ExParam(TYPE_INT);
+	unsigned i = ExParam(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
 		return (*rdPtr->layers)[i].tileHeight;
@@ -1778,9 +1823,9 @@ EXPRESSION(
 	/* Flags */			0,
 	/* Params */		(3, EXPPARAM_NUMBER, "Layer index", EXPPARAM_NUMBER, "Tile X", EXPPARAM_NUMBER, "Tile Y")
 ) {
-	unsigned int i = ExParam(TYPE_INT);
-	unsigned int x = ExParam(TYPE_INT);
-	unsigned int y = ExParam(TYPE_INT);
+	unsigned i = ExParam(TYPE_INT);
+	unsigned x = ExParam(TYPE_INT);
+	unsigned y = ExParam(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
 	{
@@ -1801,9 +1846,9 @@ EXPRESSION(
 	/* Flags */			0,
 	/* Params */		(3, EXPPARAM_NUMBER, "Layer index", EXPPARAM_NUMBER, "Tile X", EXPPARAM_NUMBER, "Tile Y")
 ) {
-	unsigned int i = ExParam(TYPE_INT);
-	unsigned int x = ExParam(TYPE_INT);
-	unsigned int y = ExParam(TYPE_INT);
+	unsigned i = ExParam(TYPE_INT);
+	unsigned x = ExParam(TYPE_INT);
+	unsigned y = ExParam(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
 	{
@@ -1824,9 +1869,9 @@ EXPRESSION(
 	/* Flags */			0,
 	/* Params */		(3, EXPPARAM_NUMBER, "Layer index", EXPPARAM_NUMBER, "Tile X", EXPPARAM_NUMBER, "Tile Y")
 ) {
-	unsigned int i = ExParam(TYPE_INT);
-	unsigned int x = ExParam(TYPE_INT);
-	unsigned int y = ExParam(TYPE_INT);
+	unsigned i = ExParam(TYPE_INT);
+	unsigned x = ExParam(TYPE_INT);
+	unsigned y = ExParam(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
 	{
@@ -1866,9 +1911,9 @@ EXPRESSION(
 	/* Flags */			0,
 	/* Params */		(3, EXPPARAM_NUMBER, "Layer index", EXPPARAM_NUMBER, "Tile X", EXPPARAM_NUMBER, "Tile Y")
 ) {
-	unsigned int i = ExParam(TYPE_INT);
-	unsigned int x = ExParam(TYPE_INT);
-	unsigned int y = ExParam(TYPE_INT);
+	unsigned i = ExParam(TYPE_INT);
+	unsigned x = ExParam(TYPE_INT);
+	unsigned y = ExParam(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
 	{
@@ -1879,4 +1924,23 @@ EXPRESSION(
 	}
 	
 	return Tile::EMPTY;
+}
+
+EXPRESSION(
+	/* ID */			18,
+	/* Name */			"TilesetAbsPath$(",
+	/* Flags */			EXPFLAG_STRING,
+	/* Params */		(1, EXPPARAM_NUMBER, "Tileset index")
+) {
+	unsigned i = ExParam(TYPE_INT);
+
+	if (i < rdPtr->tilesets->size())
+	{
+		if ((*rdPtr->tilesets)[i].isValid())
+		{
+			ReturnString((*rdPtr->tilesets)[i].getPath());
+		}
+	}
+	
+	ReturnString("");
 }

@@ -5,11 +5,11 @@
 class Layer
 {
 	// Tile data
-	Tile*					data;
+	Tile*			data;
 	
 	// Tile count (map size)
-	unsigned int	width;
-	unsigned int	height;
+	unsigned		width;
+	unsigned		height;
 
 public:
 
@@ -94,13 +94,13 @@ public:
 	}
 
 	// Check if a coordinate is valid
-	inline bool isValid(unsigned int x, unsigned int y) const
+	inline bool isValid(unsigned x, unsigned y) const
 	{
 		return isValid() && x < width && y < height;
 	}
 
 	// Get a tile within the layer array
-	inline Tile* getTile(unsigned int x, unsigned int y)
+	inline Tile* getTile(unsigned x, unsigned y)
 	{
 		return data + x + width*y;
 	}
@@ -110,23 +110,23 @@ public:
 		return data;
 	}
 
-	inline unsigned int getWidth() const
+	inline unsigned getWidth() const
 	{
 		return width;
 	}
 
-	inline unsigned int getHeight() const
+	inline unsigned getHeight() const
 	{
 		return height;
 	}
 
-	inline unsigned int getByteSize() const
+	inline unsigned getByteSize() const
 	{
 		return width * height * sizeof(Tile);
 	}
 
 	// Resize layer, new tiles are empty
-	void resize(unsigned int newWidth, unsigned int newHeight)
+	void resize(unsigned newWidth, unsigned newHeight)
 	{
 		// Nothing to do...
 		if (width == newWidth && height == newHeight)

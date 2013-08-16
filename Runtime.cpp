@@ -102,6 +102,10 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
 	// Default compression level
 	rdPtr->compress = 6;
 
+	// How to save tileset paths (by default, use path relative to map file)
+	rdPtr->tilesetPathMode = TSPM_MAP_PATH;
+	callRunTimeFunction(rdPtr, RFUNCTION_GETFILEINFOS, FILEINFO_PATH, (long)&rdPtr->appPath[0]);
+
 	// Set up tile cursor
 	rdPtr->cursor.x = 0;
 	rdPtr->cursor.y = 0;

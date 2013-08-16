@@ -29,6 +29,9 @@
 		SEPARATOR
 		ITEM(26, "Set compression level")
 		ITEM(40, "Set block options")
+		SEPARATOR
+		ITEM(50, "Set tileset path mode")
+		ITEM(51, "Set tileset user path")
 	SUB_END
 	SUB_START("Tilesets")
 		ITEM(12, "Add tileset")
@@ -137,6 +140,8 @@
 		SEPARATOR
 		ITEM(0, "Width")
 		ITEM(1, "Height")
+		SEPARATOR
+		ITEM(18, "Absolute path")
 	SUB_END
 	SUB_START("Layer")
 		ITEM(15, "Count")

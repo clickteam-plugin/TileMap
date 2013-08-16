@@ -1,9 +1,12 @@
 #pragma once
 #include "HWASurface.h"
 
-struct Tileset
+class Tileset
 {
 	char			path[256];
+
+public:
+
 	cSurface*		surface;
 	cSurface*		texture;
 	COLORREF		transpCol;
@@ -64,4 +67,28 @@ struct Tileset
 #endif
 	}
 
+	void setPathFromRelative(const char* sourcePath, const char* relativePath)
+	{
+		// Try to make this path absolute
+		if (!PathCombine(path, sourcePath, relativePath))
+		{
+			// Last chance: Copy path directly
+			strcpy_s(path, 256, relativePath);
+		}
+	}
+
+	void setPath(const char* source)
+	{
+		strcpy_s(path, 256, source);
+	}
+
+	const char* getPath() const
+	{
+		return (const char*)&path[0];
+	}
+
+	bool getPathRelativeTo(const char* sourcePath, char* outputBuffer, bool sourceIsFile = false) const
+	{
+		return outputBuffer && PathRelativePathTo(outputBuffer, sourcePath, sourceIsFile ? 0 : FILE_ATTRIBUTE_DIRECTORY, path, 0);
+	}
 };
