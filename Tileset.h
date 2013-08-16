@@ -16,6 +16,9 @@ struct Tileset
 	~Tileset()
 	{
 		delete surface;
+#ifdef HWABETA
+		delete texture;
+#endif
 	}
 
 	Tileset(const Tileset& src) : surface(0), texture(0)

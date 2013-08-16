@@ -52,6 +52,7 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
 	rdPtr->viewports = new list<TMAPVIEW*>;
 	rdPtr->redraw = false;
 
+
 	// Create surface, get MMF depth..
 	cSurface *ps = WinGetSurface((int)rdPtr->rHo.hoAdRunHeader->rhIdEditWin);
 
@@ -66,13 +67,15 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
 	rdPtr->tilesets = new vector<Tileset>;
 	rdPtr->currentLayer = 0;
 	rdPtr->currentTileset = 0;
-	
+
 	// Load edit tilesets
-	Tileset tileset;
 	cSurface is;
 
 	for (int i = 0; i < edPtr->tilesetCount; ++i)
 	{
+		rdPtr->tilesets->push_back(Tileset());
+		Tileset& tileset = rdPtr->tilesets->back();
+
 		// Create a tileset for each image
 		if (LockImageSurface(rhPtr->rhIdAppli, edPtr->tilesets[i], is))
 		{
@@ -88,9 +91,6 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
 			tileset.updateTexture();
 		}
 
-		rdPtr->tilesets->push_back(tileset);
-		delete tileset.surface;
-		tileset.surface = 0;
 	}
 
 	// Tileset settings
@@ -123,12 +123,7 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
 // 
 short WINAPI DLLExport DestroyRunObject(LPRDATA rdPtr, long fast)
 {
-	list<TMAPVIEW*>::iterator it;
-	for (it = rdPtr->viewports->begin(); it != rdPtr->viewports->end(); ++it)
-	{
-		// Detach Tile Map
-		(*it)->p = 0;
-	}
+	delete rdPtr->viewports;
 	delete rdPtr->layers;
 	delete rdPtr->tilesets;
 	// No errors

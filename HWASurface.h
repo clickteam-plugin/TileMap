@@ -7,7 +7,7 @@ inline cSurface* getPrototype(int depth, bool render = false)
 #ifdef HWABETA
 	if (render)
 	{
-		GetSurfacePrototype(&proto, depth, ST_HWA_ROUTEXTURE, SD_D3D9);
+		GetSurfacePrototype(&proto, depth, ST_HWA_ROMTEXTURE, SD_D3D9);
 		return proto;
 	}
 #endif

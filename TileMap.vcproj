@@ -75,7 +75,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib mmfs2.lib"
-				OutputFile="./MFX/Data/Runtime/TileMap.mfx"
+				OutputFile="c:\mmf2\data\runtime\TileMap.mfx"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\lib\"
@@ -172,7 +172,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib mmfs2.lib"
-				OutputFile="c:/mmf2/Extensions/TileMap.mfx"
+				OutputFile="c:\mmf2\extensions\TileMap.mfx"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\lib\"
@@ -271,7 +271,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib mmfs2hwa.lib"
-				OutputFile="./MFX/Extensions/TileMap.mfx"
+				OutputFile="c:\mmf2\extensions\TileMap.mfx"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\lib\"
@@ -368,7 +368,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib mmfs2hwa.lib"
-				OutputFile="./MFX/Extensions/HWA/TileMap.mfx"
+				OutputFile="c:\mmf2\extensions\hwa\TileMap.mfx"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\lib\"
@@ -466,7 +466,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib mmfs2hwa.lib"
-				OutputFile="./MFX/Extensions/HWA/TileMap.mfx"
+				OutputFile="c:\mmf2\extensions\hwa\TileMap.mfx"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\lib\"
@@ -563,7 +563,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib mmfs2hwa.lib"
-				OutputFile="./MFX/Data/Runtime/HWA/TileMap.mfx"
+				OutputFile="c:\mmf2\data\runtime\hwa\TileMap.mfx"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\lib\"
@@ -660,7 +660,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib mmfs2.lib"
-				OutputFile="./MFX/Extensions/TileMap.mfx"
+				OutputFile="c:\mmf2\extensions\TileMap.mfx"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\lib\"
@@ -1175,10 +1175,6 @@
 				>
 				<File
 					RelativePath=".\Layer.h"
-					>
-				</File>
-				<File
-					RelativePath=".\SubLayer.h"
 					>
 				</File>
 				<File
