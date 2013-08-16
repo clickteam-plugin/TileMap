@@ -305,84 +305,84 @@ ACTION(
 	PARAM_NUMBER,"Method, add one of X (1: Wrap, 4: Repeat, 16: Box, 64: Random) and Y (2: Wrap, 8: Repeat, 32: Box, 128: Random)")
 ) {
 
-	if (rdPtr->currentLayer)
-	{
-		if (!rdPtr->currentLayer->isValid())
-			return;
+	//if (rdPtr->currentLayer)
+	//{
+	//	if (!rdPtr->currentLayer->isValid())
+	//		return;
 
-		int tlX = intParam();
-		int tlY = intParam();
-		int brX = intParam();
-		int brY = intParam();
+	//	int tlX = intParam();
+	//	int tlY = intParam();
+	//	int brX = intParam();
+	//	int brY = intParam();
 
-		//int tilesetID = intParam();
+	//	//int tilesetID = intParam();
 
-		int x1 = intParam();
-		int y1 = intParam();
-		int x2 = intParam();
-		int y2 = intParam();
+	//	int x1 = intParam();
+	//	int y1 = intParam();
+	//	int x2 = intParam();
+	//	int y2 = intParam();
 
-		int method = intParam();
+	//	int method = intParam();
 
-		int width = rdPtr->currentLayer->getWidth();
-		int height = rdPtr->currentLayer->getHeight();
+	//	int width = rdPtr->currentLayer->getWidth();
+	//	int height = rdPtr->currentLayer->getHeight();
 
-		if (tlX < 0) tlX += width;
-		if (tlY < 0) tlY += height;
-		if (brX < 0) brX += width;
-		if (brY < 0) brY += height;
+	//	if (tlX < 0) tlX += width;
+	//	if (tlY < 0) tlY += height;
+	//	if (brX < 0) brX += width;
+	//	if (brY < 0) brY += height;
 
-		tlX = max(0, min(width-1, tlX));
-		brX = max(0, min(width-1, brX));
-		tlY = max(0, min(height-1, tlY));
-		brY = max(0, min(height-1, brY));
+	//	tlX = max(0, min(width-1, tlX));
+	//	brX = max(0, min(width-1, brX));
+	//	tlY = max(0, min(height-1, tlY));
+	//	brY = max(0, min(height-1, brY));
 
-		if (brX-tlX < 0 || brY-tlY < 0)
-			return;
+	//	if (brX-tlX < 0 || brY-tlY < 0)
+	//		return;
 
-		Tile* data = rdPtr->currentLayer->getTile();
-		for (int x = 0; x <= brX-tlX; ++x)
-		{
-			for (int y = 0; y <= brY-tlY; ++y)
-			{
-				Tile* tile = data + (tlX+x) + width*(tlY+y);
-				//tile->tileset = tilesetID + 1;
-			
-				// X method
-				switch(method & (1|4|16|64))
-				{
-				case 1: // Wrap
-					tile->x = x1 + ((x2-x1) ? (x % (x2-x1+1)) : 0); break;
-				case 4: // Repeat
-					tile->x = max(x1, min(x2, x1+x)); break;
-				case 16: // Box
-					tile->x = x1 + (x ? (1 + x/(brX-tlX)) : 0); break;
-				case 64: // Random
-					tile->x = x1 + ((x2-x1) ? (rand() % (x2-x1+1)) : 0); break;
-				default: // Undefined
-					tile->x = x1 + x;
-				}	
+	//	Layer* layer = rdPtr->currentLayer;
+	//	for (int x = 0; x <= brX-tlX; ++x)
+	//	{
+	//		for (int y = 0; y <= brY-tlY; ++y)
+	//		{
+	//			Tile* tile = layer->getTile(tlX + x, tlY + y);
+	//			//tile->tileset = tilesetID + 1;
+	//		
+	//			// X method
+	//			switch(method & (1|4|16|64))
+	//			{
+	//			case 1: // Wrap
+	//				tile->x = x1 + ((x2-x1) ? (x % (x2-x1+1)) : 0); break;
+	//			case 4: // Repeat
+	//				tile->x = max(x1, min(x2, x1+x)); break;
+	//			case 16: // Box
+	//				tile->x = x1 + (x ? (1 + x/(brX-tlX)) : 0); break;
+	//			case 64: // Random
+	//				tile->x = x1 + ((x2-x1) ? (rand() % (x2-x1+1)) : 0); break;
+	//			default: // Undefined
+	//				tile->x = x1 + x;
+	//			}	
 
-				// Y method
-				switch(method & (2|8|32|128))
-				{
-				case 2: // Wrap
-					tile->y = y1 + ((y2-y1) ? (y % (y2-y1+1)) : 0); break;
-				case 8: // Repeat
-					tile->y = max(y1, min(y2, y1+y)); break;
-				case 32: // Box
-					tile->y = y1 + (y ? (1 + y/(brY-tlY)) : 0); break;
-				case 128: // Random
-					tile->y = y1 + ((y2-y1) ? (rand() % (y2-y1+1)) : 0); break;
-				default: // Undefined
-					tile->y = y1 + y;
-				}
+	//			// Y method
+	//			switch(method & (2|8|32|128))
+	//			{
+	//			case 2: // Wrap
+	//				tile->y = y1 + ((y2-y1) ? (y % (y2-y1+1)) : 0); break;
+	//			case 8: // Repeat
+	//				tile->y = max(y1, min(y2, y1+y)); break;
+	//			case 32: // Box
+	//				tile->y = y1 + (y ? (1 + y/(brY-tlY)) : 0); break;
+	//			case 128: // Random
+	//				tile->y = y1 + ((y2-y1) ? (rand() % (y2-y1+1)) : 0); break;
+	//			default: // Undefined
+	//				tile->y = y1 + y;
+	//			}
 
-			}
-		}
+	//		}
+	//	}
 
-		rdPtr->redraw = true;
-	}
+	//	rdPtr->redraw = true;
+	//}
 }
 
 
@@ -783,7 +783,7 @@ ACTION(
 
 										// Allocation succeeded, assign data pointer
 										if (layer->isValid())
-											destination = (unsigned char*)layer->getTile();
+											destination = (unsigned char*)layer->getDataPointer();
 
 										break;
 								}
@@ -951,7 +951,7 @@ ACTION(
 				mz_ulong dataSize = layer->getByteSize();
 				mz_ulong dataAlloc = mz_compressBound(dataSize);
 				unsigned char* temp = new unsigned char[dataAlloc];
-				mz_compress2(temp, &dataAlloc, (const unsigned char*)layer->getTile(), dataSize, rdPtr->compress);
+				mz_compress2(temp, &dataAlloc, (const unsigned char*)layer->getDataPointer(), dataSize, rdPtr->compress);
 
 				// Write compressed size
 				fwrite(&dataAlloc, sizeof(int), 1, file);
@@ -1043,13 +1043,12 @@ ACTION(
 		if (brX-tlX < 0 || brY-tlY < 0)
 			return;
 
-		Tile* data = rdPtr->currentLayer->getTile();
+		Layer* layer = rdPtr->currentLayer;
 		for (int x = 0; x <= brX-tlX; ++x)
 		{
 			for (int y = 0; y <= brY-tlY; ++y)
 			{
-				Tile* tile = data + (tlX+x) + width*(tlY+y);
-				//tile->tileset = tilesetID + 1;
+				Tile* tile = layer->getTile(tlX + x, tlY + y);
 				tile->x = tileX;
 				tile->y = tileY;
 			}
@@ -1127,6 +1126,8 @@ ACTION(
 ) {
 	rdPtr->layers->push_back(Layer());
 	rdPtr->currentLayer = &rdPtr->layers->back();
+	rdPtr->currentLayer->tileWidth = rdPtr->tileWidth;
+	rdPtr->currentLayer->tileHeight = rdPtr->tileHeight;
 	ActionFunc1(rdPtr, param1, param2);
 }
 
@@ -1190,19 +1191,18 @@ ACTION(
 				tile->y = rdPtr->cursor.tiles.b.y;
 			}
 			
-			
 			return;
 		}
 
 		// Rectangular area
-		int x2 = x1 + width-1;
-		int y2 = y1 + height-1	;
+		int x2 = x1 + width - 1;
+		int y2 = y1 + height - 1;
 
 		// Limit area to layer data
-		x1 = max(0, min(layerWidth-1, x1));
-		y1 = max(0, min(layerHeight-1, y1));
-		x2 = max(0, min(layerWidth-1, x2));
-		y2 = max(0, min(layerHeight-1, y2));
+		x1 = max(0, min(layerWidth - 1, x1));
+		y1 = max(0, min(layerHeight - 1, y1));
+		x2 = max(0, min(layerWidth - 1, x2));
+		y2 = max(0, min(layerHeight - 1, y2));
 
 		// Get tile range and pattern
 		TileRange tiles = rdPtr->cursor.tiles;
@@ -1213,10 +1213,10 @@ ACTION(
 		{
 			for (int y = 0; y <= y2-y1; ++y)
 			{
-				Tile* tile = layer->getTile(x+x1, y+y1);
+				Tile* tile = layer->getTile(x + x1, y + y1);
 
 				// X value
-				if (tiles.b.x-tiles.a.x)
+				if (tiles.b.x - tiles.a.x)
 				{
 					switch(patternX)
 					{
@@ -1236,7 +1236,7 @@ ACTION(
 				}
 
 				// Y value
-				if (tiles.b.y-tiles.a.y)
+				if (tiles.b.y - tiles.a.y)
 				{
 					switch(patternY)
 					{
@@ -1462,7 +1462,7 @@ ACTION(
 ) {
 	if (rdPtr->currentLayer && rdPtr->currentLayer->isValid())
 	{
-		memset(rdPtr->currentLayer->getTile(), Tile::EMPTY & 0xff, rdPtr->currentLayer->getWidth()*rdPtr->currentLayer->getHeight()*sizeof(Tile));
+		memset(rdPtr->currentLayer->getDataPointer(), Tile::EMPTY & 0xff, rdPtr->currentLayer->getWidth()*rdPtr->currentLayer->getHeight()*sizeof(Tile));
 	}
 }
 
@@ -1481,15 +1481,14 @@ ACTION(
 		int tileX = intParam();
 		int tileY = intParam();
 
-		int width = rdPtr->currentLayer->getWidth();
-		int height = rdPtr->currentLayer->getHeight();
-
-		Tile* data = rdPtr->currentLayer->getTile();
+		Layer* layer = rdPtr->currentLayer;
+		int width = layer->getWidth();
+		int height = layer->getHeight();
 		for (int x = 0; x < width; ++x)
 		{
 			for (int y = 0; y < height; ++y)
 			{
-				Tile* tile = data + x + width*y;
+				Tile* tile = layer->getTile(x, y);
 				tile->x = tileX;
 				tile->y = tileY;
 			}

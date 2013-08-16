@@ -100,9 +100,14 @@ public:
 	}
 
 	// Get a tile within the layer array
-	inline Tile* getTile(unsigned int x = 0, unsigned int y = 0)
+	inline Tile* getTile(unsigned int x, unsigned int y)
 	{
 		return data + x + width*y;
+	}
+
+	inline Tile* getDataPointer()
+	{
+		return data;
 	}
 
 	inline unsigned int getWidth() const
