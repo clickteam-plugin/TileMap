@@ -19,6 +19,7 @@ PROPS_IDS_START()
 	//PROPID_BLOCKMAP,
 	PROPID_BLOCKTILE,
 	PROPID_BLOCKLAYER,
+	PROPID_TILESETPATHMODE,
 
 	//PROPID_GRP_DISPLAY,
 	//PROPID_AUTOSCROLL,
@@ -47,6 +48,17 @@ int tileSize[] = {
     0, 0
 };
 
+const char* tilesetPathModes[] =
+{
+	0,
+	"Absolute",
+	"Application folder",
+	"Map file folder",
+	"User-specified path",
+	"Custom (no physical file)",
+	0,
+};
+
 PROPS_DATA_START()
 
 
@@ -54,10 +66,11 @@ PROPS_DATA_START()
 	//PropData_CheckBox(PROPID_TRANSPARENT, (int)"Transparent", (int)"Use with caution - a background may greatly increase the FPS, especially in HWA."),
 	//PropData_CheckBox(PROPID_AUTOSCROLL, (int)"Follow MMF camera", (int)"If checked, the Tile Map automatically follows the MMF camera."),
 
-	PropData_Group(PROPID_GRP_FILES, (int)"File blocks", (int)"Set up what kind of data should be loaded from and saved to files."),
+	PropData_Group(PROPID_GRP_FILES, (int)"File I/O", (int)"Set up what kind of data should be loaded from and saved to files."),
 	//PropData_CheckBox(PROPID_BLOCKMAP, (int)"Map", (int)"Stores general map information. Right now, this is only includes tile size."),
-	PropData_CheckBox(PROPID_BLOCKLAYER, (int)"Layers", (int)"Stores each layer including its tiles and settings."),
-	PropData_CheckBox(PROPID_BLOCKTILE, (int)"Tilesets", (int)"Stores every tileset with settings and path, but not the image itself."),
+	PropData_CheckBox(PROPID_BLOCKLAYER, (int)"Layer block", (int)"Stores each layer including its tiles and settings."),
+	PropData_CheckBox(PROPID_BLOCKTILE, (int)"Tileset block", (int)"Stores every tileset with settings and path, but not the image itself."),
+	PropData_ComboBox(PROPID_TILESETPATHMODE, (int)"Tileset origin", (int)"Relative to what should a tileset path be stored in a map file?", tilesetPathModes),
 
 	// PropData_Group(PROPID_GRP_MAP, (int)"Map", (int)""),
 	PropData_Group(PROPID_GRP_DATA, (int)"Data", (int)""),
@@ -182,6 +195,8 @@ LPVOID WINAPI DLLExport GetPropValue(LPMV mV, LPEDATA edPtr, UINT nPropID)
 
 	case PROPID_TILESIZE:
 		return new CPropSizeValue(edPtr->tileWidth, edPtr->tileHeight);
+	case PROPID_TILESETPATHMODE:
+		return new CPropDWordValue(edPtr->tilesetPathMode);
 	case PROPID_TILESETS:
 		CPropDataValue* pv = new CPropDataValue((edPtr->tilesetCount + 1) * sizeof(WORD), NULL);
             if ( pv != NULL )
@@ -250,6 +265,12 @@ void WINAPI DLLExport SetPropValue(LPMV mV, LPEDATA edPtr, UINT nPropID, LPVOID 
 			edPtr->tileHeight = max(1, ((CPropSizeValue*)pValue)->m_cy);
 			mvInvalidateObject(mV,edPtr);
 			break;
+
+		case PROPID_TILESETPATHMODE:
+			edPtr->tilesetPathMode = (unsigned char)((CPropDWordValue*)pValue)->m_dwValue;
+			mvInvalidateObject(mV,edPtr);
+			break;
+
 
 		case PROPID_TILESETS:
 		if (((CPropDataValue*)pValue)->m_pData)
@@ -610,6 +631,8 @@ int WINAPI DLLExport CreateObject(mv _far *mV, fpLevObj loPtr, LPEDATA edPtr)
 	edPtr->blockMap = false;
 	edPtr->blockLayers = true;
 	edPtr->blockTilesets = false;
+
+	edPtr->tilesetPathMode = TSPM_MAP_PATH;
 
 	return 0;	// No error
 
