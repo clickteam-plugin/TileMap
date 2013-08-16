@@ -1,6 +1,7 @@
 #pragma once
-#include <vector>
+
 #include "SubLayer.h"
+#include "Property.h"
 
 class Layer
 {
@@ -12,9 +13,6 @@ class Layer
 	unsigned		height;
 
 public:
-
-	// Sub-layers
-	std::vector<SubLayer>	subLayers;
 
 	// Scrolling offset in pixels
 	int				offsetX;
@@ -39,6 +37,12 @@ public:
 	// Tile size (pixels)
 	unsigned short	tileWidth;
 	unsigned short	tileHeight;
+
+	// User properties
+	map<string, Property> properties;
+
+	// Sub-layers
+	vector<SubLayer> subLayers;
 
 	// Constructor/destructor
 	Layer() : offsetX(0), offsetY(0), scrollX(1.0), scrollY(1.0), wrapX(false), wrapY(false),

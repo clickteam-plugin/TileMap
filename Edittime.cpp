@@ -16,7 +16,7 @@
 PROPS_IDS_START()
 	
 	PROPID_GRP_FILES,
-	//PROPID_BLOCKMAP,
+	PROPID_BLOCKMAP,
 	PROPID_BLOCKTILE,
 	PROPID_BLOCKLAYER,
 	PROPID_TILESETPATHMODE,
@@ -67,7 +67,7 @@ PROPS_DATA_START()
 	//PropData_CheckBox(PROPID_AUTOSCROLL, (int)"Follow MMF camera", (int)"If checked, the Tile Map automatically follows the MMF camera."),
 
 	PropData_Group(PROPID_GRP_FILES, (int)"File I/O", (int)"Set up what kind of data should be loaded from and saved to files."),
-	//PropData_CheckBox(PROPID_BLOCKMAP, (int)"Map", (int)"Stores general map information. Right now, this is only includes tile size."),
+	PropData_CheckBox(PROPID_BLOCKMAP, (int)"Property block", (int)"Stores map-global properties."),
 	PropData_CheckBox(PROPID_BLOCKLAYER, (int)"Layer block", (int)"Stores each layer including its tiles and settings."),
 	PropData_CheckBox(PROPID_BLOCKTILE, (int)"Tileset block", (int)"Stores every tileset with settings and path, but not the image itself."),
 	PropData_ComboBox(PROPID_TILESETPATHMODE, (int)"Tileset origin", (int)"Relative to what should a tileset path be stored in a map file?", tilesetPathModes),
@@ -233,8 +233,8 @@ BOOL WINAPI DLLExport GetPropCheck(LPMV mV, LPEDATA edPtr, UINT nPropID)
 	{
 	case PROPID_BLOCKLAYER:
 		return edPtr->blockLayers;
-	//case PROPID_BLOCKMAP:
-	//	return edPtr->blockMap;
+	case PROPID_BLOCKMAP:
+		return edPtr->blockMap;
 	case PROPID_BLOCKTILE:
 		return edPtr->blockTilesets;
 	}
@@ -308,9 +308,9 @@ void WINAPI DLLExport SetPropCheck(LPMV mV, LPEDATA edPtr, UINT nPropID, BOOL nC
 	case PROPID_BLOCKLAYER:
 		edPtr->blockLayers = nCheck != 0;
 		break;
-	//case PROPID_BLOCKMAP: // deprecated
-	//	edPtr->blockMap = nCheck != 0;
-	//	break;
+	case PROPID_BLOCKMAP:
+		edPtr->blockMap = nCheck != 0;
+		break;
 	case PROPID_BLOCKTILE:
 		edPtr->blockTilesets = nCheck != 0;
 		break;
@@ -628,7 +628,7 @@ int WINAPI DLLExport CreateObject(mv _far *mV, fpLevObj loPtr, LPEDATA edPtr)
 		edPtr->tilesets[i] = 0;
 	edPtr->tilesetCount = 0;
 
-	edPtr->blockMap = false;
+	edPtr->blockMap = true;
 	edPtr->blockLayers = true;
 	edPtr->blockTilesets = false;
 

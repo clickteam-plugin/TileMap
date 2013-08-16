@@ -52,6 +52,14 @@ CONDITION(
 	return true;
 }
 
+CONDITION(
+	/* ID */			4,
+	/* Name */			"%o: On map property",
+	/* Flags */			0,
+	/* Params */		(0)
+) {
+	return true;
+}
 
 
 // ============================================================================
@@ -589,15 +597,16 @@ ACTION(
 
 const char MAGIC[9] = "ACHTUNG!";
 const int TILE = 'ELIT';
-const int MAP_ = ' PAM'; // deprecated
+const int MAP_ = ' PAM';
 const int LAYR = 'RYAL';
 const int MAIN = 'NIAM'; // LAYR sub-block: Main (tile data)
 const int TSID = 'DIST'; // LAYR sub-block: Tileset IDs
 const int VALS = 'SLAV'; // LAYR sub-block: Alterable values
+const short VER_13 = (1<<8) | 3;
 const short VER_12 = (1<<8) | 2;
 const short VER_11 = (1<<8) | 1;
 const short VER_10 = (1<<8) | 0;
-#define VER VER_12
+#define VER VER_13
 
 ACTION(
 	/* ID */			21,
@@ -645,9 +654,54 @@ ACTION(
 			{
 				case MAP_:
 
+					if((rdPtr->blocks & BLOCK_MAP) && version >= VER_13)
+					{
+						rdPtr->properties->clear();
+
+						unsigned short propertyCount;
+						fread(&propertyCount, 1, sizeof(short), file);
+
+						for (int i = 0; i < propertyCount; ++i)
+						{
+							char name[100] = {};
+							unsigned char nameLength, type;
+							fread(&nameLength, sizeof(char), 1, file);
+							fread(&name[0], 1, nameLength, file);
+							fread(&type, sizeof(char), 1, file);
+
+							if (type == TMPT_INT)
+							{
+								int value;
+								fread(&value, sizeof(int), 1, file);
+								rdPtr->properties->insert(pair<string, Property>(name, value));
+							}
+							else if (type == TMPT_FLOAT)
+							{
+								float value;
+								fread(&value, sizeof(float), 1, file);
+								rdPtr->properties->insert(pair<string, Property>(name, value));
+							}
+							else if(type == TMPT_STRING)
+							{
+								unsigned valueLength;
+								fread(&valueLength, sizeof(int), 1, file);
+								char* value = new char[valueLength+1];
+								fread(&value[0], 1, valueLength, file);
+								value[valueLength] = 0;
+								rdPtr->properties->insert(pair<string, Property>(name, value));
+								delete[] value;
+							}
+							else
+							{
+								// Unknown type
+								error = true;
+								break;
+							}
+						}
+					}
 					// Deprecated... however, we will still read the tile size as new default tile size
 					// So it can be used when we will read the LAYR block.
-					if (rdPtr->blocks & BLOCK_MAP && version < VER_12)
+					else if ((rdPtr->blocks & BLOCK_MAP) && version < VER_13)
 					{
 						// Invalid size, exit
 						if (blockSize != sizeof(short)*2)
@@ -896,10 +950,39 @@ ACTION(
 	if (rdPtr->blocks & BLOCK_MAP)
 	{
 		fwrite(&MAP_, sizeof(int), 1, file);
-		blockSize = sizeof(short)*2;
+		// Size will be written later...
+		blockSize = ftell(file);
 		fwrite(&blockSize, sizeof(int), 1, file);
-		fwrite(&rdPtr->tileWidth, sizeof(short), 1, file);
-		fwrite(&rdPtr->tileHeight, sizeof(short), 1, file);
+
+		unsigned short propertyCount = rdPtr->properties->size();
+		fwrite(&propertyCount, sizeof(short), 1, file);
+
+		map<string, Property>::iterator it = rdPtr->properties->begin();
+		for (; it != rdPtr->properties->end(); ++it)
+		{
+			unsigned length = it->first.length();
+			fwrite(&length, sizeof(char), 1, file);
+			fputs(it->first.c_str(), file);
+			fputc(it->second.type, file);
+			if (it->second.type == TMPT_STRING)
+			{
+				length = strlen(it->second.c);
+				printf("save len %d\n", length);
+				fwrite(&length, sizeof(int), 1, file);
+				fputs(it->second.c, file);
+			}
+			else
+			{
+				fwrite(&it->second.i, sizeof(int), 1, file);
+			}
+		}
+
+		// Go back and write the block size
+		int blockSizeAfter = ftell(file);
+		fseek(file, blockSize, SEEK_SET);
+		blockSize = blockSizeAfter - blockSize - sizeof(int);
+		fwrite(&blockSize, sizeof(int), 1, file);
+		fseek(file, blockSizeAfter, SEEK_SET);
 	}
 
 	// Write tileset block
@@ -1615,15 +1698,15 @@ ACTION(
 
 ACTION(
 	/* ID */			50,
-	/* Name */			"Set tileset path mode to %0",
+	/* Name */			"Set tileset origin to %0",
 	/* Flags */			0,
-	/* Params */		(1, PARAM_NUMBER, "Path mode (0: Untreated, 1: Application folder, 2: Map file folder, 3: User path, 4: Custom (no physical file)")
+	/* Params */		(1, PARAM_NUMBER, "Origin (0: Absolute, 1: Application folder, 2: Map file folder, 3: User path, 4: Custom (no physical file)")
 ) {
 	rdPtr->tilesetPathMode = (TSPMODE)param1;
 }
 
 ACTION(
-	/* ID */			51	,
+	/* ID */			51,
 	/* Name */			"Set tileset user path to %0",
 	/* Flags */			0,
 	/* Params */		(1, PARAM_STRING, "User path (used for the 'User path' tileset path mode)")
@@ -1631,6 +1714,76 @@ ACTION(
 	strcpy_s(rdPtr->tilesetUserPath, 256, (const char*)param1);
 }
 
+ACTION(
+	/* ID */			52,
+	/* Name */			"Set map property %0 to integer %1",
+	/* Flags */			0,
+	/* Params */		(2, PARAM_STRING, "Property name", PARAM_NUMBER, "Integer value")
+) {
+	string id = (const char*)strParam();
+	int value = intParam();
+	rdPtr->properties->erase(id);
+	rdPtr->properties->insert(pair<string, Property>(id, value));
+}
+
+ACTION(
+	/* ID */			53,
+	/* Name */			"Set map property %0 to float %1",
+	/* Flags */			0,
+	/* Params */		(2, PARAM_STRING, "Property name", PARAM_NUMBER, "Float value")
+) {
+	string id = (const char*)strParam();
+	float  value = fltParam();
+	rdPtr->properties->erase(id);
+	rdPtr->properties->insert(pair<string, Property>(id, value));
+}
+
+ACTION(
+	/* ID */			54,
+	/* Name */			"Set map property %0 to %1",
+	/* Flags */			0,
+	/* Params */		(2, PARAM_STRING, "Property name", PARAM_STRING, "String value")
+) {
+	string id = strParam();
+	char* value = (char*)strParam();
+	rdPtr->properties->erase(id);
+	rdPtr->properties->insert(pair<string, Property>(id, value));
+}
+
+ACTION(
+	/* ID */			55,
+	/* Name */			"Delete map property %0",
+	/* Flags */			0,
+	/* Params */		(1, PARAM_STRING, "Property name")
+) {
+	string id = strParam();
+	rdPtr->properties->erase(id);
+}
+
+ACTION(
+	/* ID */			56,
+	/* Name */			"Delete all map properties",
+	/* Flags */			0,
+	/* Params */		(0)
+) {
+	rdPtr->properties->clear();
+}
+
+ACTION(
+	/* ID */			57,
+	/* Name */			"Iterate over map properties",
+	/* Flags */			0,
+	/* Params */		(0)
+) {
+	map<string, Property>::iterator it = rdPtr->properties->begin();
+	for (; it != rdPtr->properties->end(); ++it)
+	{
+		rdPtr->onProperty = it->first.c_str();
+		rdPtr->rRd->GenerateEvent(4);
+	}
+
+	rdPtr->onProperty = 0;
+}
 // ============================================================================
 //
 // EXPRESSIONS
@@ -1943,4 +2096,90 @@ EXPRESSION(
 	}
 	
 	ReturnString("");
+}
+
+EXPRESSION(
+	/* ID */			19,
+	/* Name */			"MapIntProp(",
+	/* Flags */			0,
+	/* Params */		(1, EXPPARAM_STRING, "Property name")
+) {
+	string id = (const char*)ExParam(TYPE_STRING);
+
+	map<string, Property>::iterator it = rdPtr->properties->find(id);
+	if (it != rdPtr->properties->end())
+	{
+		if (it->second.type == TMPT_INT)
+			return it->second.i;
+		if (it->second.type == TMPT_FLOAT)
+			return (int)it->second.f;
+
+		return atoi(it->second.c);
+	}
+
+	return 0;
+}
+
+EXPRESSION(
+	/* ID */			20,
+	/* Name */			"MapFloatProp(",
+	/* Flags */			0,
+	/* Params */		(1, EXPPARAM_STRING, "Property name")
+) {
+	string id = (const char*)ExParam(TYPE_STRING);
+	
+	float out = 0.0f;
+
+	map<string, Property>::iterator it = rdPtr->properties->find(id);
+	if (it != rdPtr->properties->end())
+	{
+		if (it->second.type == TMPT_FLOAT)
+			out = it->second.f;
+		else if (it->second.type == TMPT_INT)
+			out = (float)it->second.i;
+		else
+			out = (float)atof(it->second.c);
+	}
+
+	ReturnFloat(out);
+}
+
+EXPRESSION(
+	/* ID */			21,
+	/* Name */			"MapStrProp$(",
+	/* Flags */			EXPFLAG_STRING,
+	/* Params */		(1, EXPPARAM_STRING, "Property name")
+) {
+	string id = (const char*)ExParam(TYPE_STRING);
+
+	map<string, Property>::iterator it = rdPtr->properties->find(id);
+	if (it != rdPtr->properties->end())
+	{
+		if (it->second.type == TMPT_STRING)
+		{	
+			ReturnString(it->second.i);
+		}
+		else
+		{
+			char buff[32] = {};
+
+			if (it->second.type == TMPT_FLOAT)
+				sprintf_s(buff, 32, "%f", it->second.f);
+			else
+				sprintf_s(buff, 32, "%d", it->second.i);
+
+			ReturnStringSafe(buff);
+		}
+	}
+
+	ReturnString("");
+}
+
+EXPRESSION(
+	/* ID */			22,
+	/* Name */			"MapIterProp$(",
+	/* Flags */			EXPFLAG_STRING,
+	/* Params */		(0)
+) {
+	ReturnString((rdPtr->onProperty ? rdPtr->onProperty : ""));
 }

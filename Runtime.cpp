@@ -65,6 +65,7 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
 	// Database
 	rdPtr->layers = new vector<Layer>;
 	rdPtr->tilesets = new vector<Tileset>;
+	rdPtr->properties = new map<string, Property>;
 	rdPtr->currentLayer = 0;
 	rdPtr->currentTileset = 0;
 
@@ -103,7 +104,7 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
 	rdPtr->compress = 6;
 
 	// How to save tileset paths (by default, use path relative to map file)
-	rdPtr->tilesetPathMode = TSPM_MAP_PATH;
+	rdPtr->tilesetPathMode = (TSPMODE)edPtr->tilesetPathMode;
 	callRunTimeFunction(rdPtr, RFUNCTION_GETFILEINFOS, FILEINFO_PATH, (long)&rdPtr->appPath[0]);
 
 	// Set up tile cursor
@@ -115,6 +116,8 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
 	rdPtr->cursor.tiles.b.id = 0;
 	rdPtr->cursor.patternX = 0;
 	rdPtr->cursor.patternY = 0;
+
+	rdPtr->onProperty = 0;
 
 	return 0;
 }
@@ -130,6 +133,7 @@ short WINAPI DLLExport DestroyRunObject(LPRDATA rdPtr, long fast)
 	delete rdPtr->viewports;
 	delete rdPtr->layers;
 	delete rdPtr->tilesets;
+	delete rdPtr->properties;
 	// No errors
 	delete rdPtr->rRd;
 	return 0;

@@ -1178,6 +1178,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\Property.h"
+					>
+				</File>
+				<File
 					RelativePath=".\Tile.h"
 					>
 				</File>

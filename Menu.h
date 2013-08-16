@@ -9,6 +9,8 @@
 	SEPARATOR
 	ITEM(1, "File saved")
 	ITEM(3, "Saving file failed")
+	SEPARATOR
+	ITEM(4, "On map property")
 	
 #endif
 
@@ -30,7 +32,7 @@
 		ITEM(26, "Set compression level")
 		ITEM(40, "Set block options")
 		SEPARATOR
-		ITEM(50, "Set tileset path mode")
+		ITEM(50, "Set tileset origin")
 		ITEM(51, "Set tileset user path")
 	SUB_END
 	SUB_START("Tilesets")
@@ -50,6 +52,16 @@
 		ITEM(44, "Delete all layers")
 		SEPARATOR
 		ITEM(8,"Set current layer")
+	SUB_END
+	SUB_START("Properties")
+		ITEM(52, "Set integer")
+		ITEM(53, "Set float")
+		ITEM(54, "Set string")
+		SEPARATOR
+		ITEM(55, "Delete")
+		ITEM(56, "Delete all")
+		SEPARATOR
+		ITEM(57, "Iterate")
 	SUB_END
 	SEPARATOR
 	ITEM(0, "~<Current tileset>")
@@ -143,7 +155,7 @@
 		SEPARATOR
 		ITEM(18, "Absolute path")
 	SUB_END
-	SUB_START("Layer")
+	SUB_START("Layers")
 		ITEM(15, "Count")
 		SEPARATOR
 		SUB_START("Offset")
@@ -175,6 +187,13 @@
 			ITEM(16, "Tileset ID")
 			ITEM(14, "Compound value")
 		SUB_END
+	SUB_END
+	SUB_START("Properties")
+		ITEM(22, "Iterated property")
+		SEPARATOR
+		ITEM(19, "Integer value")
+		ITEM(20, "Float value")
+		ITEM(21, "String value")
 	SUB_END
 	SEPARATOR
 

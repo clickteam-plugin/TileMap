@@ -4,7 +4,10 @@ class rRundata;
 typedef rRundata * LPRRDATA;
 
 #include <list>
-using namespace std;
+#include <vector>
+#include <map>
+#include <string>
+
 #include "Tileset.h"
 #include "Tile.h"
 #include "Layer.h"
@@ -31,6 +34,7 @@ struct TILEMAP
 
 	vector<Layer>*	layers;
 	vector<Tileset>*tilesets;
+	map<string, Property>*properties;
 
 	// Current stuff
 	Layer*			currentLayer;
@@ -52,6 +56,9 @@ struct TILEMAP
 	TSPMODE			tilesetPathMode;
 	char			tilesetUserPath[256];
 	char			appPath[256]; // Used for APP_PATH mode
+
+	// Property iterator
+	const char*		onProperty;
 
 	// Pen used for more flexible tile drawing
 	struct
