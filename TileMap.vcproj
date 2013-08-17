@@ -75,7 +75,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib mmfs2.lib"
-				OutputFile="c:\mmf2\data\runtime\TileMap.mfx"
+				OutputFile="MFX\Data\Runtime\TileMap.mfx"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\lib\"
@@ -271,7 +271,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib mmfs2hwa.lib"
-				OutputFile="c:\mmf2\extensions\TileMap.mfx"
+				OutputFile="MFX\Extensions\TileMap.mfx"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\lib\"
@@ -466,7 +466,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib mmfs2hwa.lib"
-				OutputFile="c:\mmf2\extensions\hwa\TileMap.mfx"
+				OutputFile="MFX\Extensions\Hwa\TileMap.mfx"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\lib\"
@@ -563,7 +563,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib mmfs2hwa.lib"
-				OutputFile="c:\mmf2\data\runtime\hwa\TileMap.mfx"
+				OutputFile="MFX\Data\Runtime\Hwa\TileMap.mfx"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\lib\"

@@ -11,6 +11,7 @@
 	ITEM(3, "Saving file failed")
 	SEPARATOR
 	ITEM(4, "On map property")
+
 	
 #endif
 
