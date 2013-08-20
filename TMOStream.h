@@ -88,7 +88,7 @@ public:
 		write((char*)compressionBuffer, allocSize);
 	}
 
-	// Write a number as binary
+	// Write a binary block
 	template <class T>
 	TMOStream& operator <<(T i)
 	{

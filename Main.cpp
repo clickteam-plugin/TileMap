@@ -7,6 +7,7 @@
 #include "Common.h"
 #include "Paramacro.h"
 #include "HWASurface.h"
+#include "TMIStream.h"
 #include "TMOStream.h"
 
 // ============================================================================
@@ -124,7 +125,7 @@ ACTION(
 	/* ID */			3,
 	/* Name */			"Assign file path %0 to tileset",
 	/* Flags */			0,
-	/* Params */		(1, PARAM_STRING, "File path (Relative file path, e.g. \"./Tileset.png\" or custom identifier)")
+	/* Params */		(1, PARAM_FILENAME2, "File path (Relative file path, e.g. \"./Tileset.png\" or custom identifier)")
 ) {
 	if (rdPtr->currentTileset)
 	{
@@ -616,8 +617,9 @@ ACTION(
 	strcpy_s(mapPath, 256, (const char*)param1);
 
 	// Start reading file
-	FILE* file = fopen(mapPath, "rb");
-	if (!file)
+	TMIStream file(mapPath);
+
+	if (!file.good())
 	{
 		rdPtr->rRd->GenerateEvent(2);
 		return;
@@ -629,27 +631,24 @@ ACTION(
 	{
 		// Check magic number
 		char leMagic[8];
-		fread(&leMagic, sizeof(char)*8, 1, file);
+		file >> leMagic;
+
 		if (memcmp(leMagic, MAGIC, sizeof(char)*8))
 			break;
 
 		// Check version
 		short version;
-		fread(&version, sizeof(short), 1, file);
+		file >> version;
 		if (version < VER_10 || version > VER)
 			break;
 		
 		// Read blocks
 		error = false;
-		while (!error && !feof(file))
+		while (!error && file.good())
 		{
-			// Read block identifier + size
-			int block = 0, blockSize = 0;
-			fread(&block, sizeof(int), 1, file);
-			fread(&blockSize, sizeof(int), 1, file);
-
-			switch(block)
+			switch(file.readBlockHeader())
 			{
+				// Map (properties)
 				case MAP_:
 
 					if((rdPtr->blocks & BLOCK_MAP) && version >= VER_13)
@@ -657,35 +656,30 @@ ACTION(
 						rdPtr->properties->clear();
 
 						unsigned short propertyCount;
-						fread(&propertyCount, 1, sizeof(short), file);
+						file >> propertyCount;
 
 						for (int i = 0; i < propertyCount; ++i)
 						{
-							char name[100] = {};
-							unsigned char nameLength, type;
-							fread(&nameLength, sizeof(char), 1, file);
-							fread(&name[0], 1, nameLength, file);
-							fread(&type, sizeof(char), 1, file);
+							char name[256] = {};
+							file.readShortStr(name);
+							unsigned char type;
+							file >> type;
 
 							if (type == TMPT_INT)
 							{
 								int value;
-								fread(&value, sizeof(int), 1, file);
+								file >> value;
 								rdPtr->properties->insert(pair<string, Property>(name, value));
 							}
 							else if (type == TMPT_FLOAT)
 							{
 								float value;
-								fread(&value, sizeof(float), 1, file);
+								file >> value;
 								rdPtr->properties->insert(pair<string, Property>(name, value));
 							}
 							else if(type == TMPT_STRING)
 							{
-								unsigned valueLength;
-								fread(&valueLength, sizeof(int), 1, file);
-								char* value = new char[valueLength+1];
-								fread(&value[0], 1, valueLength, file);
-								value[valueLength] = 0;
+								char* value = file.readLongStr();
 								rdPtr->properties->insert(pair<string, Property>(name, value));
 								delete[] value;
 							}
@@ -701,20 +695,14 @@ ACTION(
 					// So it can be used when we will read the LAYR block.
 					else if ((rdPtr->blocks & BLOCK_MAP) && version < VER_13)
 					{
-						// Invalid size, exit
-						if (blockSize != sizeof(short)*2)
-						{
-							error = true;
-							break;
-						}
-
 						// Tile size
-						fread(&rdPtr->tileWidth, sizeof(short), 1, file);
-						fread(&rdPtr->tileHeight, sizeof(short), 1, file);
+						file >> rdPtr->tileWidth;
+						file >> rdPtr->tileHeight;
 					}
 					else
 					{
-						fseek(file, blockSize, SEEK_CUR);
+						// We don't want to read this block, skip it.
+						file.skipBlock();
 					}
 
 					break;
@@ -726,7 +714,7 @@ ACTION(
 						rdPtr->tilesets->clear();
 
 						unsigned char tilesetCount = 0;
-						fread(&tilesetCount, sizeof(char), 1, file);
+						file >> tilesetCount;
 						rdPtr->tilesets->reserve(tilesetCount);
 
 						// Need to store a copy to the current tileset because we will temporarily change it
@@ -738,13 +726,11 @@ ACTION(
 							Tileset* tileset = &rdPtr->tilesets->back();
 
 							// Read settings
-							fread(&tileset->transpCol, sizeof(COLORREF), 1, file);
+							file >> tileset->transpCol;
 							
 							// Read relative path
 							char relativeTilesetPath[256] = {};
-							unsigned char pathLength = 0;
-							fread(&pathLength, sizeof(char), 1, file);
-							fread(relativeTilesetPath, 1, pathLength, file);
+							file.readShortStr(relativeTilesetPath);
 
 							// Make this path absolute
 
@@ -785,7 +771,8 @@ ACTION(
 					}
 					else
 					{
-						fseek(file, blockSize, SEEK_CUR);
+						// We don't want to read this block, skip it.
+						file.skipBlock();
 					}
 				break;
 
@@ -796,7 +783,10 @@ ACTION(
 						rdPtr->layers->clear();
 
 						unsigned layerCount = 0;
-						fread(&layerCount, (version < VER_11) ? sizeof(char) : sizeof(short), 1, file);
+						if (version < VER_11)
+							file >> (char&)layerCount;
+						else
+							file >> (short&)layerCount;
 						rdPtr->layers->reserve(layerCount);
 
 						// Load them layers
@@ -808,13 +798,13 @@ ACTION(
 
 							// Read settings
 							unsigned width, height;
-							fread(&width, sizeof(int), 1, file);
-							fread(&height, sizeof(int), 1, file);
+							file >> width;
+							file >> height;
 
 							if (version >= VER_12)
 							{
-								fread(&layer->tileWidth, sizeof(short), 1, file);
-								fread(&layer->tileHeight, sizeof(short), 1, file);
+								file >> layer->tileWidth;
+								file >> layer->tileHeight;
 							}
 							else
 							{
@@ -822,26 +812,26 @@ ACTION(
 								layer->tileHeight = rdPtr->tileHeight;
 							}
 
-							fread(&layer->tileset, sizeof(char), 1, file);
-							fread(&layer->collision, sizeof(char), 1, file);
-							fread(&layer->offsetX, sizeof(int), 1, file);
-							fread(&layer->offsetY, sizeof(int), 1, file);
-							fread(&layer->scrollX, sizeof(float), 1, file);
-							fread(&layer->scrollY, sizeof(float), 1, file);
-							fread(&layer->wrapX, sizeof(bool), 1, file);
-							fread(&layer->wrapY, sizeof(bool), 1, file);
-							fread(&layer->visible, sizeof(bool), 1, file);
-							fread(&layer->opacity, sizeof(float), 1, file);
+							file >> layer->tileset;
+							file >> layer->collision;
+							file >> layer->offsetX;
+							file >> layer->offsetY;
+							file >> layer->scrollX;
+							file >> layer->scrollY;
+							file >> layer->wrapX;
+							file >> layer->wrapY;
+							file >> layer->visible;
+							file >> layer->opacity;
 
 							// Get the number of data bocks
 							unsigned char dataBlockCount;
-							fread(&dataBlockCount, sizeof(char), 1, file);
+							file >> dataBlockCount;
 
 							// Now, keeps read all the data blocks
 							for (int i = 0; i < dataBlockCount; ++i)
 							{
-								int dataBlock;
-								fread(&dataBlock, sizeof(int), 1, file);
+								unsigned dataBlock;
+								file >> dataBlock;
 
 								// Prepare for the data type
 								unsigned char* destination = 0;
@@ -862,18 +852,18 @@ ACTION(
 
 								// Read compressed size
 								mz_ulong dataSize = 0;
-								fread(&dataSize, sizeof(long), 1, file);
+								file >> dataSize;
 										
 								// Recognized data, read it
 								if (destination)
 								{
 									// Read the compressed data
-									unsigned char* temp = new unsigned char[dataSize];
-									fread(temp, dataSize, 1, file);
+									char* temp = new char[dataSize];
+									file.read(temp, dataSize);
 
 									// Uncompress data
 									mz_ulong dataAlloc = layer->getByteSize();
-									mz_uncompress(destination, &dataAlloc, temp, dataSize);
+									mz_uncompress(destination, &dataAlloc, (unsigned char*)temp, dataSize);
 
 									// Delete temporary compression buffer
 									delete[] temp;
@@ -881,20 +871,21 @@ ACTION(
 								// We can't read this...
 								else
 								{
-									fseek(file, dataSize, SEEK_CUR);
+									file.seekg(dataSize, ios_base::cur);
 								}
 							}
 						}
 					}
 					else
 					{
-						fseek(file, blockSize, SEEK_CUR);
+						// We don't want to read this block, skip it.
+						file.skipBlock();
 					}
 
 				break;
 
 				default:
-					if (!feof(file))
+					if (!file.eof())
 					{
 						// Error occured
 						error = true;
@@ -914,8 +905,6 @@ ACTION(
 		rdPtr->rRd->GenerateEvent(2);
 	else
 		rdPtr->rRd->GenerateEvent(0);
-
-	fclose(file);
 
 	rdPtr->redraw = true;
 }
@@ -979,7 +968,7 @@ ACTION(
 			file << tileset->transpCol;
 
 			// Store file path (relative to app, map or absolute)
-			char path[MAX_PATH] = {};
+			char path[256] = {};
 
 			switch (rdPtr->tilesetPathMode)
 			{
@@ -1451,7 +1440,7 @@ ACTION(
 	/* ID */			40,
 	/* Name */			"Set file block options to %0",
 	/* Flags */			0,
-	/* Params */		(1, PARAM_NUMBER, "Blocks to load/save, add together (1: *Unused*, 2: Layers, 4: Tilesets, Default: 2)")
+	/* Params */		(1, PARAM_NUMBER, "Blocks to load/save, add together (1: Properties, 2: Layers, 4: Tilesets, Default: 2)")
 ) {
 	rdPtr->blocks = param1;
 }

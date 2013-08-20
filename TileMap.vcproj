@@ -1171,6 +1171,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\TMIStream.h"
+				>
+			</File>
+			<File
 				RelativePath=".\TMOStream.h"
 				>
 			</File>
