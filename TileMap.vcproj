@@ -80,11 +80,11 @@
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\lib\"
 				ModuleDefinitionFile=".\Ext.def"
-				ProgramDatabaseFile=".\Run_Only/Template.pdb"
+				ProgramDatabaseFile=".\Run_Only/rSDK.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary=".\Run_Only/Template.lib"
+				ImportLibrary=".\Run_Only/rSDK.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -428,11 +428,11 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				PreprocessorDefinitions="NDEBUG,RUN_ONLY"
+				PreprocessorDefinitions="NDEBUG,EDITOR"
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="1"
-				TypeLibraryName=".\Run_Only/rSDK.tlb"
+				TypeLibraryName=".\Release/rSDK.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -444,10 +444,10 @@
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
-				PrecompiledHeaderFile=".\Run_Only/rSDK.pch"
-				AssemblerListingLocation=".\Run_Only/"
-				ObjectFile=".\Run_Only/"
-				ProgramDataBaseFileName=".\Run_Only/"
+				PrecompiledHeaderFile=".\Release/rSDK.pch"
+				AssemblerListingLocation=".\Release/"
+				ObjectFile=".\Release/"
+				ProgramDataBaseFileName=".\Release/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 			/>
@@ -456,7 +456,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG,RUN_ONLY"
+				PreprocessorDefinitions="NDEBUG"
 				Culture="1033"
 				AdditionalIncludeDirectories="..\..\Inc"
 			/>
@@ -471,11 +471,11 @@
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\lib\"
 				ModuleDefinitionFile=".\Ext.def"
-				ProgramDatabaseFile=".\Run_Only/Template.pdb"
+				ProgramDatabaseFile=".\Release/rSDK.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary=".\Run_Only/Template.lib"
+				ImportLibrary=".\Release/rSDK.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -489,7 +489,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Run_Only/rSDK.bsc"
+				OutputFile=".\Release/rSDK.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -568,11 +568,11 @@
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\lib\"
 				ModuleDefinitionFile=".\Ext.def"
-				ProgramDatabaseFile=".\Run_Only/Template.pdb"
+				ProgramDatabaseFile=".\Run_Only/rSDK.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
-				ImportLibrary=".\Run_Only/Template.lib"
+				ImportLibrary=".\Run_Only/rSDK.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -1170,6 +1170,10 @@
 				RelativePath=".\Rundata.h"
 				>
 			</File>
+			<File
+				RelativePath=".\TMOStream.h"
+				>
+			</File>
 			<Filter
 				Name="Format"
 				>
@@ -1375,7 +1379,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\Inc\rTemplate.h"
+				RelativePath="..\..\Inc\rrSDK.h"
 				>
 			</File>
 			<File
