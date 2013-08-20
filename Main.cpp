@@ -202,7 +202,7 @@ ACTION(
 	/* ID */			7,
 	/* Name */			"Set layer tile at (%0, %1) to (%2, %3)",
 	/* Flags */			0,
-	/* Params */		(4, PARAM_NUMBER,"Tile X", PARAM_NUMBER,"Tile Y", PARAM_NUMBER,"Tileset index (0-99, -1: Empty)",
+	/* Params */		(4, PARAM_NUMBER,"Tile X", PARAM_NUMBER,"Tile Y", //PARAM_NUMBER,"Tileset index (0-99, -1: Empty)",
 	PARAM_NUMBER,"Tileset X (-1: Empty)", PARAM_NUMBER,"Tileset Y (-1: Empty)")
 ) {
 	if (rdPtr->currentLayer)
