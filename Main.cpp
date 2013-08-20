@@ -5,10 +5,9 @@
 // ============================================================================
 
 #include "Common.h"
-#define MINIZ_HEADER_FILE_ONLY 1
-#include "miniz.c"
 #include "Paramacro.h"
 #include "HWASurface.h"
+#include "TMOStream.h"
 
 // ============================================================================
 //
@@ -596,21 +595,20 @@ ACTION(
 
 
 const char MAGIC[9] = "ACHTUNG!";
-const int TILE = 'ELIT';
-const int MAP_ = ' PAM';
-const int LAYR = 'RYAL';
-const int MAIN = 'NIAM'; // LAYR sub-block: Main (tile data)
-const int TSID = 'DIST'; // LAYR sub-block: Tileset IDs
-const int VALS = 'SLAV'; // LAYR sub-block: Alterable values
+const unsigned TILE = 'ELIT';
+const unsigned MAP_ = ' PAM';
+const unsigned LAYR = 'RYAL';
+const unsigned MAIN = 'NIAM'; // LAYR sub-block: Main (tile data)
+const unsigned TSID = 'ATAD'; // LAYR sub-block: Data ("sub-layer")
 const short VER_13 = (1<<8) | 3;
 const short VER_12 = (1<<8) | 2;
 const short VER_11 = (1<<8) | 1;
 const short VER_10 = (1<<8) | 0;
-#define VER VER_13
+const short VER = VER_13;
 
 ACTION(
 	/* ID */			21,
-	/* Name */			"Load map from file %0", // (Ignore tilesets: %1)",
+	/* Name */			"Load map from file %0",
 	/* Flags */			0,
 	/* Params */		(1, PARAM_FILENAME2, "File")
 ) {
@@ -929,80 +927,56 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(1, PARAM_FILENAME2,"File")
 ) {
-	unsigned layerCount = rdPtr->layers->size();
-	unsigned tilesetCount = rdPtr->tilesets->size();
-
 	const char* mapPath = (const char*)param1;
-	FILE* file = fopen(mapPath, "wb");
-	if (!file)
+	
+	TMOStream file(mapPath, rdPtr->compress);
+
+	if (!file.good())
 	{
 		rdPtr->rRd->GenerateEvent(3);
 		return;
 	}
 
-	// Magic number, version, tileset and layer count
-	fputs(MAGIC, file);
-	fwrite(&VER, sizeof(short), 1, file);
-	
-	int blockSize = 0;
+	// Header: Magic number and format version
+	file << MAGIC << VER;
 
 	// Write map block
 	if (rdPtr->blocks & BLOCK_MAP)
 	{
-		fwrite(&MAP_, sizeof(int), 1, file);
-		// Size will be written later...
-		blockSize = ftell(file);
-		fwrite(&blockSize, sizeof(int), 1, file);
+		file.beginBlock(MAP_);
 
-		unsigned short propertyCount = rdPtr->properties->size();
-		fwrite(&propertyCount, sizeof(short), 1, file);
+		file << (unsigned short)rdPtr->properties->size();
 
 		map<string, Property>::iterator it = rdPtr->properties->begin();
 		for (; it != rdPtr->properties->end(); ++it)
 		{
-			unsigned length = it->first.length();
-			fwrite(&length, sizeof(char), 1, file);
-			fputs(it->first.c_str(), file);
-			fputc(it->second.type, file);
+			// Name
+			file.writeShortStr(it->first.c_str());
+			// Type
+			file.put(it->second.type);
+			// Value
 			if (it->second.type == TMPT_STRING)
-			{
-				length = strlen(it->second.c);
-				printf("save len %d\n", length);
-				fwrite(&length, sizeof(int), 1, file);
-				fputs(it->second.c, file);
-			}
+				file.writeLongStr(it->second.c);
 			else
-			{
-				fwrite(&it->second.i, sizeof(int), 1, file);
-			}
+				file << it->second.i;
 		}
 
-		// Go back and write the block size
-		int blockSizeAfter = ftell(file);
-		fseek(file, blockSize, SEEK_SET);
-		blockSize = blockSizeAfter - blockSize - sizeof(int);
-		fwrite(&blockSize, sizeof(int), 1, file);
-		fseek(file, blockSizeAfter, SEEK_SET);
+		file.endBlock();
 	}
 
 	// Write tileset block
 	if (rdPtr->blocks & BLOCK_TILESETS)
 	{
-		fwrite(&TILE, sizeof(int), 1, file);
-		blockSize = sizeof(char);
-		for (unsigned i = 0; i < tilesetCount; ++i)
-		{
-			blockSize += sizeof(COLORREF);
-			blockSize += sizeof(char);
-			blockSize += strlen((&(*rdPtr->tilesets)[i])->getPath());
-		}
-		fwrite(&blockSize, sizeof(int), 1, file);
-		fwrite(&tilesetCount, sizeof(char), 1, file);
+		file.beginBlock(TILE);
+		unsigned char tilesetCount = min(255, rdPtr->tilesets->size());	
+		file.put(tilesetCount);
 
 		for (unsigned i = 0; i < tilesetCount; ++i)
 		{
 			Tileset* tileset = &(*rdPtr->tilesets)[i];
-			fwrite(&tileset->transpCol, sizeof(COLORREF), 1, file);
+
+			// Transparent colour
+			file << tileset->transpCol;
 
 			// Store file path (relative to app, map or absolute)
 			char path[MAX_PATH] = {};
@@ -1025,85 +999,46 @@ ACTION(
 					strcpy_s(path, 256, tileset->getPath());
 			}
 
-			fputc(strlen(path), file);
-			fputs(path, file);
+			// Write compueted relative path
+			file.writeShortStr(path);
 		}
+
+		file.endBlock();
 	}
 
 	// Write layer block
 	if (rdPtr->blocks & BLOCK_LAYERS)
 	{
-		fwrite(&LAYR, sizeof(int), 1, file);
-		
-		// Size will be written later...
-		blockSize = ftell(file);
-		fwrite(&blockSize, sizeof(int), 1, file);
+		file.beginBlock(LAYR);
 
-		fwrite(&layerCount, sizeof(short), 1, file);
+		unsigned short layerCount = min(0xffff, rdPtr->layers->size());
+		file << layerCount;
 
 		for (unsigned i = 0; i < layerCount; ++i)
 		{
 			Layer* layer = &(*rdPtr->layers)[i];
 
 			// General settings
-			unsigned width = layer->getWidth();
-			unsigned height = layer->getHeight();
-			fwrite(&width, sizeof(int), 1, file);
-			fwrite(&height, sizeof(int), 1, file);
-			fwrite(&layer->tileWidth, sizeof(short), 1, file);
-			fwrite(&layer->tileHeight, sizeof(short), 1, file);
-			fwrite(&layer->tileset, sizeof(char), 1, file);
-			fwrite(&layer->collision, sizeof(char), 1, file);
-			fwrite(&layer->offsetX, sizeof(int), 1, file);
-			fwrite(&layer->offsetY, sizeof(int), 1, file);
-			fwrite(&layer->scrollX, sizeof(float), 1, file);
-			fwrite(&layer->scrollY, sizeof(float), 1, file);
-			fwrite(&layer->wrapX, sizeof(bool), 1, file);
-			fwrite(&layer->wrapY, sizeof(bool), 1, file);
-			fwrite(&layer->visible, sizeof(bool), 1, file);
-			fwrite(&layer->opacity, sizeof(float), 1, file);
+			file << layer->getWidth() << layer->getHeight();
+			file << layer->tileWidth << layer->tileHeight;
+			file << layer->tileset << layer->collision;
+			file << layer->offsetX << layer->offsetY;
+			file << layer->scrollX << layer->scrollY;
+			file << layer->wrapX << layer->wrapY;
+			file << layer->visible;
+			file << layer->opacity;
 
 			// Number of data blocks
-			unsigned char dataBlockCount = 1;
-			fwrite(&dataBlockCount, sizeof(char), 1, file);
+			file.put(1 + layer->subLayers.size());
 
-			// Tile data
-			fwrite(&MAIN, sizeof(int), 1, file);
-
-			if (layer->isValid())
-			{
-				// Compress tile data...
-				mz_ulong dataSize = layer->getByteSize();
-				mz_ulong dataAlloc = mz_compressBound(dataSize);
-				unsigned char* temp = new unsigned char[dataAlloc];
-				mz_compress2(temp, &dataAlloc, (const unsigned char*)layer->getDataPointer(), dataSize, rdPtr->compress);
-
-				// Write compressed size
-				fwrite(&dataAlloc, sizeof(int), 1, file);
-
-				// Write compressed data
-				fwrite(temp, dataAlloc, 1, file);
-
-				// Delete temporary compression buffer
-				delete[] temp;
-			}
-			else
-			{
-				// Write empty data
-				int nullValue = 0;
-				fwrite(&nullValue, sizeof(int), 1, file);
-			}
+			// Main block (tiles)
+			file.writeLayerDataBlock(MAIN, (unsigned char*)layer->getDataPointer(), layer->getByteSize());
 		}
 
-		// Go back and write the block size
-		int blockSizeAfter = ftell(file);
-		fseek(file, blockSize, SEEK_SET);
-		blockSize = blockSizeAfter - blockSize - sizeof(int);
-		fwrite(&blockSize, sizeof(int), 1, file);
+		file.endBlock();
 	}
 
 	rdPtr->rRd->GenerateEvent(1);
-	fclose(file);
 }
 
 ACTION(
