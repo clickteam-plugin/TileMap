@@ -7,17 +7,20 @@ class TMIStream : public std::ifstream
 {
 	unsigned blockSize;
 
+	unsigned char* compressionBuffer;
+	unsigned compressionBufferSize;
 public:
 
 	TMIStream(const char* fileName)
 		:	std::ifstream(fileName, std::ifstream::in | std::ifstream::binary),
-			blockSize(0)
+			blockSize(0), compressionBuffer(0), compressionBufferSize(0)
 	{
 
 	}
 
 	~TMIStream()
 	{
+		delete[] compressionBuffer;
 	}
 
 	// Reads a file block header (map, layer, tileset)
@@ -35,6 +38,42 @@ public:
 	void skipBlock()
 	{
 		seekg(blockSize, ios_base::cur);
+	}
+
+	void readCompressedData(char* destination, unsigned size)
+	{
+		// Read the size of the compressed input data
+		mz_ulong dataSize;
+		*this >> dataSize;
+				
+		if (destination)
+		{
+			// Buffer already exists, but is too small...
+			if (compressionBuffer && compressionBufferSize < dataSize)
+			{
+				delete[] compressionBuffer;
+				compressionBuffer = 0;
+			}
+
+			// Need to allocate a compression buffer
+			if (!compressionBuffer)
+			{
+				compressionBuffer = new unsigned char[dataSize];
+				compressionBufferSize = dataSize;
+			}
+
+			// Read the compressed data
+			read((char*)compressionBuffer, dataSize);
+
+			// Uncompress data
+			mz_ulong dataAlloc = size;
+			mz_uncompress((unsigned char*)destination, &dataAlloc, compressionBuffer, dataSize);
+		}
+		// We can't read this...
+		else
+		{
+			seekg(dataSize, ios_base::cur);
+		}
 	}
 
 	// Read a binary block as big as the given buffer

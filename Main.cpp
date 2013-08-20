@@ -834,7 +834,8 @@ ACTION(
 								file >> dataBlock;
 
 								// Prepare for the data type
-								unsigned char* destination = 0;
+								char* destination = 0;
+								unsigned size = 0;
 
 								switch(dataBlock)
 								{
@@ -845,34 +846,16 @@ ACTION(
 
 										// Allocation succeeded, assign data pointer
 										if (layer->isValid())
-											destination = (unsigned char*)layer->getDataPointer();
+										{
+											destination = (char*)layer->getDataPointer();
+											size = layer->getByteSize();
+										}
 
 										break;
 								}
 
 								// Read compressed size
-								mz_ulong dataSize = 0;
-								file >> dataSize;
-										
-								// Recognized data, read it
-								if (destination)
-								{
-									// Read the compressed data
-									char* temp = new char[dataSize];
-									file.read(temp, dataSize);
-
-									// Uncompress data
-									mz_ulong dataAlloc = layer->getByteSize();
-									mz_uncompress(destination, &dataAlloc, (unsigned char*)temp, dataSize);
-
-									// Delete temporary compression buffer
-									delete[] temp;
-								}
-								// We can't read this...
-								else
-								{
-									file.seekg(dataSize, ios_base::cur);
-								}
+								file.readCompressedData(destination, size);
 							}
 						}
 					}
