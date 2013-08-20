@@ -94,6 +94,10 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
 
 	}
 
+	// Select 0th tileset by default...
+	if (edPtr->tilesetCount)
+		rdPtr->currentTileset = &rdPtr->tilesets->front();
+
 	// Tileset settings
 	rdPtr->tileWidth = edPtr->tileWidth;
 	rdPtr->tileHeight = edPtr->tileHeight;
