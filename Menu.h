@@ -117,7 +117,8 @@
 		SUB_END
 	SUB_END
 	SUB_START("Sub-layers")
-		ITEM(48, "Add sub-layer")
+		ITEM(48, "Add byte sub-layer")
+		ITEM(58, "Add integer sub-layer")
 		SEPARATOR
 		SUB_START("With cursor")
 			ITEM(49, "Fill with value")
@@ -133,9 +134,8 @@
 	SUB_START("Layer source")
 		ITEM(35, "Move")
 		ITEM(33, "Resize")
-		SEPARATOR
 		ITEM(47, "Select range")
-		ITEM(39, "Maximize to layer")
+		ITEM(39, "Maximize to current layer")
 	SUB_END
 	SEPARATOR
 #endif

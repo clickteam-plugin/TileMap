@@ -600,7 +600,7 @@ const unsigned TILE = 'ELIT';
 const unsigned MAP_ = ' PAM';
 const unsigned LAYR = 'RYAL';
 const unsigned MAIN = 'NIAM'; // LAYR sub-block: Main (tile data)
-const unsigned TSID = 'ATAD'; // LAYR sub-block: Data ("sub-layer")
+const unsigned DATA = 'ATAD'; // LAYR sub-block: Data ("sub-layer")
 const short VER_13 = (1<<8) | 3;
 const short VER_12 = (1<<8) | 2;
 const short VER_11 = (1<<8) | 1;
@@ -852,6 +852,28 @@ ACTION(
 										}
 
 										break;
+
+									case DATA:
+
+										// Read sub-layer's cell settings
+										char cellSize;
+										file >> cellSize;
+										unsigned defaultValue;
+										file >> defaultValue;
+
+										// Add new sub-layer
+										layer->subLayers.push_back(SubLayer(cellSize, defaultValue));
+										SubLayer& subLayer = layer->subLayers.back();
+
+										subLayer.resize(width, height);
+
+										if (subLayer.isValid())
+										{
+											destination = (char*)subLayer.getDataPointer();
+											size = subLayer.getByteSize();
+										}
+
+										break;
 								}
 
 								// Read compressed size
@@ -1004,7 +1026,18 @@ ACTION(
 			file.put(1 + layer->subLayers.size());
 
 			// Main block (tiles)
-			file.writeLayerDataBlock(MAIN, (unsigned char*)layer->getDataPointer(), layer->getByteSize());
+			file << MAIN;
+			file.writeCompressedData((unsigned char*)layer->getDataPointer(), layer->getByteSize());
+
+			// Sub blocks
+			for (unsigned s = 0; s < layer->subLayers.size(); ++s)
+			{
+				SubLayer& subLayer = layer->subLayers[s];
+				file << DATA;
+				file << subLayer.getCellSize();
+				file << subLayer.getDefaultValue();
+				file.writeCompressedData((unsigned char*)subLayer.getDataPointer(), subLayer.getByteSize());
+			}
 		}
 
 		file.endBlock();
@@ -1537,21 +1570,32 @@ ACTION(
 	/* Params */		(4, PARAM_NUMBER, "Top-left tile X", PARAM_NUMBER, "Top-left tile Y",
 							PARAM_NUMBER, "Bottom-right tile X", PARAM_NUMBER, "Bottom-right tile Y")
 ) {
-	rdPtr->cursor.x = intParam();
-	rdPtr->cursor.y = intParam();
-	rdPtr->cursor.width = intParam() - rdPtr->cursor.x;
-	rdPtr->cursor.height = intParam() - rdPtr->cursor.y;
+	int x1 = intParam();
+	int y1 = intParam();
+	int x2 = intParam();
+	int y2 = intParam();
+
+	if (x1 > x2)
+		swap(x1, x2);
+
+	if (y1 > y2)
+		swap(y1, y2);
+
+	rdPtr->cursor.x = x1;
+	rdPtr->cursor.y = y1;
+	rdPtr->cursor.width = x2 - x1;
+	rdPtr->cursor.height = y2 - y1;
 }
 
 ACTION(
 	/* ID */			48,
-	/* Name */			"Add sub-layer",
+	/* Name */			"Add byte sub-layer with default value %0",
 	/* Flags */			0,
-	/* Params */		(0)
+	/* Params */		(1, PARAM_NUMBER, "Default value (0-255), used for new and blank tiles")
 ) {
 	if (rdPtr->currentLayer)
 	{
-		rdPtr->currentLayer->subLayers.push_back(SubLayer());
+		rdPtr->currentLayer->subLayers.push_back(SubLayer(1, param1));
 		rdPtr->currentLayer->subLayers.back().resize(
 			rdPtr->currentLayer->getWidth(),
 			rdPtr->currentLayer->getHeight()
@@ -1593,11 +1637,12 @@ ACTION(
 		x2 = max(0, min(layerWidth-1, x2));
 		y2 = max(0, min(layerHeight-1, y2));
 
+		unsigned cellSize = sub.getCellSize();
 		for (int x = 0; x <= x2-x1; ++x)
 		{
 			for (int y = 0; y <= y2-y1; ++y)
 			{
-				*(sub.getCell(x+x1, y+y1)) = value;
+				memcpy(sub.getCell(x+x1, y+y1), &value, cellSize);
 			}
 		}
 	}
@@ -1691,6 +1736,23 @@ ACTION(
 
 	rdPtr->onProperty = 0;
 }
+
+ACTION(
+	/* ID */			58,
+	/* Name */			"Add int sub-layer with default value %0",
+	/* Flags */			0,
+	/* Params */		(1, PARAM_NUMBER, "Default value, used for new and blank tiles")
+) {
+	if (rdPtr->currentLayer)
+	{
+		rdPtr->currentLayer->subLayers.push_back(SubLayer(4, param1));
+		rdPtr->currentLayer->subLayers.back().resize(
+			rdPtr->currentLayer->getWidth(),
+			rdPtr->currentLayer->getHeight()
+		);
+	}
+}
+
 // ============================================================================
 //
 // EXPRESSIONS

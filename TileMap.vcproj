@@ -1190,6 +1190,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\SubLayer.h"
+					>
+				</File>
+				<File
 					RelativePath=".\Tile.h"
 					>
 				</File>

@@ -49,11 +49,9 @@ public:
 		seekp(currentPos);
 	}
 
-	// Writes a layer data block containing compressed tile information
-	void writeLayerDataBlock(unsigned id, unsigned char* data, unsigned size)
+	// Writes z-lib compressed data preceded by the size
+	void writeCompressedData(unsigned char* data, unsigned size)
 	{
-		*this << id;
-
 		// Invalid data - write length 0 and quit
 		if (!data || !size)
 		{

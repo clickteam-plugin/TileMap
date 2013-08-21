@@ -6,11 +6,17 @@
 
 class SubLayer
 {
+	// The power of two to use for the data cell size (0 = 1 byte).
+	unsigned		cellShift;
+
+	// Size of a single cell in bytes.
+	char			cellSize;
+
+	// The value used for empty/new tiles.
+	unsigned		defaultValue;
+
 	// Raw data (may be reinterpreted)
 	unsigned char*	data;
-
-	// The power of two to use for the data cell size (0 = 1 byte).
-	unsigned int	cellShift;
 
 	// Tile count, should always be the same as the parent's
 	unsigned int	width;
@@ -18,13 +24,21 @@ class SubLayer
 
 public:
 
-	SubLayer() : data(0), cellShift(0)
+	SubLayer()
+		:	data(0), cellShift(0), cellSize(1), defaultValue(0)
 	{
 	}
 
-	SubLayer(const SubLayer& src) : data(0)
+	// Allocate layer with custom cell settings
+	SubLayer(unsigned cellSize, unsigned defaultValue)
+		// cellShift calculation is accurate for cellSize in {1, 2, 4, 8} which is all we need really
+		:	data(0), defaultValue(defaultValue), cellSize(cellSize), cellShift(min(cellSize / 2, 3))
 	{
-		cellShift = src.cellShift;
+	}
+
+	SubLayer(const SubLayer& src)
+		:	data(0), defaultValue(src.defaultValue), cellShift(src.cellShift), cellSize(src.cellSize)
+	{
 		width = src.width;
 		height = src.height;
 
@@ -38,6 +52,16 @@ public:
 	~SubLayer()
 	{
 		delete[] data;
+	}
+
+	inline char getCellSize() const
+	{
+		return cellSize;
+	}
+
+	inline unsigned getDefaultValue() const
+	{
+		return defaultValue;
 	}
 
 	// Check if a layer is usable
@@ -58,6 +82,12 @@ public:
 		return data + ((x + width * y) << cellShift);
 	}
 
+	template <class T>
+	T* getCellAs(unsigned int x = 0, unsigned int y = 0)
+	{
+		return reinterpret_cast<T*>(getCell(x, y));
+	}
+
 	inline unsigned int getWidth() const
 	{
 		return width;
@@ -66,6 +96,11 @@ public:
 	inline unsigned int getHeight() const
 	{
 		return height;
+	}
+
+	inline unsigned char* getDataPointer()
+	{
+		return data;
 	}
 
 	inline unsigned int getByteSize() const
@@ -90,7 +125,7 @@ public:
 		}
 
 		// Allocate a new array
-		unsigned char* newData = new unsigned char[newWidth * newHeight];
+		unsigned char* newData = new unsigned char[(newWidth * newHeight) << cellShift];
 		if (!newData)
 		{
 			width = 0;
@@ -99,7 +134,13 @@ public:
 		}
 
 		// Zero all tiles
-		memset(newData, 0, (newWidth * newHeight) << cellShift);
+		if (cellShift)
+		{
+			for (unsigned i = 0; i < newWidth * newHeight; ++i)
+				memcpy(newData + (i << cellShift), &defaultValue, cellSize);
+		}
+		else
+			memset(newData, defaultValue, newWidth * newHeight);
 
 		// Copy old data
 		if (data)
@@ -108,12 +149,25 @@ public:
 			int copyWidth = min(width, newWidth);
 			int copyHeight = min(height, newHeight);
 
-			// Copy the old tiles
-			for (int x = 0; x < copyWidth; ++x)
+			// Copy the old tiles (optimized for 1 byte cell size)
+			if (cellShift)
 			{
-				for (int y = 0; y < copyHeight; ++y)
+				for (int x = 0; x < copyWidth; ++x)
 				{
-					newData[(x + y * newWidth) << cellShift] = data[(x + y * width) << cellShift];
+					for (int y = 0; y < copyHeight; ++y)
+					{
+						memcpy(newData + ((x + y * newWidth) << cellShift), data + ((x + y * width) << cellShift), cellSize);
+					}
+				}
+			}
+			else
+			{
+				for (int x = 0; x < copyWidth; ++x)
+				{
+					for (int y = 0; y < copyHeight; ++y)
+					{
+						newData[x + y * newWidth] = data[x + y * width];
+					}
 				}
 			}
 

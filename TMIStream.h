@@ -40,13 +40,14 @@ public:
 		seekg(blockSize, ios_base::cur);
 	}
 
+	// Reads z-lib compressed data preceded by the size
 	void readCompressedData(char* destination, unsigned size)
 	{
 		// Read the size of the compressed input data
 		mz_ulong dataSize;
 		*this >> dataSize;
 				
-		if (destination)
+		if (destination && dataSize)
 		{
 			// Buffer already exists, but is too small...
 			if (compressionBuffer && compressionBufferSize < dataSize)
@@ -70,7 +71,7 @@ public:
 			mz_uncompress((unsigned char*)destination, &dataAlloc, compressionBuffer, dataSize);
 		}
 		// We can't read this...
-		else
+		else if(dataSize)
 		{
 			seekg(dataSize, ios_base::cur);
 		}
