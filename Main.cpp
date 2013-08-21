@@ -1977,13 +1977,14 @@ EXPRESSION(
 	{
 		Layer* layer = &(*rdPtr->layers)[i];
 
-		if (x >= layer->getWidth() || y >= layer->getHeight())
-			return 0;
-
-		return layer->getTile(x, y)->x;
+		if (x < layer->getWidth() && y < layer->getHeight())
+		{
+			int value = layer->getTile(x, y)->x;
+			return value == 0xff ? -1 : value;
+		}
 	}
 	
-	return 0;
+	return -1;
 }
 
 EXPRESSION(
@@ -2000,13 +2001,14 @@ EXPRESSION(
 	{
 		Layer* layer = &(*rdPtr->layers)[i];
 
-		if (x >= layer->getWidth() || y >= layer->getHeight())
-			return 0;
-
-		return layer->getTile(x, y)->y;
+		if (x < layer->getWidth() && y < layer->getHeight())
+		{
+			int value = layer->getTile(x, y)->y;
+			return value == 0xff ? -1 : value;
+		}
 	}
 	
-	return 0;
+	return -1;
 }
 
 EXPRESSION(
