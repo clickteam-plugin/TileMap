@@ -139,6 +139,7 @@ struct TMAPVIEW
 		int			offsetX;
 		int			offsetY;
 		Tile*		tile;
+		BYTE		tileset;
 
 		// HWA specific
 		COLORREF	tint;

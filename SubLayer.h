@@ -77,15 +77,20 @@ public:
 	}
 
 	// Get a tile within the layer array
-	inline unsigned char* getCell(unsigned int x = 0, unsigned int y = 0)
+	inline unsigned char* getCell(unsigned int x, unsigned int y)
 	{
 		return data + ((x + width * y) << cellShift);
 	}
 
 	template <class T>
-	T* getCellAs(unsigned int x = 0, unsigned int y = 0)
+	T* getCellAs(unsigned int x, unsigned int y)
 	{
 		return reinterpret_cast<T*>(getCell(x, y));
+	}
+
+	inline void setCell(unsigned int x, unsigned int y, unsigned value)
+	{
+		memcpy(getCell(x, y), &value, cellSize);
 	}
 
 	inline unsigned int getWidth() const

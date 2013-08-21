@@ -117,8 +117,12 @@
 		SUB_END
 	SUB_END
 	SUB_START("Sub-layers")
-		ITEM(48, "Add byte sub-layer")
-		ITEM(58, "Add integer sub-layer")
+		SUB_START("Add sub-layer...")
+			ITEM(48, "Simple")
+			ITEM(58, "Custom cell size & default value")
+		SUB_END
+		SEPARATOR
+		ITEM(59, "Set cell")
 		SEPARATOR
 		SUB_START("With cursor")
 			ITEM(49, "Fill with value")
@@ -187,6 +191,12 @@
 			SEPARATOR
 			ITEM(16, "Tileset ID")
 			ITEM(14, "Compound value")
+		SUB_END
+		SEPARATOR
+		SUB_START("Sub-layers")
+			ITEM(23, "Byte at position")
+			ITEM(24, "Integer at position")
+			ITEM(25, "Float at position")
 		SUB_END
 	SUB_END
 	SUB_START("Properties")

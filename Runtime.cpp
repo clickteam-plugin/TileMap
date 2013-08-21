@@ -71,7 +71,6 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
 
 	// Load edit tilesets
 	cSurface is;
-
 	for (int i = 0; i < edPtr->tilesetCount; ++i)
 	{
 		rdPtr->tilesets->push_back(Tileset());

@@ -431,7 +431,7 @@ ACTION(
 	/* ID */			15,
 	/* Name */			"Set layer collision tileset to %0",
 	/* Flags */			0,
-	/* Params */		(1, PARAM_NUMBER,"Tileset index (0-99, -1: Same as normal tileset)")
+	/* Params */		(1, PARAM_NUMBER,"Tileset index (0-255, -1: Same as normal tileset)")
 ) {
 	if (rdPtr->currentLayer)
 	{
@@ -1185,7 +1185,7 @@ ACTION(
 
 ACTION(
 	/* ID */			29,
-	/* Name */			"Add new layer with size (%0,%1)",
+	/* Name */			"Add new layer with size (%0, %1)",
 	/* Flags */			0,
 	/* Params */		(2,PARAM_NUMBER,"Layer width (tiles)", PARAM_NUMBER,"Layer height (tiles)")
 ) {
@@ -1341,7 +1341,7 @@ ACTION(
 	/* ID */			34,
 	/* Name */			"Swap tilesets %0 and %1",
 	/* Flags */			0,
-	/* Params */		(2, PARAM_NUMBER, "Tileset A (0-99)", PARAM_NUMBER, "Tileset B (0-99)")
+	/* Params */		(2, PARAM_NUMBER, "Tileset A (0-255)", PARAM_NUMBER, "Tileset B (0-255)")
 ) {
 	unsigned a = intParam(), b = intParam();
 	if (a < rdPtr->tilesets->size() && b < rdPtr->tilesets->size())
@@ -1377,7 +1377,7 @@ ACTION(
 	/* ID */			37,
 	/* Name */			"Set layer tileset to %0",
 	/* Flags */			0,
-	/* Params */		(1, PARAM_NUMBER,"Tileset index (0-99)")
+	/* Params */		(1, PARAM_NUMBER,"Tileset index (0-255)")
 ) {
 	if (rdPtr->currentLayer)
 	{
@@ -1589,13 +1589,13 @@ ACTION(
 
 ACTION(
 	/* ID */			48,
-	/* Name */			"Add byte sub-layer with default value %0",
+	/* Name */			"Add sub-layer",
 	/* Flags */			0,
-	/* Params */		(1, PARAM_NUMBER, "Default value (0-255), used for new and blank tiles")
+	/* Params */		(0)
 ) {
 	if (rdPtr->currentLayer)
 	{
-		rdPtr->currentLayer->subLayers.push_back(SubLayer(1, param1));
+		rdPtr->currentLayer->subLayers.push_back(SubLayer(1, 0));
 		rdPtr->currentLayer->subLayers.back().resize(
 			rdPtr->currentLayer->getWidth(),
 			rdPtr->currentLayer->getHeight()
@@ -1605,16 +1605,17 @@ ACTION(
 
 ACTION(
 	/* ID */			49,
-	/* Name */			"Fill sub-layer cells at cursor with %0",
+	/* Name */			"Fill sub-layer %0 cells at cursor with %1",
 	/* Flags */			0,
-	/* Params */		(1, PARAM_NUMBER, "Value")
+	/* Params */		(2, PARAM_NUMBER, "Sub-layer index", PARAM_NUMBER, "Value")
 ) {
+	unsigned s = intParam();
 	int value = intParam();
 
 	Layer* layer = rdPtr->currentLayer;
-	if (layer && layer->isValid() && layer->subLayers.size() && layer->subLayers[0].isValid())
+	if (layer && layer->isValid() && s < layer->subLayers.size())
 	{
-		SubLayer& sub = layer->subLayers[0];
+		SubLayer& sub = layer->subLayers[s];
 
 		// Get layer size
 		int layerWidth = layer->getWidth();
@@ -1739,17 +1740,40 @@ ACTION(
 
 ACTION(
 	/* ID */			58,
-	/* Name */			"Add int sub-layer with default value %0",
+	/* Name */			"Add sub-layer with cell size %0 and default value %1",
 	/* Flags */			0,
-	/* Params */		(1, PARAM_NUMBER, "Default value, used for new and blank tiles")
+	/* Params */		(2, PARAM_NUMBER, "Cell size", PARAM_NUMBER, "Default value, used for new and blank tiles")
 ) {
 	if (rdPtr->currentLayer)
 	{
-		rdPtr->currentLayer->subLayers.push_back(SubLayer(4, param1));
+		rdPtr->currentLayer->subLayers.push_back(SubLayer(param1, param2));
 		rdPtr->currentLayer->subLayers.back().resize(
 			rdPtr->currentLayer->getWidth(),
 			rdPtr->currentLayer->getHeight()
 		);
+	}
+}
+
+ACTION(
+	/* ID */			59,
+	/* Name */			"Set sub-layer %0 cell at (%1, %2) to %3",
+	/* Flags */			0,
+	/* Params */		(4, PARAM_NUMBER, "Sub-layer index", PARAM_NUMBER, "Cell X", PARAM_NUMBER, "Cell Y", PARAM_NUMBER, "Value")
+) {
+	unsigned s = intParam();
+	int x = intParam();
+	int y = intParam();
+	int value = intParam();
+
+	Layer* layer = rdPtr->currentLayer;
+	if (layer && s < layer->subLayers.size())
+	{
+		SubLayer& sub = layer->subLayers[s];
+		
+		if (sub.isValid(x, y))
+		{
+			sub.setCell(x, y, value);
+		}
 	}
 }
 
@@ -2151,4 +2175,93 @@ EXPRESSION(
 	/* Params */		(0)
 ) {
 	ReturnString((rdPtr->onProperty ? rdPtr->onProperty : ""));
+}
+
+EXPRESSION(
+	/* ID */			23,
+	/* Name */			"SubLayerByteVal(",
+	/* Flags */			0,
+	/* Params */		(4, EXPPARAM_NUMBER, "Layer index", EXPPARAM_NUMBER, "Sub-layer index", EXPPARAM_NUMBER, "Tile X", EXPPARAM_NUMBER, "Tile Y")
+) {
+	unsigned i = ExParam(TYPE_INT);
+	unsigned s = ExParam(TYPE_INT);
+	unsigned x = ExParam(TYPE_INT);
+	unsigned y = ExParam(TYPE_INT);
+
+	if (i < rdPtr->layers->size())
+	{
+		Layer& layer = (*rdPtr->layers)[i];
+
+		if (x < layer.getWidth() && y < layer.getHeight())
+		{
+			if (s < layer.subLayers.size())
+			{
+				SubLayer& subLayer = layer.subLayers[s];
+
+				return *subLayer.getCell(x, y);
+			}
+		}
+	}
+	
+	return 0;
+}
+
+EXPRESSION(
+	/* ID */			24,
+	/* Name */			"SubLayerIntVal(",
+	/* Flags */			0,
+	/* Params */		(4, EXPPARAM_NUMBER, "Layer index", EXPPARAM_NUMBER, "Sub-layer index", EXPPARAM_NUMBER, "Tile X", EXPPARAM_NUMBER, "Tile Y")
+) {
+	unsigned i = ExParam(TYPE_INT);
+	unsigned s = ExParam(TYPE_INT);
+	unsigned x = ExParam(TYPE_INT);
+	unsigned y = ExParam(TYPE_INT);
+
+	if (i < rdPtr->layers->size())
+	{
+		Layer& layer = (*rdPtr->layers)[i];
+
+		if (x < layer.getWidth() && y < layer.getHeight())
+		{
+			if (s < layer.subLayers.size())
+			{
+				SubLayer& subLayer = layer.subLayers[s];
+
+				return *subLayer.getCellAs<int>(x, y);
+			}
+		}
+	}
+	
+	return 0;
+}
+
+EXPRESSION(
+	/* ID */			25,
+	/* Name */			"SubLayerFloatVal(",
+	/* Flags */			EXPFLAG_DOUBLE,
+	/* Params */		(4, EXPPARAM_NUMBER, "Layer index", EXPPARAM_NUMBER, "Sub-layer index", EXPPARAM_NUMBER, "Tile X", EXPPARAM_NUMBER, "Tile Y")
+) {
+	unsigned i = ExParam(TYPE_INT);
+	unsigned s = ExParam(TYPE_INT);
+	unsigned x = ExParam(TYPE_INT);
+	unsigned y = ExParam(TYPE_INT);
+
+	rdPtr->rHo.hoFlags|=HOF_FLOAT; // MUST be done after getting params
+
+	if (i < rdPtr->layers->size())
+	{
+		Layer& layer = (*rdPtr->layers)[i];
+
+		if (x < layer.getWidth() && y < layer.getHeight())
+		{
+			if (s < layer.subLayers.size())
+			{
+				SubLayer& subLayer = layer.subLayers[s];
+
+				return *subLayer.getCellAs<int>(x, y);
+			}
+		}
+	}
+	
+	return 0;
 }
