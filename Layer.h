@@ -165,7 +165,7 @@ public:
 		}
 
 		// Zero all tiles
-		memset(newData, 0xff, getByteSize());
+		memset(newData, 0xff, newWidth * newHeight * sizeof(Tile));
 
 		// Copy old data
 		if (data)

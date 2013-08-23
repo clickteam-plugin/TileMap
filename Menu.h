@@ -136,7 +136,6 @@
 		SEPARATOR
 		ITEM(67, "Clear")
 		SEPARATOR
-		SEPARATOR
 		ITEM(59, "Set integer")
 		ITEM(64, "Set float")
 		SEPARATOR
@@ -214,7 +213,7 @@
 		SUB_END
 		SEPARATOR
 		SUB_START("Sub-layers")
-			ITEM(23, "Byte at position")
+			//ITEM(23, "Byte at position")
 			ITEM(24, "Integer at position")
 			ITEM(25, "Float at position")
 		SUB_END
