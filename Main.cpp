@@ -521,7 +521,7 @@ const unsigned MAP_ = ' PAM';
 const unsigned LAYR = 'RYAL';
 const unsigned MAIN = 'NIAM'; // LAYR sub-block: Main (tile data)
 const unsigned DATA = 'ATAD'; // LAYR sub-block: Data ("sub-layer")
-const short VER_14 = (1<<8) |4;
+const short VER_14 = (1<<8) | 4;
 const short VER_13 = (1<<8) | 3;
 const short VER_12 = (1<<8) | 2;
 const short VER_11 = (1<<8) | 1;
@@ -558,7 +558,7 @@ ACTION(
 			break;
 
 		// Check version
-		short version;
+		short version = 0;
 		file >> version;
 		if (version < VER_10 || version > VER)
 			break;
@@ -567,7 +567,13 @@ ACTION(
 		error = false;
 		while (!error && file.good())
 		{
-			switch(file.readBlockHeader())
+			unsigned blockHeader = file.readBlockHeader();
+
+			// Nothing more left to read - success!
+			if (!blockHeader)
+				break;
+
+			switch(blockHeader)
 			{
 				// Map (properties)
 				case MAP_:
@@ -718,7 +724,7 @@ ACTION(
 							Layer* layer = &rdPtr->layers->back();
 
 							// Read settings
-							unsigned width, height;
+							unsigned width = 0, height = 0;
 							file >> width;
 							file >> height;
 
@@ -749,13 +755,13 @@ ACTION(
 								file >> layer->settings.subLayerLink;
 
 							// Get the number of data bocks
-							unsigned char dataBlockCount;
+							unsigned char dataBlockCount = 0;
 							file >> dataBlockCount;
 
 							// Now, keeps read all the data blocks
 							for (int i = 0; i < dataBlockCount; ++i)
 							{
-								unsigned dataBlock;
+								unsigned dataBlock = 0;
 								file >> dataBlock;
 
 								// Prepare for the data type
@@ -1111,7 +1117,7 @@ ACTION(
 
 ACTION(
 	/* ID */			29,
-	/* Name */			"Add new layer with size (%0, %1)",
+	/* Name */			"Add layer with size (%0, %1)",
 	/* Flags */			0,
 	/* Params */		(2,PARAM_NUMBER,"Layer width (tiles)", PARAM_NUMBER,"Layer height (tiles)")
 ) {
@@ -1175,13 +1181,14 @@ ACTION(
 		// Single tile, avoid loop
 		if (width == 1 && height == 1)
 		{
-			if (x1 >= 0 && y1 >= 0 && x1 < layerWidth && y1 < layerHeight)
+			if (layer->isValid(x1, y1))
 			{
 				Tile* tile = layer->getTile(x1, y1);
 				tile->x = rdPtr->cursor.tiles.a.x;
 				tile->y = rdPtr->cursor.tiles.b.y;
 			}
 			
+			rdPtr->redraw = true;
 			return;
 		}
 
@@ -2316,7 +2323,9 @@ EXPRESSION(
 			{
 				SubLayer& subLayer = layer.subLayers[s];
 
-				return subLayer.getCellAs<int>(x, y);
+				int value = 0;
+				subLayer.getCellSafe(x, y, &value);
+				return value;
 			}
 		}
 	}

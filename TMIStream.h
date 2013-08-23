@@ -26,7 +26,7 @@ public:
 	// Reads a file block header (map, layer, tileset)
 	unsigned readBlockHeader()
 	{
-		unsigned identifier;
+		unsigned identifier = 0;
 
 		*this >> identifier;
 		*this >> blockSize;
@@ -44,7 +44,7 @@ public:
 	void readCompressedData(char* destination, unsigned size)
 	{
 		// Read the size of the compressed input data
-		mz_ulong dataSize;
+		mz_ulong dataSize = 0;
 		*this >> dataSize;
 				
 		if (destination && dataSize)
@@ -92,7 +92,7 @@ public:
 	// Read a string preceded by its length into a buffer (max 256 bytes)
 	unsigned char readShortStr(char* buffer)
 	{
-		unsigned char length;
+		unsigned char length = 0;
 		*this >> length;
 		read(buffer, length);
 
@@ -102,7 +102,7 @@ public:
 	// Read a string preceded by its length into a newly allocated buffer
 	char* readLongStr()
 	{
-		unsigned char length;
+		unsigned char length = 0;
 		*this >> length;
 
 		char* buffer = new char[length + 1];
