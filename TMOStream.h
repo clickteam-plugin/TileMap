@@ -72,18 +72,27 @@ public:
 		// Need to allocate a compression buffer
 		if (!compressionBuffer)
 		{
-			compressionBuffer = new unsigned char[allocSize];
-			compressionBufferSize = allocSize;
+			compressionBuffer = new (std::nothrow) unsigned char[allocSize];
+			compressionBufferSize = compressionBuffer ? allocSize : 0;
 		}
 
-		// Perform compression and store actual size in allocSize
-		mz_compress2(compressionBuffer, &allocSize, data, size, compressionLevel);
+		// Successfully allocated buffer
+		if (compressionBuffer)
+		{
+			// Perform compression and store actual size in allocSize
+			mz_compress2(compressionBuffer, &allocSize, data, size, compressionLevel);
 
-		// Write compressed size
-		*this << allocSize;
+			// Write compressed size
+			*this << allocSize;
 
-		// Write compressed data
-		write((char*)compressionBuffer, allocSize);
+			// Write compressed data
+			write((char*)compressionBuffer, allocSize);
+		}
+		// Failed - write an empty buffer...
+		else
+		{
+			*this << 0;
+		}
 	}
 
 	// Write a binary block

@@ -59,22 +59,26 @@ public:
 			// Need to allocate a compression buffer
 			if (!compressionBuffer)
 			{
-				compressionBuffer = new unsigned char[dataSize];
-				compressionBufferSize = dataSize;
+				compressionBuffer = new (std::nothrow) unsigned char[dataSize];
+				compressionBufferSize = compressionBuffer ? dataSize : 0;
 			}
 
-			// Read the compressed data
-			read((char*)compressionBuffer, dataSize);
+			// If we were able to allocate the buffer
+			if (compressionBuffer)
+			{
+				// Read the compressed data
+				read((char*)compressionBuffer, dataSize);
 
-			// Uncompress data
-			mz_ulong dataAlloc = size;
-			mz_uncompress((unsigned char*)destination, &dataAlloc, compressionBuffer, dataSize);
+				// Uncompress data
+				mz_ulong dataAlloc = size;
+				mz_uncompress((unsigned char*)destination, &dataAlloc, compressionBuffer, dataSize);
+
+				return;
+			}
 		}
-		// We can't read this...
-		else if(dataSize)
-		{
-			seekg(dataSize, ios_base::cur);
-		}
+		
+		// If we reach this point, something went wrong - skip data
+		seekg(dataSize, ios_base::cur);
 	}
 
 	// Read a binary block as big as the given buffer

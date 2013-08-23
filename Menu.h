@@ -21,7 +21,7 @@
 
 #ifdef ACTION_MENU
 
-	//SEPARATOR
+	SEPARATOR
 	ITEM(11, "Attach viewport")
 	ITEM(31, "Detach viewport")
 	SEPARATOR
@@ -89,6 +89,11 @@
 		ITEM(2, "Set scroll speed")
 		SEPARATOR
 		ITEM(9, "Set wrapping")
+		SEPARATOR
+		SUB_START("Sub-layer links")
+			ITEM(68, "Set animation")
+			ITEM(69, "Set tileset")
+		SUB_END
 	SUB_END
 	SUB_START("Tiles")
 		ITEM(45, "Clear layer")
@@ -118,11 +123,25 @@
 	SUB_END
 	SUB_START("Sub-layers")
 		SUB_START("Add sub-layer...")
-			ITEM(48, "Simple")
-			ITEM(58, "Custom cell size & default value")
+			ITEM(48, "Byte")
+			ITEM(60, "Short")
+			ITEM(61, "Integer")
+			ITEM(68, "Float")
+			ITEM(63, "Custom")
+			SEPARATOR
+			SUB_START("With default value...")
+				ITEM(62, "Byte")
+				ITEM(58, "Custom")
+			SUB_END
 		SUB_END
 		SEPARATOR
-		ITEM(59, "Set cell")
+		ITEM(67, "Clear")
+		SEPARATOR
+		ITEM(59, "Set value")
+		ITEM(64, "Set value (float)")
+		SEPARATOR
+		ITEM(65, "Fill with value")
+		ITEM(66, "Fill with value (float)")
 		SEPARATOR
 		SUB_START("With cursor")
 			ITEM(49, "Fill with value")

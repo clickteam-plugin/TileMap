@@ -78,6 +78,32 @@ struct TILEMAP
 	
 };
 
+enum ANIMMODE
+{
+	AM_LOOP,
+	AM_PINGPONG,
+	AM_ONCE,
+	// ...
+};
+
+struct Animation
+{
+	// Tiles per tick/sec
+	double		speed;
+
+	// Whether to traverse columns before rows
+	bool		columnMajor;
+
+	// Width of the tile source box
+	unsigned	width;
+
+	// Height of the tile source box
+	unsigned	height;
+
+	// In what order to play the frames
+	ANIMMODE	mode;
+};
+
 struct TMAPVIEW
 {
 	headerObject	rHo;					// Header
@@ -114,6 +140,12 @@ struct TMAPVIEW
 	cSurface*		surface;
 	bool			accurateClip;
 
+	// Animation info table
+	DWORD			lastTick;
+	int				animMode;
+	double			animTime;
+	Animation		anim[255];
+
 	// Overlaps condition
 	Tileset*		cndTileset;
 	cSurface*		cndAlphaSurf;
@@ -124,35 +156,47 @@ struct TMAPVIEW
 	// Collision margin
 	RECT collMargin;
 
+	struct
+	{
+		// Configuration
+		bool			use;
+
+		// On layer
+		LayerSettings*	settings;
+
+		// Sub-layer linkage
+		struct
+		{
+			unsigned char tileset;
+			unsigned char scaleX;
+			unsigned char scaleY;
+			unsigned char angle;
+			unsigned char animation;
+
+		} link;
+
+		// Get-only
+		unsigned		index;
+
+	} layerCallback;
+
 	// Callback for rendering
 	struct
 	{
-		bool		use;
+		// Configuration
+		bool			use;
+		int				borderX;
+		int				borderY;
 
-		// Additional tile render border
-		int			borderX;
-		int			borderY;
+		// On tile
+		Tile*			tile;
+		TileSettings*	settings;
 
-		// Data that can be modified
-		bool		visible;
-		float		opacity;
-		int			offsetX;
-		int			offsetY;
-		Tile*		tile;
-		BYTE		tileset;
+		// Get-only
+		int				x;
+		int				y;
+	} tileCallback;
 
-		// HWA specific
-		COLORREF	tint;
-		bool		transform;
-		float		scaleX;
-		float		scaleY;
-		float		angle;
-
-		// Get-only (for now?)
-		int			x;
-		int			y;
-
-	}				callback;
 };
 
 typedef struct tagSURFACE

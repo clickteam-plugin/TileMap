@@ -3,17 +3,18 @@
 #include "SubLayer.h"
 #include "Property.h"
 
-class Layer
+struct SubLayerLink
 {
-	// Tile data
-	Tile*			data;
-	
-	// Tile count (map size)
-	unsigned		width;
-	unsigned		height;
+	unsigned char tileset;
+	unsigned char animation;
 
-public:
+	SubLayerLink() : tileset(0xff), animation(0xff)
+	{
+	}
+};
 
+struct LayerSettings
+{
 	// Scrolling offset in pixels
 	int				offsetX;
 	int				offsetY;
@@ -38,6 +39,30 @@ public:
 	unsigned short	tileWidth;
 	unsigned short	tileHeight;
 
+	// Sub-layer link indices
+	SubLayerLink	subLayerLink;
+
+	LayerSettings() : offsetX(0), offsetY(0), scrollX(1.0), scrollY(1.0), wrapX(false), wrapY(false),
+		visible(true), opacity(1.0), tileset(0), collision(-1),
+		tileWidth(16), tileHeight(16)
+	{
+	}
+};
+
+class Layer
+{
+	// Tile data
+	Tile*			data;
+	
+	// Tile count (map size)
+	unsigned		width;
+	unsigned		height;
+
+public:
+
+	// Modiyable layer settings
+	LayerSettings	settings;
+
 	// User properties
 	map<string, Property> properties;
 
@@ -45,32 +70,17 @@ public:
 	vector<SubLayer> subLayers;
 
 	// Constructor/destructor
-	Layer() : offsetX(0), offsetY(0), scrollX(1.0), scrollY(1.0), wrapX(false), wrapY(false),
-		visible(true), opacity(1.0), tileset(0), collision(-1),
-		tileWidth(16), tileHeight(16), width(0), height(0), data(0)
+	Layer()
+		:	width(0), height(0), data(0)
 	{
 	}
 
-	Layer(const Layer& src) : data(0)
+	Layer(const Layer& src)
+		:	data(0), settings(src.settings), width(src.width), height(src.height)
 	{
-		offsetX = src.offsetX;
-		offsetY = src.offsetY;
-		scrollX = src.scrollX;
-		scrollY = src.scrollY;
-		wrapX = src.wrapX;
-		wrapY = src.wrapY;
-		width = src.width;
-		height = src.height;
-		tileWidth = src.tileWidth;
-		tileHeight = src.tileHeight;
-		visible = src.visible;
-		opacity = src.opacity;
-		tileset = src.tileset;
-		collision = src.collision;
-
 		if (src.data)
 		{
-			data = new Tile[width * height];
+			data = new (std::nothrow) Tile[width * height];
 			if (!data)
 			{
 				width = 0;
@@ -94,7 +104,7 @@ public:
 	// Check if a layer is usable
 	inline bool isValid() const
 	{
-		return width > 0 && height > 0 && tileWidth > 0 && tileHeight > 0 && data != 0;
+		return width > 0 && height > 0 && data != 0;
 	}
 
 	// Check if a coordinate is valid
@@ -146,7 +156,7 @@ public:
 		}
 
 		// Allocate a new array
-		Tile* newData = new Tile[newWidth*newHeight];
+		Tile* newData = new (std::nothrow) Tile[newWidth * newHeight];
 		if (!newData)
 		{
 			width = 0;
@@ -155,7 +165,7 @@ public:
 		}
 
 		// Zero all tiles
-		memset(newData, 0xff, sizeof(Tile)*newWidth*newHeight);
+		memset(newData, 0xff, getByteSize());
 
 		// Copy old data
 		if (data)
@@ -169,7 +179,7 @@ public:
 			{
 				for (int y = 0; y < copyHeight; ++y)
 				{
-					newData[x+y*newWidth] = data[x+y*width];
+					newData[x + y * newWidth] = data[x + y * width];
 				}
 			}
 
@@ -187,12 +197,12 @@ public:
 	// For viewport rendering
 	inline int getScreenX(int cameraX)
 	{
-		return (int)((offsetX - cameraX) * scrollX);
+		return (int)((settings.offsetX - cameraX) * settings.scrollX);
 	}
 
 	// For viewport rendering
 	inline int getScreenY(int cameraY)
 	{
-		return (int)((offsetY - cameraY) * scrollY);
+		return (int)((settings.offsetY - cameraY) * settings.scrollY);
 	}
 };

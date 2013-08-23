@@ -153,14 +153,14 @@ short WINAPI DLLExport HandleRunObject(LPRDATA rdPtr)
 	if (rdPtr->redraw)
 	{
 		// Redraw all attached viewports
-		list<TMAPVIEW*>::iterator it;
-		for (it = rdPtr->viewports->begin(); it != rdPtr->viewports->end(); ++it)
-		{
-			if (((*it)->rHo.hoFlags & HOF_DESTROYED) == 0)
-				rdPtr->rRd->LPRO_Redraw((LPRO)*it);
-			else
-				rdPtr->viewports->erase(it++);
-		}
+		//list<TMAPVIEW*>::iterator it;
+		//for (it = rdPtr->viewports->begin(); it != rdPtr->viewports->end(); ++it)
+		//{
+		//	if (((*it)->rHo.hoFlags & HOF_DESTROYED) == 0)
+		//		rdPtr->rRd->LPRO_Redraw((LPRO)*it);
+		//	else
+		//		rdPtr->viewports->erase(it++);
+		//}
 
 		rdPtr->redraw = false;
 	}

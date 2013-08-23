@@ -44,7 +44,7 @@ public:
 
 		if (src.data)
 		{
-			if (data = new unsigned char[(width * height) << cellShift])
+			if (data = new (std::nothrow) unsigned char[(width * height) << cellShift])
 				memcpy(data, src.data, (width * height) << cellShift);
 		}
 	}
@@ -77,18 +77,26 @@ public:
 	}
 
 	// Get a tile within the layer array
-	inline unsigned char* getCell(unsigned int x, unsigned int y)
+	inline unsigned char* getCell(unsigned x, unsigned int y)
 	{
 		return data + ((x + width * y) << cellShift);
 	}
 
 	template <class T>
-	T* getCellAs(unsigned int x, unsigned int y)
+	inline void getCellSafe(unsigned x, unsigned y, T* target)
 	{
-		return reinterpret_cast<T*>(getCell(x, y));
+		unsigned maxSize = min(sizeof(*target), cellSize);
+
+		memcpy(target, getCell(x, y), maxSize);
 	}
 
-	inline void setCell(unsigned int x, unsigned int y, unsigned value)
+	template <class T>
+	T getCellAs(unsigned x, unsigned y)
+	{
+		return *reinterpret_cast<T*>(getCell(x, y));
+	}
+
+	inline void setCell(unsigned x, unsigned y, unsigned value)
 	{
 		memcpy(getCell(x, y), &value, cellSize);
 	}
@@ -130,7 +138,7 @@ public:
 		}
 
 		// Allocate a new array
-		unsigned char* newData = new unsigned char[(newWidth * newHeight) << cellShift];
+		unsigned char* newData = new (std::nothrow) unsigned char[(newWidth * newHeight) << cellShift];
 		if (!newData)
 		{
 			width = 0;

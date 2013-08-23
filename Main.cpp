@@ -79,8 +79,8 @@ ACTION(
 ) {
 	if (rdPtr->currentLayer)
 	{
-		rdPtr->currentLayer->tileWidth = (unsigned short)intParam();
-		rdPtr->currentLayer->tileHeight = (unsigned short)intParam();
+		rdPtr->currentLayer->settings.tileWidth = (unsigned short)intParam();
+		rdPtr->currentLayer->settings.tileHeight = (unsigned short)intParam();
 		rdPtr->redraw = true;
 	}
 }
@@ -115,8 +115,8 @@ ACTION(
 ) {
 	if (rdPtr->currentLayer)
 	{
-		rdPtr->currentLayer->scrollX = fltParam();
-		rdPtr->currentLayer->scrollY = fltParam();
+		rdPtr->currentLayer->settings.scrollX = fltParam();
+		rdPtr->currentLayer->settings.scrollY = fltParam();
 		rdPtr->redraw = true;
 	}
 }
@@ -246,8 +246,8 @@ ACTION(
 ) {
 	if (rdPtr->currentLayer)
 	{
-		rdPtr->currentLayer->wrapX = intParam() != 0;
-		rdPtr->currentLayer->wrapY = intParam() != 0;
+		rdPtr->currentLayer->settings.wrapX = intParam() != 0;
+		rdPtr->currentLayer->settings.wrapY = intParam() != 0;
 		rdPtr->redraw = true;
 	}
 }
@@ -260,8 +260,8 @@ ACTION(
 ) {
 	if (rdPtr->currentLayer)
 	{	
-		rdPtr->currentLayer->offsetX = (short)intParam();
-		rdPtr->currentLayer->offsetY = (short)intParam();
+		rdPtr->currentLayer->settings.offsetX = (short)intParam();
+		rdPtr->currentLayer->settings.offsetY = (short)intParam();
 		rdPtr->redraw = true;
 	}
 }
@@ -276,7 +276,7 @@ ACTION(
 
 	// Assign this Tile Map and redraw
 	o->p = rdPtr;
-	rdPtr->rRd->LPRO_Redraw((LPRO)o);
+	o->rc.rcChanged = true;
 
 	// Add to list
 	rdPtr->viewports->push_back(o);
@@ -302,85 +302,7 @@ ACTION(
 	PARAM_NUMBER,"Top-left tileset X", PARAM_NUMBER,"Top-left tileset Y", PARAM_NUMBER,"Bottom-right tileset X", PARAM_NUMBER,"Bottom-right tileset Y",
 	PARAM_NUMBER,"Method, add one of X (1: Wrap, 4: Repeat, 16: Box, 64: Random) and Y (2: Wrap, 8: Repeat, 32: Box, 128: Random)")
 ) {
-
-	//if (rdPtr->currentLayer)
-	//{
-	//	if (!rdPtr->currentLayer->isValid())
-	//		return;
-
-	//	int tlX = intParam();
-	//	int tlY = intParam();
-	//	int brX = intParam();
-	//	int brY = intParam();
-
-	//	//int tilesetID = intParam();
-
-	//	int x1 = intParam();
-	//	int y1 = intParam();
-	//	int x2 = intParam();
-	//	int y2 = intParam();
-
-	//	int method = intParam();
-
-	//	int width = rdPtr->currentLayer->getWidth();
-	//	int height = rdPtr->currentLayer->getHeight();
-
-	//	if (tlX < 0) tlX += width;
-	//	if (tlY < 0) tlY += height;
-	//	if (brX < 0) brX += width;
-	//	if (brY < 0) brY += height;
-
-	//	tlX = max(0, min(width-1, tlX));
-	//	brX = max(0, min(width-1, brX));
-	//	tlY = max(0, min(height-1, tlY));
-	//	brY = max(0, min(height-1, brY));
-
-	//	if (brX-tlX < 0 || brY-tlY < 0)
-	//		return;
-
-	//	Layer* layer = rdPtr->currentLayer;
-	//	for (int x = 0; x <= brX-tlX; ++x)
-	//	{
-	//		for (int y = 0; y <= brY-tlY; ++y)
-	//		{
-	//			Tile* tile = layer->getTile(tlX + x, tlY + y);
-	//			//tile->tileset = tilesetID + 1;
-	//		
-	//			// X method
-	//			switch(method & (1|4|16|64))
-	//			{
-	//			case 1: // Wrap
-	//				tile->x = x1 + ((x2-x1) ? (x % (x2-x1+1)) : 0); break;
-	//			case 4: // Repeat
-	//				tile->x = max(x1, min(x2, x1+x)); break;
-	//			case 16: // Box
-	//				tile->x = x1 + (x ? (1 + x/(brX-tlX)) : 0); break;
-	//			case 64: // Random
-	//				tile->x = x1 + ((x2-x1) ? (rand() % (x2-x1+1)) : 0); break;
-	//			default: // Undefined
-	//				tile->x = x1 + x;
-	//			}	
-
-	//			// Y method
-	//			switch(method & (2|8|32|128))
-	//			{
-	//			case 2: // Wrap
-	//				tile->y = y1 + ((y2-y1) ? (y % (y2-y1+1)) : 0); break;
-	//			case 8: // Repeat
-	//				tile->y = max(y1, min(y2, y1+y)); break;
-	//			case 32: // Box
-	//				tile->y = y1 + (y ? (1 + y/(brY-tlY)) : 0); break;
-	//			case 128: // Random
-	//				tile->y = y1 + ((y2-y1) ? (rand() % (y2-y1+1)) : 0); break;
-	//			default: // Undefined
-	//				tile->y = y1 + y;
-	//			}
-
-	//		}
-	//	}
-
-	//	rdPtr->redraw = true;
-	//}
+	// TODO: Replace
 }
 
 
@@ -435,12 +357,10 @@ ACTION(
 ) {
 	if (rdPtr->currentLayer)
 	{
-		rdPtr->currentLayer->collision = (unsigned char)intParam();
+		rdPtr->currentLayer->settings.collision = (unsigned char)intParam();
 		rdPtr->redraw = true;
 	}
 }
-
-
 
 ACTION(
 	/* ID */			16,
@@ -563,7 +483,7 @@ ACTION(
 ) {
 	if (rdPtr->currentLayer)
 	{
-		rdPtr->currentLayer->visible = intParam() != 0;
+		rdPtr->currentLayer->settings.visible = intParam() != 0;
 		rdPtr->redraw = true;
 	}
 }
@@ -576,8 +496,8 @@ ACTION(
 ) {
 	if (rdPtr->currentLayer)
 	{
-		rdPtr->currentLayer->opacity = fltParam();
-		rdPtr->currentLayer->opacity = max(0, min(1, rdPtr->currentLayer->opacity));
+		rdPtr->currentLayer->settings.opacity = fltParam();
+		rdPtr->currentLayer->settings.opacity = max(0, min(1, rdPtr->currentLayer->settings.opacity));
 		rdPtr->redraw = true;
 	}
 }
@@ -601,11 +521,12 @@ const unsigned MAP_ = ' PAM';
 const unsigned LAYR = 'RYAL';
 const unsigned MAIN = 'NIAM'; // LAYR sub-block: Main (tile data)
 const unsigned DATA = 'ATAD'; // LAYR sub-block: Data ("sub-layer")
+const short VER_14 = (1<<8) |4;
 const short VER_13 = (1<<8) | 3;
 const short VER_12 = (1<<8) | 2;
 const short VER_11 = (1<<8) | 1;
 const short VER_10 = (1<<8) | 0;
-const short VER = VER_13;
+const short VER = VER_14;
 
 ACTION(
 	/* ID */			21,
@@ -803,25 +724,29 @@ ACTION(
 
 							if (version >= VER_12)
 							{
-								file >> layer->tileWidth;
-								file >> layer->tileHeight;
+								file >> layer->settings.tileWidth;
+								file >> layer->settings.tileHeight;
 							}
 							else
 							{
-								layer->tileWidth = rdPtr->tileWidth;
-								layer->tileHeight = rdPtr->tileHeight;
+								layer->settings.tileWidth = rdPtr->tileWidth;
+								layer->settings.tileHeight = rdPtr->tileHeight;
 							}
 
-							file >> layer->tileset;
-							file >> layer->collision;
-							file >> layer->offsetX;
-							file >> layer->offsetY;
-							file >> layer->scrollX;
-							file >> layer->scrollY;
-							file >> layer->wrapX;
-							file >> layer->wrapY;
-							file >> layer->visible;
-							file >> layer->opacity;
+							file >> layer->settings.tileset;
+							file >> layer->settings.collision;
+							file >> layer->settings.offsetX;
+							file >> layer->settings.offsetY;
+							file >> layer->settings.scrollX;
+							file >> layer->settings.scrollY;
+							file >> layer->settings.wrapX;
+							file >> layer->settings.wrapY;
+							file >> layer->settings.visible;
+							file >> layer->settings.opacity;
+
+							// Sppecial sub-layer indices
+							if (version >= VER_14)
+								file >> layer->settings.subLayerLink;
 
 							// Get the number of data bocks
 							unsigned char dataBlockCount;
@@ -1014,13 +939,16 @@ ACTION(
 
 			// General settings
 			file << layer->getWidth() << layer->getHeight();
-			file << layer->tileWidth << layer->tileHeight;
-			file << layer->tileset << layer->collision;
-			file << layer->offsetX << layer->offsetY;
-			file << layer->scrollX << layer->scrollY;
-			file << layer->wrapX << layer->wrapY;
-			file << layer->visible;
-			file << layer->opacity;
+			file << layer->settings.tileWidth << layer->settings.tileHeight;
+			file << layer->settings.tileset << layer->settings.collision;
+			file << layer->settings.offsetX << layer->settings.offsetY;
+			file << layer->settings.scrollX << layer->settings.scrollY;
+			file << layer->settings.wrapX << layer->settings.wrapY;
+			file << layer->settings.visible;
+			file << layer->settings.opacity;
+
+			// Special sub-layer indices
+			file << layer->settings.subLayerLink;
 
 			// Number of data blocks
 			file.put(1 + layer->subLayers.size());
@@ -1191,8 +1119,8 @@ ACTION(
 ) {
 	rdPtr->layers->push_back(Layer());
 	rdPtr->currentLayer = &rdPtr->layers->back();
-	rdPtr->currentLayer->tileWidth = rdPtr->tileWidth;
-	rdPtr->currentLayer->tileHeight = rdPtr->tileHeight;
+	rdPtr->currentLayer->settings.tileWidth = rdPtr->tileWidth;
+	rdPtr->currentLayer->settings.tileHeight = rdPtr->tileHeight;
 	ActionFunc1(rdPtr, param1, param2);
 }
 
@@ -1381,7 +1309,7 @@ ACTION(
 ) {
 	if (rdPtr->currentLayer)
 	{
-		rdPtr->currentLayer->tileset = (unsigned char)intParam();
+		rdPtr->currentLayer->settings.tileset = (unsigned char)intParam();
 		rdPtr->redraw = true;
 	}
 }
@@ -1587,20 +1515,14 @@ ACTION(
 	rdPtr->cursor.height = y2 - y1;
 }
 
+short WINAPI DLLExport ActionFunc58(LPRDATA, long, long);
 ACTION(
 	/* ID */			48,
-	/* Name */			"Add sub-layer",
+	/* Name */			"Add byte sub-layer",
 	/* Flags */			0,
 	/* Params */		(0)
 ) {
-	if (rdPtr->currentLayer)
-	{
-		rdPtr->currentLayer->subLayers.push_back(SubLayer(1, 0));
-		rdPtr->currentLayer->subLayers.back().resize(
-			rdPtr->currentLayer->getWidth(),
-			rdPtr->currentLayer->getHeight()
-		);
-	}
+	ActionFunc58(rdPtr, 1, 0);
 }
 
 ACTION(
@@ -1742,7 +1664,7 @@ ACTION(
 	/* ID */			58,
 	/* Name */			"Add sub-layer with cell size %0 and default value %1",
 	/* Flags */			0,
-	/* Params */		(2, PARAM_NUMBER, "Cell size", PARAM_NUMBER, "Default value, used for new and blank tiles")
+	/* Params */		(2, PARAM_NUMBER,  "Cell size in bytes", PARAM_NUMBER, "Default value, used for new and blank tiles")
 ) {
 	if (rdPtr->currentLayer)
 	{
@@ -1756,7 +1678,7 @@ ACTION(
 
 ACTION(
 	/* ID */			59,
-	/* Name */			"Set sub-layer %0 cell at (%1, %2) to %3",
+	/* Name */			"Set sub-layer %0 value at (%1, %2) to %3",
 	/* Flags */			0,
 	/* Params */		(4, PARAM_NUMBER, "Sub-layer index", PARAM_NUMBER, "Cell X", PARAM_NUMBER, "Cell Y", PARAM_NUMBER, "Value")
 ) {
@@ -1774,6 +1696,154 @@ ACTION(
 		{
 			sub.setCell(x, y, value);
 		}
+	}
+}
+
+ACTION(
+	/* ID */			60,
+	/* Name */			"Add short sub-layer",
+	/* Flags */			0,
+	/* Params */		(0)
+) {
+	ActionFunc58(rdPtr, 2, 0);
+}
+
+ACTION(
+	/* ID */			61,
+	/* Name */			"Add integer sub-layer",
+	/* Flags */			0,
+	/* Params */		(0)
+) {
+	ActionFunc58(rdPtr, 4, 0);
+}
+
+ACTION(
+	/* ID */			62,
+	/* Name */			"Add byte sub-layer with default value %0",
+	/* Flags */			0,
+	/* Params */		(1, PARAM_NUMBER, "Default value, used for new and blank tiles")
+) {
+	ActionFunc58(rdPtr, 1, param1);
+}
+
+ACTION(
+	/* ID */			63,
+	/* Name */			"Add sub-layer with cell size %0",
+	/* Flags */			0,
+	/* Params */		(1, PARAM_NUMBER, "Cell size in bytes")
+) {
+	ActionFunc58(rdPtr, param1, 0);
+}
+
+ACTION(
+	/* ID */			64,
+	/* Name */			"Set sub-layer %0 value at (%1, %2) to float %3",
+	/* Flags */			0,
+	/* Params */		(4, PARAM_NUMBER, "Sub-layer index", PARAM_NUMBER, "Cell X", PARAM_NUMBER, "Cell Y", PARAM_NUMBER, "Float value")
+) {
+	unsigned s = intParam();
+	int x = intParam();
+	int y = intParam();
+	float value = fltParam();
+
+	Layer* layer = rdPtr->currentLayer;
+	if (layer && s < layer->subLayers.size())
+	{
+		SubLayer& sub = layer->subLayers[s];
+		
+		if (sub.isValid(x, y))
+		{
+			sub.setCell(x, y, *(unsigned int*)&value);
+		}
+	}
+}
+
+ACTION(
+	/* ID */			65,
+	/* Name */			"Fill sub-layer %0 with value %1",
+	/* Flags */			0,
+	/* Params */		(2, PARAM_NUMBER, "Sub-layer index", PARAM_NUMBER, "Value")
+) {
+	unsigned s = intParam();
+	int value = intParam();
+
+	Layer* layer = rdPtr->currentLayer;
+	if (layer && s < layer->subLayers.size())
+	{
+		SubLayer& sub = layer->subLayers[s];
+		
+		unsigned width = sub.getWidth(), height = sub.getHeight();
+		for (unsigned x = 0; x < width; ++x)
+			for (unsigned y = 0; y < height; ++y)
+				sub.setCell(x, y, value);
+	}
+}
+
+ACTION(
+	/* ID */			66,
+	/* Name */			"Fill sub-layer %0 with float value %1",
+	/* Flags */			0,
+	/* Params */		(2, PARAM_NUMBER, "Sub-layer index", PARAM_NUMBER, "Float value")
+) {
+	unsigned s = intParam();
+	float value = fltParam();
+
+	Layer* layer = rdPtr->currentLayer;
+	if (layer && s < layer->subLayers.size())
+	{
+		SubLayer& sub = layer->subLayers[s];
+		
+		unsigned width = sub.getWidth(), height = sub.getHeight();
+		for (unsigned x = 0; x < width; ++x)
+			for (unsigned y = 0; y < height; ++y)
+				sub.setCell(x, y, *(unsigned int*)&value);
+	}
+}
+
+ACTION(
+	/* ID */			67,
+	/* Name */			"Clear sub-layer %0",
+	/* Flags */			0,
+	/* Params */		(1, PARAM_NUMBER, "Sub-layer index")
+) {
+	unsigned s = intParam();
+
+	Layer* layer = rdPtr->currentLayer;
+	if (layer && s < layer->subLayers.size())
+	{
+		SubLayer& sub = layer->subLayers[s];
+		
+		unsigned width = sub.getWidth(), height = sub.getHeight();
+		unsigned value = sub.getDefaultValue();
+		for (unsigned x = 0; x < width; ++x)
+			for (unsigned y = 0; y < height; ++y)
+				sub.setCell(x, y, value);
+	}
+}
+
+ACTION(
+	/* ID */			68,
+	/* Name */			"Set layer animation link to %0",
+	/* Flags */			0,
+	/* Params */		(1, PARAM_NUMBER,"Animation sub-layer index (-1: None)")
+) {
+	if (rdPtr->currentLayer)
+	{
+		rdPtr->currentLayer->settings.subLayerLink.animation = (unsigned char)intParam();
+		rdPtr->redraw = true;
+	}
+}
+
+ACTION(
+	/* ID */			69,
+	/* Name */			"Set layer tileset link to %0",
+	/* Flags */			0,
+	/* Params */		(1, PARAM_NUMBER,"Tileset sub-layer index (-1: None)")
+) {
+	if (rdPtr->currentLayer)
+	{
+		rdPtr->currentLayer->settings.subLayerLink.tileset = (unsigned char)intParam();
+		rdPtr->redraw = true;
 	}
 }
 
@@ -1854,7 +1924,7 @@ EXPRESSION(
 	unsigned i = ExParam(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
-		return (*rdPtr->layers)[i].wrapX;
+		return (*rdPtr->layers)[i].settings.wrapX;
 	
 	return 0;
 }
@@ -1868,7 +1938,7 @@ EXPRESSION(
 	unsigned i = ExParam(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
-		return (*rdPtr->layers)[i].wrapY;
+		return (*rdPtr->layers)[i].settings.wrapY;
 	
 	return 0;
 }
@@ -1882,7 +1952,7 @@ EXPRESSION(
 	unsigned i = ExParam(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
-		return (*rdPtr->layers)[i].offsetX;
+		return (*rdPtr->layers)[i].settings.offsetX;
 	
 	return 0;
 }
@@ -1896,7 +1966,7 @@ EXPRESSION(
 	unsigned i = ExParam(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
-		return (*rdPtr->layers)[i].offsetY;
+		return (*rdPtr->layers)[i].settings.offsetY;
 	
 	return 0;
 }
@@ -1912,7 +1982,7 @@ EXPRESSION(
 	if (i < rdPtr->layers->size())
 	{
 		// Stupid macro that expands to TWO lines!
-		ReturnFloat((*rdPtr->layers)[i].scrollX);
+		ReturnFloat((*rdPtr->layers)[i].settings.scrollX);
 	}
 	
 	ReturnFloat(0);
@@ -1929,7 +1999,7 @@ EXPRESSION(
 	if (i < rdPtr->layers->size())
 	{
 		// Stupid macro that expands to TWO lines!
-		ReturnFloat((*rdPtr->layers)[i].scrollY);
+		ReturnFloat((*rdPtr->layers)[i].settings.scrollY);
 	}
 	
 	ReturnFloat(0);
@@ -1944,7 +2014,7 @@ EXPRESSION(
 	unsigned i = ExParam(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
-		return (*rdPtr->layers)[i].tileWidth;
+		return (*rdPtr->layers)[i].settings.tileWidth;
 	
 	return 0;
 }
@@ -1958,7 +2028,7 @@ EXPRESSION(
 	unsigned i = ExParam(TYPE_INT);
 
 	if (i < rdPtr->layers->size())
-		return (*rdPtr->layers)[i].tileHeight;
+		return (*rdPtr->layers)[i].settings.tileHeight;
 	
 	return 0;
 }
@@ -2229,7 +2299,7 @@ EXPRESSION(
 			{
 				SubLayer& subLayer = layer.subLayers[s];
 
-				return *subLayer.getCellAs<int>(x, y);
+				return subLayer.getCellAs<int>(x, y);
 			}
 		}
 	}
@@ -2260,7 +2330,7 @@ EXPRESSION(
 			{
 				SubLayer& subLayer = layer.subLayers[s];
 
-				return *subLayer.getCellAs<int>(x, y);
+				return subLayer.getCellAs<int>(x, y);
 			}
 		}
 	}
