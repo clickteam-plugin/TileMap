@@ -123,28 +123,29 @@
 	SUB_END
 	SUB_START("Sub-layers")
 		SUB_START("Add sub-layer...")
-			ITEM(48, "Byte")
-			ITEM(60, "Short")
-			ITEM(61, "Integer")
-			ITEM(68, "Float")
+			ITEM(48, "Small (one byte)")
+			ITEM(60, "Medium (two bytes)")
+			ITEM(61, "Large (four bytes)")
 			ITEM(63, "Custom")
 			SEPARATOR
 			SUB_START("With default value...")
-				ITEM(62, "Byte")
+				ITEM(62, "Small")
 				ITEM(58, "Custom")
 			SUB_END
 		SUB_END
 		SEPARATOR
 		ITEM(67, "Clear")
 		SEPARATOR
-		ITEM(59, "Set value")
-		ITEM(64, "Set value (float)")
 		SEPARATOR
-		ITEM(65, "Fill with value")
-		ITEM(66, "Fill with value (float)")
+		ITEM(59, "Set integer")
+		ITEM(64, "Set float")
+		SEPARATOR
+		ITEM(65, "Fill with integer")
+		ITEM(66, "Fill with float")
 		SEPARATOR
 		SUB_START("With cursor")
-			ITEM(49, "Fill with value")
+			ITEM(49, "Fill with integer")
+			ITEM(70, "Fill with float")
 		SUB_END
 	SUB_END
 	SEPARATOR

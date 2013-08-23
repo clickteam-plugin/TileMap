@@ -1001,8 +1001,8 @@ ACTION(
 	/* ID */			24,
 	/* Name */			"Fill layer area (%0, %1) => (%2, %3) with tile (%4, %5)",
 	/* Flags */			0,
-	/* Params */		(6, PARAM_NUMBER,"Top-left tile X (Negative numbers will wrap)", PARAM_NUMBER,"Top-left tile Y (Negative numbers will wrap)",
-	PARAM_NUMBER,"Bottom-right tile X (Negative numbers will wrap)", PARAM_NUMBER,"Bottom-right tile Y (Negative numbers will wrap)",
+	/* Params */		(6, PARAM_NUMBER,"Top-left tile X", PARAM_NUMBER,"Top-left tile Y",
+	PARAM_NUMBER,"Bottom-right tile X", PARAM_NUMBER,"Bottom-right tile Y",
 	 /*PARAM_NUMBER,"Tileset index (0-99, -1: Empty)",*/ PARAM_NUMBER,"Tileset X (-1: Empty)", PARAM_NUMBER,"Tileset Y (-1: Empty)")
 ) {
 
@@ -1023,15 +1023,13 @@ ACTION(
 		int width = rdPtr->currentLayer->getWidth();
 		int height = rdPtr->currentLayer->getHeight();
 
-		if (tlX < 0) tlX += width;
-		if (tlY < 0) tlY += height;
-		if (brX < 0) brX += width;
-		if (brY < 0) brY += height;
+		if (tlX >= width || tlY >= height || brX < 0 || brY < 0)
+			return;
 
-		tlX = max(0, min(width-1, tlX));
-		brX = max(0, min(width-1, brX));
-		tlY = max(0, min(height-1, tlY));
-		brY = max(0, min(height-1, brY));
+		tlX = max(0, tlX);
+		tlY = max(0, tlY);
+		brX = min(width-1, brX);
+		brY = min(height-1, brY);
 
 		if (brX-tlX < 0 || brY-tlY < 0)
 			return;
@@ -1191,11 +1189,14 @@ ACTION(
 		int x2 = x1 + width - 1;
 		int y2 = y1 + height - 1;
 
+		if (x1 >= (int)layerWidth || y1 >= (int)layerHeight || x2 < 0 || y2 < 0)
+			return;
+
 		// Limit area to layer data
-		x1 = max(0, min(layerWidth - 1, x1));
-		y1 = max(0, min(layerHeight - 1, y1));
-		x2 = max(0, min(layerWidth - 1, x2));
-		y2 = max(0, min(layerHeight - 1, y2));
+		x1 = max(0, x1);
+		y1 = max(0, y1);
+		x2 = min(layerWidth - 1, x2);
+		y2 = min(layerHeight - 1, y2);
 
 		// Get tile range and pattern
 		TileRange tiles = rdPtr->cursor.tiles;
@@ -1518,7 +1519,7 @@ ACTION(
 short WINAPI DLLExport ActionFunc58(LPRDATA, long, long);
 ACTION(
 	/* ID */			48,
-	/* Name */			"Add byte sub-layer",
+	/* Name */			"Add small sub-layer",
 	/* Flags */			0,
 	/* Params */		(0)
 ) {
@@ -1550,22 +1551,27 @@ ACTION(
 		int x1 = rdPtr->cursor.x;
 		int y1 = rdPtr->cursor.y;
 
+		if (x1 >= (int)layerWidth || y1 >= (int)layerHeight)
+			return;
+
 		// Rectangular area
 		int x2 = x1 + width-1;
 		int y2 = y1 + height-1;
 
-		// Limit area to layer data
-		x1 = max(0, min(layerWidth-1, x1));
-		y1 = max(0, min(layerHeight-1, y1));
-		x2 = max(0, min(layerWidth-1, x2));
-		y2 = max(0, min(layerHeight-1, y2));
+		if (x2 < 0 || y2 < 0)
+			return;
 
-		unsigned cellSize = sub.getCellSize();
+		// Limit area to layer data
+		x1 = max(0, x1);
+		y1 = max(0, y1);
+		x2 = min(layerWidth-1, x2);
+		y2 = min(layerHeight-1, y2);
+
 		for (int x = 0; x <= x2-x1; ++x)
 		{
 			for (int y = 0; y <= y2-y1; ++y)
 			{
-				memcpy(sub.getCell(x+x1, y+y1), &value, cellSize);
+				sub.setCell(x+x1, y+y1, value);
 			}
 		}
 	}
@@ -1701,7 +1707,7 @@ ACTION(
 
 ACTION(
 	/* ID */			60,
-	/* Name */			"Add short sub-layer",
+	/* Name */			"Add medium sub-layer",
 	/* Flags */			0,
 	/* Params */		(0)
 ) {
@@ -1710,7 +1716,7 @@ ACTION(
 
 ACTION(
 	/* ID */			61,
-	/* Name */			"Add integer sub-layer",
+	/* Name */			"Add large sub-layer",
 	/* Flags */			0,
 	/* Params */		(0)
 ) {
@@ -1719,7 +1725,7 @@ ACTION(
 
 ACTION(
 	/* ID */			62,
-	/* Name */			"Add byte sub-layer with default value %0",
+	/* Name */			"Add small sub-layer with default value %0",
 	/* Flags */			0,
 	/* Params */		(1, PARAM_NUMBER, "Default value, used for new and blank tiles")
 ) {
@@ -1730,7 +1736,7 @@ ACTION(
 	/* ID */			63,
 	/* Name */			"Add sub-layer with cell size %0",
 	/* Flags */			0,
-	/* Params */		(1, PARAM_NUMBER, "Cell size in bytes")
+	/* Params */		(1, PARAM_NUMBER, "Cell size in bytes (E.g. 1: Small, 2: Medium, 4: Large)")
 ) {
 	ActionFunc58(rdPtr, param1, 0);
 }
@@ -1845,6 +1851,17 @@ ACTION(
 		rdPtr->currentLayer->settings.subLayerLink.tileset = (unsigned char)intParam();
 		rdPtr->redraw = true;
 	}
+}
+
+ACTION(
+	/* ID */			70,
+	/* Name */			"Fill sub-layer %0 cells at cursor with %1",
+	/* Flags */			0,
+	/* Params */		(2, PARAM_NUMBER, "Sub-layer index", PARAM_NUMBER, "Value")
+) {
+	int i = intParam();
+	float value = fltParam();
+	ActionFunc49(rdPtr, i, *(int*)&value);
 }
 
 // ============================================================================
