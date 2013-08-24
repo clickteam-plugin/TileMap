@@ -1103,6 +1103,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\Helpers.h"
+				>
+			</File>
+			<File
 				RelativePath=".\HWASurface.h"
 				>
 			</File>

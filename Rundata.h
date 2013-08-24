@@ -12,6 +12,28 @@ typedef rRundata * LPRRDATA;
 #include "Tile.h"
 #include "Layer.h"
 
+// Simple rect structure with shorter member names than Windows' LEFT, BOTTOM, etc.... jeez
+struct Rect
+{
+	int x1, y1, x2, y2;
+
+	void moveBy(int x, int y)
+	{
+		x1 += x;
+		y1 += y;
+		x2 += x;
+		y2 += y;
+	}
+
+	void moveTo(int x, int y)
+	{
+		x2 += x - x1;
+		y2 += y - y1;
+		x1 = x;
+		y1 = y;
+	}
+};
+
 // Tileset path mode
 enum TSPMODE
 {
