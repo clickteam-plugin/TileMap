@@ -61,6 +61,74 @@ CONDITION(
 	return true;
 }
 
+CONDITION(
+	/* ID */			5,
+	/* Name */			"%o: Layer %0 tile (%1, %2) tileset X %3",
+	/* Flags */			EVFLAGS_ALWAYS,
+	/* Params */		(4, PARAM_NUMBER, "Layer index", PARAM_NUMBER, "Tile X", PARAM_NUMBER, "Tile Y", PARAM_COMPARISON, "Tileset ID")
+) {
+	unsigned i = intParam();
+	unsigned x = intParam();
+	unsigned y = intParam();
+
+	if (i < rdPtr->layers->size())
+	{
+		Layer& layer = (*rdPtr->layers)[i];
+
+		if (layer.isValid(x, y))
+		{
+			int value = layer.getTile(x, y)->x;
+			return value == 0xff ? -1 : value;
+		}
+	}
+	
+	return -1;
+}
+
+CONDITION(
+	/* ID */			6,
+	/* Name */			"%o: Layer %0 tile (%1, %2) tileset Y %3",
+	/* Flags */			EVFLAGS_ALWAYS,
+	/* Params */		(4, PARAM_NUMBER, "Layer index", PARAM_NUMBER, "Tile X", PARAM_NUMBER, "Tile Y", PARAM_COMPARISON, "Tileset ID")
+) {
+	unsigned i = intParam();
+	unsigned x = intParam();
+	unsigned y = intParam();
+
+	if (i < rdPtr->layers->size())
+	{
+		Layer& layer = (*rdPtr->layers)[i];
+
+		if (layer.isValid(x, y))
+		{
+			int value = layer.getTile(x, y)->y;
+			return value == 0xff ? -1 : value;
+		}
+	}
+	
+	return -1;
+}
+
+CONDITION(
+	/* ID */			7,
+	/* Name */			"%o: Layer %0 tile (%1, %2) ID %3",
+	/* Flags */			EVFLAGS_ALWAYS,
+	/* Params */		(4, PARAM_NUMBER, "Layer index", PARAM_NUMBER, "Tile X", PARAM_NUMBER, "Tile Y", PARAM_COMPARISON, "Tileset ID")
+) {
+	unsigned i = intParam();
+	unsigned x = intParam();
+	unsigned y = intParam();
+
+	if (i < rdPtr->layers->size())
+	{
+		Layer& layer = (*rdPtr->layers)[i];
+
+		if (layer.isValid(x, y))
+			return layer.getTile(x, y)->id;
+	}
+
+	return Tile::EMPTY;
+}
 
 // ============================================================================
 //
@@ -212,10 +280,10 @@ ACTION(
 		unsigned char tileX = (unsigned char)intParam();
 		unsigned char tileY = (unsigned char)intParam();
 
-		Layer* layer = rdPtr->currentLayer;
-		if (layer->isValid(x, y))
+		Layer& layer = *rdPtr->currentLayer;
+		if (layer.isValid(x, y))
 		{
-			Tile* tile = layer->getTile(x, y);
+			Tile* tile = layer.getTile(x, y);
 			tile->x = tileX;
 			tile->y = tileY;
 		}
@@ -368,9 +436,10 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(2, PARAM_OBJECT,"Surface", PARAM_NUMBER,"Image index")
 ) {
-	Layer* layer = rdPtr->currentLayer;
-	if (layer && layer->isValid())
+	if (rdPtr->currentLayer && rdPtr->currentLayer->isValid())
 	{
+		Layer& layer = *rdPtr->currentLayer;
+
 		SURFACE* surface = (SURFACE*)param1;
 		int id = param2;
 
@@ -382,8 +451,8 @@ ACTION(
 			return;
 
 		// Get layer size
-		int layerWidth = layer->getWidth();
-		int layerHeight = layer->getHeight();
+		int layerWidth = layer.getWidth();
+		int layerHeight = layer.getHeight();
 
 		// Get cursor size
 		unsigned width = rdPtr->cursor.width;
@@ -404,7 +473,7 @@ ACTION(
 		{
 			for (int y = 0; y < y2-y1; ++y)
 			{
-				Tile* tile = layer->getTile(x+x1, y+y1);
+				Tile* tile = layer.getTile(x+x1, y+y1);
 
 				COLORREF color = 0;
 				color |= tile->x; // X = red
@@ -425,9 +494,10 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(2, PARAM_OBJECT,"Surface", PARAM_NUMBER,"Image index")
 ) {
-	Layer* layer = rdPtr->currentLayer;
-	if (layer && layer->isValid())
+	if (rdPtr->currentLayer && rdPtr->currentLayer->isValid())
 	{
+		Layer& layer = *rdPtr->currentLayer;
+
 		SURFACE* surface = (SURFACE*)param1;
 		int id = param2;
 
@@ -439,8 +509,8 @@ ACTION(
 			return;
 
 		// Get layer size
-		int layerWidth = layer->getWidth();
-		int layerHeight = layer->getHeight();
+		int layerWidth = layer.getWidth();
+		int layerHeight = layer.getHeight();
 
 		// Get cursor size
 		unsigned width = rdPtr->cursor.width;
@@ -461,7 +531,7 @@ ACTION(
 		{
 			for (int y = 0; y < y2-y1; ++y)
 			{
-				Tile* tile = layer->getTile(x+x1, y+y1);
+				Tile* tile = layer.getTile(x+x1, y+y1);
 
 				COLORREF color = 0;
 				image->GetPixel(x, y, color);
@@ -721,7 +791,7 @@ ACTION(
 						{
 
 							rdPtr->layers->push_back(Layer());
-							Layer* layer = &rdPtr->layers->back();
+							Layer& layer = rdPtr->layers->back();
 
 							// Read settings
 							unsigned width = 0, height = 0;
@@ -730,29 +800,29 @@ ACTION(
 
 							if (version >= VER_12)
 							{
-								file >> layer->settings.tileWidth;
-								file >> layer->settings.tileHeight;
+								file >> layer.settings.tileWidth;
+								file >> layer.settings.tileHeight;
 							}
 							else
 							{
-								layer->settings.tileWidth = rdPtr->tileWidth;
-								layer->settings.tileHeight = rdPtr->tileHeight;
+								layer.settings.tileWidth = rdPtr->tileWidth;
+								layer.settings.tileHeight = rdPtr->tileHeight;
 							}
 
-							file >> layer->settings.tileset;
-							file >> layer->settings.collision;
-							file >> layer->settings.offsetX;
-							file >> layer->settings.offsetY;
-							file >> layer->settings.scrollX;
-							file >> layer->settings.scrollY;
-							file >> layer->settings.wrapX;
-							file >> layer->settings.wrapY;
-							file >> layer->settings.visible;
-							file >> layer->settings.opacity;
+							file >> layer.settings.tileset;
+							file >> layer.settings.collision;
+							file >> layer.settings.offsetX;
+							file >> layer.settings.offsetY;
+							file >> layer.settings.scrollX;
+							file >> layer.settings.scrollY;
+							file >> layer.settings.wrapX;
+							file >> layer.settings.wrapY;
+							file >> layer.settings.visible;
+							file >> layer.settings.opacity;
 
 							// Sppecial sub-layer indices
 							if (version >= VER_14)
-								file >> layer->settings.subLayerLink;
+								file >> layer.settings.subLayerLink;
 
 							// Get the number of data bocks
 							unsigned char dataBlockCount = 0;
@@ -773,13 +843,13 @@ ACTION(
 									case MAIN:
 
 										// Try to allocate an array to hold the data
-										layer->resize(width, height);
+										layer.resize(width, height);
 
 										// Allocation succeeded, assign data pointer
-										if (layer->isValid())
+										if (layer.isValid())
 										{
-											destination = (char*)layer->getDataPointer();
-											size = layer->getByteSize();
+											destination = (char*)layer.getDataPointer();
+											size = layer.getByteSize();
 										}
 
 										break;
@@ -793,8 +863,8 @@ ACTION(
 										file >> defaultValue;
 
 										// Add new sub-layer
-										layer->subLayers.push_back(SubLayer(cellSize, defaultValue));
-										SubLayer& subLayer = layer->subLayers.back();
+										layer.subLayers.push_back(SubLayer(cellSize, defaultValue));
+										SubLayer& subLayer = layer.subLayers.back();
 
 										subLayer.resize(width, height);
 
@@ -941,32 +1011,32 @@ ACTION(
 
 		for (unsigned i = 0; i < layerCount; ++i)
 		{
-			Layer* layer = &(*rdPtr->layers)[i];
+			Layer& layer = (*rdPtr->layers)[i];
 
 			// General settings
-			file << layer->getWidth() << layer->getHeight();
-			file << layer->settings.tileWidth << layer->settings.tileHeight;
-			file << layer->settings.tileset << layer->settings.collision;
-			file << layer->settings.offsetX << layer->settings.offsetY;
-			file << layer->settings.scrollX << layer->settings.scrollY;
-			file << layer->settings.wrapX << layer->settings.wrapY;
-			file << layer->settings.visible;
-			file << layer->settings.opacity;
+			file << layer.getWidth() << layer.getHeight();
+			file << layer.settings.tileWidth << layer.settings.tileHeight;
+			file << layer.settings.tileset << layer.settings.collision;
+			file << layer.settings.offsetX << layer.settings.offsetY;
+			file << layer.settings.scrollX << layer.settings.scrollY;
+			file << layer.settings.wrapX << layer.settings.wrapY;
+			file << layer.settings.visible;
+			file << layer.settings.opacity;
 
 			// Special sub-layer indices
-			file << layer->settings.subLayerLink;
+			file << layer.settings.subLayerLink;
 
 			// Number of data blocks
-			file.put(1 + layer->subLayers.size());
+			file.put(1 + layer.subLayers.size());
 
 			// Main block (tiles)
 			file << MAIN;
-			file.writeCompressedData((unsigned char*)layer->getDataPointer(), layer->getByteSize());
+			file.writeCompressedData((unsigned char*)layer.getDataPointer(), layer.getByteSize());
 
 			// Sub blocks
-			for (unsigned s = 0; s < layer->subLayers.size(); ++s)
+			for (unsigned s = 0; s < layer.subLayers.size(); ++s)
 			{
-				SubLayer& subLayer = layer->subLayers[s];
+				SubLayer& subLayer = layer.subLayers[s];
 				file << DATA;
 				file << subLayer.getCellSize();
 				file << subLayer.getDefaultValue();
@@ -991,10 +1061,10 @@ ACTION(
 		unsigned x = intParam();
 		unsigned y = intParam();
 
-		Layer* layer = rdPtr->currentLayer;
-		if (layer->isValid(x, y))
+		Layer& layer = *rdPtr->currentLayer;
+		if (layer.isValid(x, y))
 		{
-			Tile* tile = layer->getTile(x, y);
+			Tile* tile = layer.getTile(x, y);
 			tile->id = Tile::EMPTY;
 
 			rdPtr->redraw = true;
@@ -1040,12 +1110,12 @@ ACTION(
 		if (brX-tlX < 0 || brY-tlY < 0)
 			return;
 
-		Layer* layer = rdPtr->currentLayer;
+		Layer& layer = *rdPtr->currentLayer;
 		for (int x = 0; x <= brX-tlX; ++x)
 		{
 			for (int y = 0; y <= brY-tlY; ++y)
 			{
-				Tile* tile = layer->getTile(tlX + x, tlY + y);
+				Tile* tile = layer.getTile(tlX + x, tlY + y);
 				tile->x = tileX;
 				tile->y = tileY;
 			}
@@ -1164,12 +1234,13 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(2, PARAM_NUMBER, "Tile X", PARAM_NUMBER, "Tile Y")
 ) {
-	Layer* layer = rdPtr->currentLayer;
-	if (layer && layer->isValid())
+	if (rdPtr->currentLayer && rdPtr->currentLayer->isValid())
 	{
+		Layer& layer = *rdPtr->currentLayer;
+
 		// Get layer size
-		int layerWidth = layer->getWidth();
-		int layerHeight = layer->getHeight();
+		int layerWidth = layer.getWidth();
+		int layerHeight = layer.getHeight();
 
 		// Get cursor size
 		unsigned width = rdPtr->cursor.width;
@@ -1181,9 +1252,9 @@ ACTION(
 		// Single tile, avoid loop
 		if (width == 1 && height == 1)
 		{
-			if (layer->isValid(x1, y1))
+			if (layer.isValid(x1, y1))
 			{
-				Tile* tile = layer->getTile(x1, y1);
+				Tile* tile = layer.getTile(x1, y1);
 				tile->x = rdPtr->cursor.tiles.a.x;
 				tile->y = rdPtr->cursor.tiles.b.y;
 			}
@@ -1214,7 +1285,7 @@ ACTION(
 		{
 			for (int y = 0; y <= y2-y1; ++y)
 			{
-				Tile* tile = layer->getTile(x + x1, y + y1);
+				Tile* tile = layer.getTile(x + x1, y + y1);
 
 				// X value
 				if (tiles.b.x - tiles.a.x)
@@ -1329,12 +1400,13 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(2,PARAM_NUMBER,"Tile X",PARAM_NUMBER,"Tile Y")
 ) {
-	Layer* layer = rdPtr->currentLayer;
-	if (layer && layer->isValid())
+	if (rdPtr->currentLayer && rdPtr->currentLayer->isValid())
 	{
+		Layer& layer = *rdPtr->currentLayer;
+
 		// Get layer size
-		int layerWidth = layer->getWidth();
-		int layerHeight = layer->getHeight();
+		int layerWidth = layer.getWidth();
+		int layerHeight = layer.getHeight();
 
 		// Get cursor size
 		unsigned width = rdPtr->cursor.width;
@@ -1362,8 +1434,8 @@ ACTION(
 		{
 			for (int y = 0; y < y2-y1; ++y)
 			{
-				Tile* tile = layer->getTile(x+x1, y+y1);
-				Tile* src = layer->getTile(x+srcX, y+srcY);
+				Tile* tile = layer.getTile(x+x1, y+y1);
+				Tile* src = layer.getTile(x+srcX, y+srcY);
 				tile->x = src->x;
 				tile->y = src->y;
 			}
@@ -1482,14 +1554,14 @@ ACTION(
 		int tileX = intParam();
 		int tileY = intParam();
 
-		Layer* layer = rdPtr->currentLayer;
-		int width = layer->getWidth();
-		int height = layer->getHeight();
+		Layer& layer = *rdPtr->currentLayer;
+		int width = layer.getWidth();
+		int height = layer.getHeight();
 		for (int x = 0; x < width; ++x)
 		{
 			for (int y = 0; y < height; ++y)
 			{
-				Tile* tile = layer->getTile(x, y);
+				Tile* tile = layer.getTile(x, y);
 				tile->x = tileX;
 				tile->y = tileY;
 			}
@@ -1767,6 +1839,7 @@ ACTION(
 		if (sub.isValid(x, y))
 		{
 			sub.setCell(x, y, *(unsigned int*)&value);
+			rdPtr->redraw = true;
 		}
 	}
 }
@@ -1789,6 +1862,8 @@ ACTION(
 		for (unsigned x = 0; x < width; ++x)
 			for (unsigned y = 0; y < height; ++y)
 				sub.setCell(x, y, value);
+
+		rdPtr->redraw = true;
 	}
 }
 
@@ -1810,6 +1885,8 @@ ACTION(
 		for (unsigned x = 0; x < width; ++x)
 			for (unsigned y = 0; y < height; ++y)
 				sub.setCell(x, y, *(unsigned int*)&value);
+
+		rdPtr->redraw = true;
 	}
 }
 
@@ -1831,6 +1908,8 @@ ACTION(
 		for (unsigned x = 0; x < width; ++x)
 			for (unsigned y = 0; y < height; ++y)
 				sub.setCell(x, y, value);
+
+		rdPtr->redraw = true;
 	}
 }
 
@@ -2069,11 +2148,11 @@ EXPRESSION(
 
 	if (i < rdPtr->layers->size())
 	{
-		Layer* layer = &(*rdPtr->layers)[i];
+		Layer& layer = (*rdPtr->layers)[i];
 
-		if (x < layer->getWidth() && y < layer->getHeight())
+		if (layer.isValid(x, y))
 		{
-			int value = layer->getTile(x, y)->x;
+			int value = layer.getTile(x, y)->x;
 			return value == 0xff ? -1 : value;
 		}
 	}
@@ -2093,11 +2172,11 @@ EXPRESSION(
 
 	if (i < rdPtr->layers->size())
 	{
-		Layer* layer = &(*rdPtr->layers)[i];
+		Layer& layer = (*rdPtr->layers)[i];
 
-		if (x < layer->getWidth() && y < layer->getHeight())
+		if (layer.isValid(x, y))
 		{
-			int value = layer->getTile(x, y)->y;
+			int value = layer.getTile(x, y)->y;
 			return value == 0xff ? -1 : value;
 		}
 	}
@@ -2117,11 +2196,11 @@ EXPRESSION(
 
 	if (i < rdPtr->layers->size())
 	{
-		Layer* layer = &(*rdPtr->layers)[i];
+		Layer& layer = (*rdPtr->layers)[i];
 
-		if (x < layer->getWidth() && y < layer->getHeight())
+		if (layer.isValid(x, y))
 		{
-			Tile* tile = layer->getTile(x, y);
+			Tile* tile = layer.getTile(x, y);
 			return 1000*tile->x + tile->y;
 		}
 	}
@@ -2159,10 +2238,10 @@ EXPRESSION(
 
 	if (i < rdPtr->layers->size())
 	{
-		Layer* layer = &(*rdPtr->layers)[i];
+		Layer& layer = (*rdPtr->layers)[i];
 
-		if (x < layer->getWidth() && y < layer->getHeight())
-			return layer->getTile(x, y)->id;
+		if (layer.isValid(x, y))
+			return layer.getTile(x, y)->id;
 	}
 	
 	return Tile::EMPTY;

@@ -4,13 +4,22 @@
 
 #ifdef CONDITION_MENU
 
-	ITEM(0, "File loaded")
-	ITEM(2, "Loading file failed")
+	SUB_START("Input/Output")
+		ITEM(0, "File loaded")
+		ITEM(2, "Loading file failed")
+		SEPARATOR
+		ITEM(1, "File saved")
+		ITEM(3, "Saving file failed")
+	SUB_END
+	SUB_START("Properties")
+		ITEM(4, "On map property")
+	SUB_END
 	SEPARATOR
-	ITEM(1, "File saved")
-	ITEM(3, "Saving file failed")
-	SEPARATOR
-	ITEM(4, "On map property")
+	SUB_START("Layer")
+		ITEM(5, "Compare to tile X")
+		ITEM(6, "Compare to tile Y")
+		ITEM(7, "Compare to tile ID")
+	SUB_END
 
 	
 #endif
