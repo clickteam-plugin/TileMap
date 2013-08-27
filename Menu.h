@@ -14,12 +14,12 @@
 	SUB_START("Properties")
 		ITEM(4, "On map property")
 	SUB_END
-	SEPARATOR
-	SUB_START("Layer")
-		ITEM(5, "Compare to tile X")
-		ITEM(6, "Compare to tile Y")
-		ITEM(7, "Compare to tile ID")
-	SUB_END
+	//SEPARATOR
+	//SUB_START("Layer")
+	//	ITEM(5, "Compare to tile X")
+	//	ITEM(6, "Compare to tile Y")
+	//	ITEM(7, "Compare to tile ID")
+	//SUB_END
 
 	
 #endif
@@ -100,7 +100,9 @@
 		ITEM(9, "Set wrapping")
 		SEPARATOR
 		SUB_START("Sub-layer links")
-			ITEM(68, "Set animation")
+			ITEM(68, "Set animation index")
+			ITEM(72, "Set animation frame offset")
+			SEPARATOR
 			ITEM(69, "Set tileset")
 		SUB_END
 	SUB_END
@@ -150,6 +152,8 @@
 		SEPARATOR
 		ITEM(65, "Fill with integer")
 		ITEM(66, "Fill with float")
+		SEPARATOR
+		ITEM(71, "Randomize")
 		SEPARATOR
 		SUB_START("With cursor")
 			ITEM(49, "Fill with integer")

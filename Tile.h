@@ -40,4 +40,12 @@ struct TileRange
 {
 	Tile a;
 	Tile b;
+
+	bool isWithin(const Tile& tile) const
+	{
+		return tile.x >= a.x
+			&& tile.y >= a.y
+			&& tile.x <= b.x
+			&& tile.y <= b.y;
+	}
 };

@@ -126,6 +126,21 @@ struct Animation
 	ANIMMODE	mode;
 };
 
+enum OFTYPE
+{
+	OFT_SUBLAYER,
+	OFT_TILESETX,
+	OFT_TILESETY,
+	OFT_TILESETRANGE,
+};
+
+struct OVERLAPFLT
+{
+	OFTYPE		type;
+	unsigned	param;
+	int			value;
+};
+
 struct TMAPVIEW
 {
 	headerObject	rHo;					// Header
@@ -176,7 +191,12 @@ struct TMAPVIEW
 	Tile			collTile;
 
 	// Collision margin
-	RECT collMargin;
+	RECT			collMargin;
+
+	// Overlap condition filter
+	OVERLAPFLT		ovlpFilters[8];
+	unsigned		ovlpFilterCount;
+	const SubLayer*	sublayerCache[16];
 
 	struct
 	{

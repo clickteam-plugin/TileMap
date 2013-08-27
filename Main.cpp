@@ -591,12 +591,13 @@ const unsigned MAP_ = ' PAM';
 const unsigned LAYR = 'RYAL';
 const unsigned MAIN = 'NIAM'; // LAYR sub-block: Main (tile data)
 const unsigned DATA = 'ATAD'; // LAYR sub-block: Data ("sub-layer")
+const short VER_15 = (1<<8) | 5;
 const short VER_14 = (1<<8) | 4;
 const short VER_13 = (1<<8) | 3;
 const short VER_12 = (1<<8) | 2;
 const short VER_11 = (1<<8) | 1;
 const short VER_10 = (1<<8) | 0;
-const short VER = VER_14;
+const short VER = VER_15;
 
 ACTION(
 	/* ID */			21,
@@ -821,8 +822,15 @@ ACTION(
 							file >> layer.settings.opacity;
 
 							// Sppecial sub-layer indices
-							if (version >= VER_14)
+							if (version == VER_14)
+							{
+								file >> layer.settings.subLayerLink.tileset;
+								file >> layer.settings.subLayerLink.animation;
+							}
+							else if (version == VER_15)
+							{
 								file >> layer.settings.subLayerLink;
+							}
 
 							// Get the number of data bocks
 							unsigned char dataBlockCount = 0;
@@ -1915,7 +1923,7 @@ ACTION(
 
 ACTION(
 	/* ID */			68,
-	/* Name */			"Set layer animation link to %0",
+	/* Name */			"Link animation index to sub-layer %0",
 	/* Flags */			0,
 	/* Params */		(1, PARAM_NUMBER,"Animation sub-layer index (-1: None)")
 ) {
@@ -1928,7 +1936,7 @@ ACTION(
 
 ACTION(
 	/* ID */			69,
-	/* Name */			"Set layer tileset link to %0",
+	/* Name */			"Link tileset index to sub-layer %0",
 	/* Flags */			0,
 	/* Params */		(1, PARAM_NUMBER,"Tileset sub-layer index (-1: None)")
 ) {
@@ -1948,6 +1956,44 @@ ACTION(
 	int i = intParam();
 	float value = fltParam();
 	ActionFunc49(rdPtr, i, *(int*)&value);
+}
+
+ACTION(
+	/* ID */			71,
+	/* Name */			"Randomize sub-layer %0 with range [%1,%2]",
+	/* Flags */			0,
+	/* Params */		(3, PARAM_NUMBER, "Sub-layer index", PARAM_NUMBER, "Inclusive minimum", PARAM_NUMBER, "Inclusive maximum")
+) {
+	unsigned s = intParam();
+	int mi = intParam();
+	int ma = intParam();
+	int size = max(1, ma - mi + 1);
+
+	Layer* layer = rdPtr->currentLayer;
+	if (layer && s < layer->subLayers.size())
+	{
+		SubLayer& sub = layer->subLayers[s];
+		
+		unsigned width = sub.getWidth(), height = sub.getHeight();
+		for (unsigned x = 0; x < width; ++x)
+			for (unsigned y = 0; y < height; ++y)
+				sub.setCell(x, y, mi + rand() % size);
+
+		rdPtr->redraw = true;
+	}
+}
+
+ACTION(
+	/* ID */			72,
+	/* Name */			"Link anim frame offset to sub-layer %0",
+	/* Flags */			0,
+	/* Params */		(1, PARAM_NUMBER,"Animation frame offset sub-layer index (-1: None)")
+) {
+	if (rdPtr->currentLayer)
+	{
+		rdPtr->currentLayer->settings.subLayerLink.animationFrame = (unsigned char)intParam();
+		rdPtr->redraw = true;
+	}
 }
 
 // ============================================================================
@@ -2201,7 +2247,9 @@ EXPRESSION(
 		if (layer.isValid(x, y))
 		{
 			Tile* tile = layer.getTile(x, y);
-			return 1000*tile->x + tile->y;
+
+			if (tile->id != Tile::EMPTY)
+				return 1000*tile->x + tile->y;
 		}
 	}
 	
@@ -2244,7 +2292,7 @@ EXPRESSION(
 			return layer.getTile(x, y)->id;
 	}
 	
-	return Tile::EMPTY;
+	return -1;
 }
 
 EXPRESSION(

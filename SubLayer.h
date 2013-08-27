@@ -77,13 +77,13 @@ public:
 	}
 
 	// Get a tile within the layer array
-	inline unsigned char* getCell(unsigned x, unsigned int y)
+	inline unsigned char* getCell(unsigned x, unsigned int y) const
 	{
 		return data + ((x + width * y) << cellShift);
 	}
 
 	template <class T>
-	inline void getCellSafe(unsigned x, unsigned y, T* target)
+	inline void getCellSafe(unsigned x, unsigned y, T* target) const
 	{
 		unsigned maxSize = min(sizeof(*target), cellSize);
 

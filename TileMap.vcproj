@@ -983,6 +983,10 @@
 			Filter="h;hpp;hxx;hm;inl"
 			>
 			<File
+				RelativePath=".\CollisionFuncs.h"
+				>
+			</File>
+			<File
 				RelativePath="Common.h"
 				>
 			</File>

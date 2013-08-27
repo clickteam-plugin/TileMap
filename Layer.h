@@ -7,8 +7,9 @@ struct SubLayerLink
 {
 	unsigned char tileset;
 	unsigned char animation;
+	unsigned char animationFrame;
 
-	SubLayerLink() : tileset(0xff), animation(0xff)
+	SubLayerLink() : tileset(0xff), animation(0xff), animationFrame(0xff)
 	{
 	}
 };
