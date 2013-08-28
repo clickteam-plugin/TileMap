@@ -147,6 +147,13 @@ public:
 		if (width == newWidth && height == newHeight)
 			return;
 
+		// Resize sub-layers accordingly
+		std::vector<SubLayer>::iterator it = subLayers.begin();
+		for (; it != subLayers.end(); ++it)
+		{
+			(*it).resize(width, height);
+		}
+
 		if (newWidth == 0 || newHeight == 0)
 		{
 			delete[] data;
