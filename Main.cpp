@@ -161,15 +161,7 @@ ACTION(
 ) {
 	if (rdPtr->currentLayer)
 	{
-		int width = intParam();
-		int height = intParam();
-
-		rdPtr->currentLayer->resize(width, height);
-
-		for (std::vector<SubLayer>::iterator it = rdPtr->currentLayer->subLayers.begin(); it != rdPtr->currentLayer->subLayers.end(); ++it)
-		{
-			(*it).resize(width, height);
-		}
+		rdPtr->currentLayer->resize(param1, param2);
 
 		rdPtr->redraw = true;
 	}
@@ -1483,7 +1475,7 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(1, PARAM_NUMBER, "Tileset index")
 ) {
-	unsigned i = Param(TYPE_INT);
+	unsigned i = param1;
 
 	if (i < rdPtr->tilesets->size())
 	{
@@ -1502,7 +1494,7 @@ ACTION(
 	/* Flags */			0,
 	/* Params */		(1, PARAM_NUMBER, "Layer index")
 ) {
-	unsigned i = Param(TYPE_INT);
+	unsigned i = param1;
 
 	if (i < rdPtr->layers->size())
 	{
@@ -1996,6 +1988,57 @@ ACTION(
 	}
 }
 
+ACTION(
+	/* ID */			73,
+	/* Name */			"Insert layer with size (%1, %2) at %0",
+	/* Flags */			0,
+	/* Params */		(3,PARAM_NUMBER,"Layer index to insert at",PARAM_NUMBER,"Layer width (tiles)", PARAM_NUMBER,"Layer height (tiles)")
+) {
+	int at = intParam();
+	int width = intParam();
+	int height = intParam();
+
+	if (at >= (int)rdPtr->layers->size())
+	{
+		ActionFunc29(rdPtr, width, height);
+		return;
+	}
+
+	at = max(0, rdPtr->layers->size());
+	rdPtr->currentLayer = &*rdPtr->layers->insert(rdPtr->layers->begin() + at, Layer());
+	rdPtr->currentLayer->settings.tileWidth = rdPtr->tileWidth;
+	rdPtr->currentLayer->settings.tileHeight = rdPtr->tileHeight;
+	ActionFunc1(rdPtr, width, height);
+}
+
+ACTION(
+	/* ID */			74,
+	/* Name */			"Delete all sub-layers",
+	/* Flags */			0,
+	/* Params */		(0)
+) {
+	if (rdPtr->currentLayer)
+	{
+		rdPtr->currentLayer->subLayers.clear();
+		rdPtr->redraw = true;
+	}
+}
+
+ACTION(
+	/* ID */			75,
+	/* Name */			"Delete sub-layer %0",
+	/* Flags */			0,
+	/* Params */		(1, PARAM_NUMBER, "Sub-layer index")
+) {
+	unsigned i = param1;
+
+	Layer* layer = rdPtr->currentLayer;
+	if (layer && i < layer->subLayers.size())
+	{
+		layer->subLayers.erase(layer->subLayers.begin() + i);
+		rdPtr->redraw = true;
+	}
+}
 // ============================================================================
 //
 // EXPRESSIONS
@@ -2490,3 +2533,63 @@ EXPRESSION(
 	
 	return 0;
 }
+
+EXPRESSION(
+	/* ID */			27,
+	/* Name */			"SubLayerCellSize(",
+	/* Flags */			0,
+	/* Params */		(2, EXPPARAM_NUMBER, "Layer index", EXPPARAM_NUMBER, "Sub-layer index")
+) {
+	unsigned i = ExParam(TYPE_INT);
+	unsigned s = ExParam(TYPE_INT);
+
+	if (i < rdPtr->layers->size())
+	{
+		Layer& layer = (*rdPtr->layers)[i];
+
+		if (s < layer.subLayers.size())
+			return layer.subLayers[s].getCellSize();
+	}
+
+	return 0;
+}
+
+EXPRESSION(
+	/* ID */			28,
+	/* Name */			"CursorX(",
+	/* Flags */			0,
+	/* Params */		(0)
+) {
+	return rdPtr->cursor.x;
+}
+
+EXPRESSION(
+	/* ID */			29,
+	/* Name */			"CursorY(",
+	/* Flags */			0,
+	/* Params */		(0)
+) {
+	return rdPtr->cursor.y;
+}
+
+
+EXPRESSION(
+	/* ID */			30,
+	/* Name */			"CursorWidth(",
+	/* Flags */			0,
+	/* Params */		(0)
+) {
+	return rdPtr->cursor.width;
+}
+
+
+EXPRESSION(
+	/* ID */			31,
+	/* Name */			"CursorHeight(",
+	/* Flags */			0,
+	/* Params */		(0)
+) {
+	return rdPtr->cursor.height;
+}
+
+

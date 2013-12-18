@@ -159,6 +159,7 @@ struct TMAPVIEW
 	int				depth;
 
 	// Scrolling center position
+	float			zoom;
 	int				cameraX;
 	int				cameraY;
 	bool			autoScroll;
@@ -176,6 +177,7 @@ struct TMAPVIEW
 	COLORREF		background;
 	cSurface*		surface;
 	bool			accurateClip;
+	DWORD			blitFlags;
 
 	// Animation info table
 	DWORD			lastTick;

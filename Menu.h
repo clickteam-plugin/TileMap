@@ -49,14 +49,16 @@
 		ITEM(12, "Add tileset")
 		ITEM(25, "Add tilesets from Surface")
 		SEPARATOR
+		ITEM(34, "Swap two tilesets")
+		SEPARATOR
 		ITEM(41, "Delete tileset")
 		ITEM(43, "Delete all tilesets")
 		SEPARATOR
 		ITEM(30, "Set current tileset")
-		ITEM(34, "Swap two tilesets")
 	SUB_END
 	SUB_START("Layers")
 		ITEM(29, "Add layer")
+		ITEM(73, "Insert layer")
 		SEPARATOR
 		ITEM(42, "Delete layer")
 		ITEM(44, "Delete all layers")
@@ -144,6 +146,8 @@
 				ITEM(58, "Custom")
 			SUB_END
 		SUB_END
+		ITEM(74, "Delete all")
+		ITEM(75, "Delete sub-layer")
 		SEPARATOR
 		ITEM(67, "Clear")
 		SEPARATOR
@@ -195,6 +199,15 @@
 	SUB_START("Layers")
 		ITEM(15, "Count")
 		SEPARATOR
+		SUB_START("Size")
+			ITEM(2, "Width")
+			ITEM(3, "Height")
+		SUB_END
+		SUB_START("Tile size")
+			ITEM(10, "Width")
+			ITEM(11, "Height")
+		SUB_END
+		SEPARATOR
 		SUB_START("Offset")
 			ITEM(6, "X")
 			ITEM(7, "Y")
@@ -208,15 +221,6 @@
 			ITEM(5, "Y")
 		SUB_END
 		SEPARATOR
-		SUB_START("Size")
-			ITEM(2, "Width")
-			ITEM(3, "Height")
-		SUB_END
-		SUB_START("Tile size")
-			ITEM(10, "Width")
-			ITEM(11, "Height")
-		SUB_END
-		SEPARATOR
 		SUB_START("Tile at position...")
 			ITEM(12, "Tileset X")
 			ITEM(13, "Tileset Y")
@@ -226,6 +230,10 @@
 		SUB_END
 		SEPARATOR
 		SUB_START("Sub-layers")
+			ITEM(26, "Count")
+			SEPARATOR
+			ITEM(27, "Cell size")
+			SEPARATOR
 			//ITEM(23, "Byte at position")
 			ITEM(24, "Integer at position")
 			ITEM(25, "Float at position")
@@ -237,6 +245,12 @@
 		ITEM(19, "Integer value")
 		ITEM(20, "Float value")
 		ITEM(21, "String value")
+	SUB_END
+	SUB_START("Tile cursor")
+		ITEM(28, "X")
+		ITEM(29, "Y")
+		ITEM(30, "Width")
+		ITEM(31, "Height")
 	SUB_END
 	SEPARATOR
 
