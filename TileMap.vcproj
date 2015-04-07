@@ -402,7 +402,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="AutoInstall.bat &quot;$(TargetPath)&quot; \Extensions\HWA"
+				CommandLine=""
 			/>
 		</Configuration>
 		<Configuration
@@ -499,7 +499,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="AutoInstall.bat &quot;$(TargetPath)&quot; \Extensions\HWA"
+				CommandLine=""
 			/>
 		</Configuration>
 		<Configuration
@@ -705,6 +705,10 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
+			<File
+				RelativePath=".\Classes.cpp"
+				>
+			</File>
 			<File
 				RelativePath="Edittime.cpp"
 				>

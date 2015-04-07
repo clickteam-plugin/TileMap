@@ -1,5 +1,15 @@
 #pragma once
 
+#include <new>
+#include <map>
+#include <vector>
+#include <string>
+
+using std::vector;
+using std::map;
+using std::string;
+
+#include "Tile.h"
 #include "SubLayer.h"
 #include "Property.h"
 
@@ -72,30 +82,11 @@ public:
 
 	// Constructor/destructor
 	Layer()
-		:	width(0), height(0), data(0)
+		: width(0), height(0), data(0)
 	{
 	}
 
-	Layer(const Layer& src)
-		:	data(0), settings(src.settings), width(src.width), height(src.height)
-	{
-		if (src.data)
-		{
-			data = new (std::nothrow) Tile[width * height];
-			if (!data)
-			{
-				width = 0;
-				height = 0;
-				return;
-			}
-
-			// Copy the source data
-			memcpy(data, src.data, width * height * sizeof(Tile));
-		}
-
-		// Copy sub-layers...
-		subLayers = src.subLayers;
-	}
+	Layer(const Layer& src);
 
 	~Layer()
 	{
@@ -103,114 +94,49 @@ public:
 	}
 
 	// Check if a layer is usable
-	inline bool isValid() const
+	bool isValid() const
 	{
 		return width > 0 && height > 0 && data != 0;
 	}
 
 	// Check if a coordinate is valid
-	inline bool isValid(unsigned x, unsigned y) const
+	bool isValid(unsigned x, unsigned y) const
 	{
 		return isValid() && x < width && y < height;
 	}
 
 	// Get a tile within the layer array
-	inline Tile* getTile(unsigned x, unsigned y)
+	__forceinline Tile* getTile(unsigned x, unsigned y)
 	{
 		return data + x + width*y;
 	}
 
-	inline Tile* getDataPointer()
+	__forceinline Tile* getDataPointer()
 	{
 		return data;
 	}
 
-	inline unsigned getWidth() const
+	unsigned getWidth() const
 	{
 		return width;
 	}
 
-	inline unsigned getHeight() const
+	unsigned getHeight() const
 	{
 		return height;
 	}
 
-	inline unsigned getByteSize() const
+	unsigned getByteSize() const
 	{
 		return width * height * sizeof(Tile);
 	}
 
 	// Resize layer, new tiles are empty
-	void resize(unsigned newWidth, unsigned newHeight)
-	{
-		// Nothing to do...
-		if (width == newWidth && height == newHeight)
-			return;
-
-		// Resize sub-layers accordingly
-		std::vector<SubLayer>::iterator it = subLayers.begin();
-		for (; it != subLayers.end(); ++it)
-		{
-			(*it).resize(width, height);
-		}
-
-		if (newWidth == 0 || newHeight == 0)
-		{
-			delete[] data;
-			data = 0;
-			width = 0;
-			height = 0;
-			return;
-		}
-
-		// Allocate a new array
-		Tile* newData = new (std::nothrow) Tile[newWidth * newHeight];
-		if (!newData)
-		{
-			width = 0;
-			height = 0;
-			return;
-		}
-
-		// Zero all tiles
-		memset(newData, 0xff, newWidth * newHeight * sizeof(Tile));
-
-		// Copy old data
-		if (data)
-		{
-			// Get the size of the rectangle to copy
-			int copyWidth = min(width, newWidth);
-			int copyHeight = min(height, newHeight);
-
-			// Copy the old tiles
-			for (int x = 0; x < copyWidth; ++x)
-			{
-				for (int y = 0; y < copyHeight; ++y)
-				{
-					newData[x + y * newWidth] = data[x + y * width];
-				}
-			}
-
-			// Delete the old array
-			delete[] data;
-		}
-
-		// Assign the new array
-		data = newData;
-
-		width = newWidth;
-		height = newHeight;
-	}
+	void resize(unsigned newWidth, unsigned newHeight);
 
 	// For viewport rendering
-	inline int getScreenX(int cameraX)
-	{
-		return (int)((settings.offsetX - cameraX) * settings.scrollX);
-	}
-
-	// For viewport rendering
-	inline int getScreenY(int cameraY)
-	{
-		return (int)((settings.offsetY - cameraY) * settings.scrollY);
-	}
+	int getScreenX(int cameraX);
+	int getScreenY(int cameraY);
+    int getScreenWidth();
+    int getScreenHeight();
 };
