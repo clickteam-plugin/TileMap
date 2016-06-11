@@ -11,13 +11,7 @@ Layer::Layer(const Layer& src)
 {
 	if (src.data)
 	{
-		data = new (std::nothrow) Tile[width * height];
-		if (!data)
-		{
-			width = 0;
-			height = 0;
-			return;
-		}
+		data = new Tile[width * height];
 
 		// Copy the source data
 		memcpy(data, src.data, width * height * sizeof(Tile));
@@ -51,13 +45,7 @@ void Layer::resize(unsigned newWidth, unsigned newHeight)
 	}
 
 	// Allocate a new array
-	Tile* newData = new (std::nothrow) Tile[newWidth * newHeight];
-	if (!newData)
-	{
-		width = 0;
-		height = 0;
-		return;
-	}
+	Tile* newData = new Tile[newWidth * newHeight];
 
 	// Zero all tiles
 	memset(newData, 0xff, newWidth * newHeight * sizeof(Tile));
@@ -95,8 +83,8 @@ int Layer::getScreenX(int cameraX)
     int pos = (int)((settings.offsetX - cameraX) * settings.scrollX);
     if (settings.wrapX)
     {
-        while (pos > 0)
-            pos -= getScreenWidth();
+        if (pos > 0)
+            pos %= getScreenWidth();
     }
 	return pos;
 }
@@ -107,8 +95,8 @@ int Layer::getScreenY(int cameraY)
     int pos = (int)((settings.offsetY - cameraY) * settings.scrollY);
     if (settings.wrapY)
     {
-        while (pos > 0)
-            pos -= getScreenHeight();
+        if (pos > 0)
+            pos %= getScreenHeight();
     }
 	return pos;
 }
@@ -142,8 +130,8 @@ SubLayer::SubLayer(const SubLayer& src)
 
 	if (src.data)
 	{
-		if (data = new (std::nothrow) unsigned char[(width * height) << cellShift])
-			memcpy(data, src.data, (width * height) << cellShift);
+		data = new unsigned char[(width * height) << cellShift];
+		memcpy(data, src.data, (width * height) << cellShift);
 	}
 }
 
@@ -162,14 +150,7 @@ void SubLayer::resize(unsigned int newWidth, unsigned int newHeight)
 		return;
 	}
 
-	// Allocate a new array
-	unsigned char* newData = new (std::nothrow) unsigned char[(newWidth * newHeight) << cellShift];
-	if (!newData)
-	{
-		width = 0;
-		height = 0;
-		return;
-	}
+	unsigned char* newData = new unsigned char[(newWidth * newHeight) << cellShift];
 
 	// Zero all tiles
 	if (cellShift)
@@ -189,25 +170,13 @@ void SubLayer::resize(unsigned int newWidth, unsigned int newHeight)
 
 		// Copy the old tiles (optimized for 1 byte cell size)
 		if (cellShift)
-		{
 			for (int x = 0; x < copyWidth; ++x)
-			{
 				for (int y = 0; y < copyHeight; ++y)
-				{
 					memcpy(newData + ((x + y * newWidth) << cellShift), data + ((x + y * width) << cellShift), cellSize);
-				}
-			}
-		}
 		else
-		{
 			for (int x = 0; x < copyWidth; ++x)
-			{
 				for (int y = 0; y < copyHeight; ++y)
-				{
 					newData[x + y * newWidth] = data[x + y * width];
-				}
-			}
-		}
 
 		// Delete the old array
 		delete[] data;

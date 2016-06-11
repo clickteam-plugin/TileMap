@@ -108,7 +108,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="AutoInstall.bat &quot;$(TargetPath)&quot; \Data\Runtime"
+				CommandLine=""
 			/>
 		</Configuration>
 		<Configuration
@@ -172,7 +172,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib mmfs2.lib"
-				OutputFile="c:\mmf2\extensions\TileMap.mfx"
+				OutputFile="c:\Program Files (x86)\Clickteam Fusion Developer 2.5\Extensions\TileMap.mfx"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\lib\"
@@ -206,7 +206,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="AutoInstall.bat &quot;$(TargetPath)&quot; \Extensions"
+				CommandLine=""
 			/>
 		</Configuration>
 		<Configuration
@@ -304,7 +304,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="AutoInstall.bat &quot;$(TargetPath)&quot; \Extensions\HWA"
+				CommandLine=""
 			/>
 		</Configuration>
 		<Configuration
@@ -368,7 +368,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib mmfs2hwa.lib"
-				OutputFile="c:\mmf2\extensions\hwa\TileMap.mfx"
+				OutputFile="c:\Program Files (x86)\Clickteam Fusion Developer 2.5\Extensions\Hwa\TileMap.mfx"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\lib\"
@@ -596,7 +596,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="AutoInstall.bat &quot;$(TargetPath)&quot; \Data\Runtime\HWA"
+				CommandLine=""
 			/>
 		</Configuration>
 		<Configuration

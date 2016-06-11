@@ -59,8 +59,8 @@ public:
 			// Need to allocate a compression buffer
 			if (!compressionBuffer)
 			{
-				compressionBuffer = new (std::nothrow) unsigned char[dataSize];
-				compressionBufferSize = compressionBuffer ? dataSize : 0;
+				compressionBuffer = new unsigned char[dataSize];
+				compressionBufferSize = dataSize;
 			}
 
 			// If we were able to allocate the buffer

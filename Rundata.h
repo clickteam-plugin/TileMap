@@ -177,6 +177,9 @@ struct TMAPVIEW
 	rVal			rv;
 	LPRRDATA		rRd;
 
+	bool			isHwa;
+	bool			isUnicode;
+
 	// Parent Tile Map
 	TILEMAP*		p;
 
@@ -187,6 +190,8 @@ struct TMAPVIEW
 
 	// Scrolling center position
 	float			zoom;
+	float			zoomPointX;
+	float			zoomPointY;
 	int				cameraX;
 	int				cameraY;
 	bool			autoScroll;
@@ -198,6 +203,7 @@ struct TMAPVIEW
 	// Misc. settings
 	bool			outsideColl;
 	bool			fineColl;
+	bool			zoomColl;
 
 	// Display surface
 	bool			transparent;
@@ -215,6 +221,7 @@ struct TMAPVIEW
 	// Overlaps condition
 	Tileset*		cndTileset;
 	cSurface*		cndAlphaSurf;
+	Layer*			cndLayer;
 
 	// On collision
 	Tile			collTile;
@@ -267,7 +274,6 @@ struct TMAPVIEW
 		int				x;
 		int				y;
 	} tileCallback;
-
 };
 
 typedef struct tagSURFACE
