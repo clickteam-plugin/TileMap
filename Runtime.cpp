@@ -1,7 +1,7 @@
 // ===========================================================================
 //
 // This file contains routines that are handled during the Runtime
-// 
+//
 // ============================================================================
 
 // Common Include
@@ -12,172 +12,164 @@
 // GetRunObjectDataSize
 // --------------------
 // Returns the size of the runtime datazone of the object
-// 
+//
 short WINAPI DLLExport GetRunObjectDataSize(fprh rhPtr, LPEDATA edPtr)
 {
-	return(sizeof(RUNDATA));
+    return (sizeof(RUNDATA));
 }
-
 
 // ---------------
 // CreateRunObject
 // ---------------
 // The routine where the object is actually created
-// 
+//
 short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPtr)
 {
-	// Do some rSDK stuff
-	#include "rCreateRunObject.h"
-	
+// Do some rSDK stuff
+#include "rCreateRunObject.h"
+
 #ifdef _DEBUG
 
-	AllocConsole();
-	freopen("conin$","r", stdin);
-	freopen("conout$","w", stdout);
-	freopen("conout$","w", stderr);
+    AllocConsole();
+    freopen("conin$", "r", stdin);
+    freopen("conout$", "w", stdout);
+    freopen("conout$", "w", stderr);
 
-	printf("TILEMAP DEBUG MODE");
+    printf("TILEMAP DEBUG MODE");
 
 #ifdef HWABETA
-	printf(" (HWA)");
+    printf(" (HWA)");
 
 #endif
 
-	printf("\n");
+    printf("\n");
 #endif
 
-	LPRH rhPtr = rdPtr->rHo.hoAdRunHeader;
+    LPRH rhPtr = rdPtr->rHo.hoAdRunHeader;
 
-	// Attached viewports
-	rdPtr->viewports = new list<TMAPVIEW*>;
-	rdPtr->redraw = false;
+    // Attached viewports
+    rdPtr->viewports = new list<TMAPVIEW*>;
+    rdPtr->redraw = false;
 
+    // Create surface, get MMF depth..
+    cSurface* ps = WinGetSurface((int)rdPtr->rHo.hoAdRunHeader->rhIdEditWin);
 
-	// Create surface, get MMF depth..
-	cSurface *ps = WinGetSurface((int)rdPtr->rHo.hoAdRunHeader->rhIdEditWin);
+    if (!ps)
+        return 1;
 
-	if (!ps)
-		return 1;
+    rdPtr->depth = ps->GetDepth();
+    cSurface* proto = getPrototype(rdPtr->depth);
 
-	rdPtr->depth = ps->GetDepth();
-	cSurface* proto = getPrototype(rdPtr->depth);
+    // Database
+    rdPtr->layers = new vector<Layer>;
+    rdPtr->tilesets = new vector<Tileset>;
+    rdPtr->properties = new map<string, Property>;
+    rdPtr->currentLayer = 0;
+    rdPtr->currentTileset = 0;
 
-	// Database
-	rdPtr->layers = new vector<Layer>;
-	rdPtr->tilesets = new vector<Tileset>;
-	rdPtr->properties = new map<string, Property>;
-	rdPtr->currentLayer = 0;
-	rdPtr->currentTileset = 0;
+    // Load edit tilesets
+    cSurface is;
+    for (int i = 0; i < edPtr->tilesetCount; ++i) {
+        rdPtr->tilesets->push_back(Tileset());
+        Tileset& tileset = rdPtr->tilesets->back();
 
-	// Load edit tilesets
-	cSurface is;
-	for (int i = 0; i < edPtr->tilesetCount; ++i)
-	{
-		rdPtr->tilesets->push_back(Tileset());
-		Tileset& tileset = rdPtr->tilesets->back();
+        // Create a tileset for each image
+        if (LockImageSurface(rhPtr->rhIdAppli, edPtr->tilesets[i], is)) {
+            tileset.transpCol = is.GetTransparentColor();
+            tileset.surface = new cSurface;
+            tileset.surface->Create(is.GetWidth(), is.GetHeight(), proto);
 
-		// Create a tileset for each image
-		if (LockImageSurface(rhPtr->rhIdAppli, edPtr->tilesets[i], is))
-		{
-			tileset.transpCol = is.GetTransparentColor();
-			tileset.surface = new cSurface;
-			tileset.surface->Create(is.GetWidth(), is.GetHeight(), proto);
+            copyBlit(is, *tileset.surface);
 
-			copyBlit(is, *tileset.surface);
+            tileset.surface->SetTransparentColor(is.GetTransparentColor());
+            UnlockImageSurface(is);
 
-			tileset.surface->SetTransparentColor(is.GetTransparentColor());
-			UnlockImageSurface(is);
+            tileset.updateTexture();
+        }
+    }
 
-			tileset.updateTexture();
-		}
+    // Select 0th tileset by default...
+    if (edPtr->tilesetCount)
+        rdPtr->currentTileset = &rdPtr->tilesets->front();
 
-	}
+    // Tileset settings
+    rdPtr->tileWidth = edPtr->tileWidth;
+    rdPtr->tileHeight = edPtr->tileHeight;
 
-	// Select 0th tileset by default...
-	if (edPtr->tilesetCount)
-		rdPtr->currentTileset = &rdPtr->tilesets->front();
+    rdPtr->blocks = (edPtr->blockMap ? BLOCK_MAP : 0) |
+                    (edPtr->blockLayers ? BLOCK_LAYERS : 0) |
+                    (edPtr->blockTilesets ? BLOCK_TILESETS : 0);
 
-	// Tileset settings
-	rdPtr->tileWidth = edPtr->tileWidth;
-	rdPtr->tileHeight = edPtr->tileHeight;
+    // Default compression level
+    rdPtr->compress = 6;
 
-	rdPtr->blocks = (edPtr->blockMap ? BLOCK_MAP : 0) | (edPtr->blockLayers ? BLOCK_LAYERS : 0) | (edPtr->blockTilesets ? BLOCK_TILESETS : 0);
+    // How to save tileset paths (by default, use path relative to map file)
+    rdPtr->tilesetPathMode = (TSPMODE)edPtr->tilesetPathMode;
+    callRunTimeFunction(rdPtr, RFUNCTION_GETFILEINFOS, FILEINFO_PATH,
+                        (long)&rdPtr->appPath[0]);
 
-	// Default compression level
-	rdPtr->compress = 6;
+    // Set up tile cursor
+    rdPtr->cursor.x = 0;
+    rdPtr->cursor.y = 0;
+    rdPtr->cursor.width = 1;
+    rdPtr->cursor.height = 1;
+    rdPtr->cursor.tiles.a.id = 0;
+    rdPtr->cursor.tiles.b.id = 0;
+    rdPtr->cursor.patternX = 0;
+    rdPtr->cursor.patternY = 0;
 
-	// How to save tileset paths (by default, use path relative to map file)
-	rdPtr->tilesetPathMode = (TSPMODE)edPtr->tilesetPathMode;
-	callRunTimeFunction(rdPtr, RFUNCTION_GETFILEINFOS, FILEINFO_PATH, (long)&rdPtr->appPath[0]);
+    rdPtr->onProperty = 0;
 
-	// Set up tile cursor
-	rdPtr->cursor.x = 0;
-	rdPtr->cursor.y = 0;
-	rdPtr->cursor.width = 1;
-	rdPtr->cursor.height = 1;
-	rdPtr->cursor.tiles.a.id = 0;
-	rdPtr->cursor.tiles.b.id = 0;
-	rdPtr->cursor.patternX = 0;
-	rdPtr->cursor.patternY = 0;
-
-	rdPtr->onProperty = 0;
-
-	return 0;
+    return 0;
 }
-
 
 // ----------------
 // DestroyRunObject
 // ----------------
 // Destroys the run-time object
-// 
+//
 short WINAPI DLLExport DestroyRunObject(LPRDATA rdPtr, long fast)
 {
-	delete rdPtr->viewports;
-	delete rdPtr->layers;
-	delete rdPtr->tilesets;
-	delete rdPtr->properties;
-	// No errors
-	delete rdPtr->rRd;
-	return 0;
+    delete rdPtr->viewports;
+    delete rdPtr->layers;
+    delete rdPtr->tilesets;
+    delete rdPtr->properties;
+    // No errors
+    delete rdPtr->rRd;
+    return 0;
 }
-
 
 // ----------------
 // HandleRunObject
 // ----------------
 // Called (if you want) each loop, this routine makes the object live
-// 
+//
 short WINAPI DLLExport HandleRunObject(LPRDATA rdPtr)
 {
-	if (rdPtr->redraw)
-	{
-		// Redraw all attached viewports
-		//list<TMAPVIEW*>::iterator it;
-		//for (it = rdPtr->viewports->begin(); it != rdPtr->viewports->end(); ++it)
-		//{
-		//	if (((*it)->rHo.hoFlags & HOF_DESTROYED) == 0)
-		//		rdPtr->rRd->LPRO_Redraw((LPRO)*it);
-		//	else
-		//		rdPtr->viewports->erase(it++);
-		//}
+    if (rdPtr->redraw) {
+        // Redraw all attached viewports
+        // list<TMAPVIEW*>::iterator it;
+        // for (it = rdPtr->viewports->begin(); it != rdPtr->viewports->end();
+        // ++it)
+        //{
+        //	if (((*it)->rHo.hoFlags & HOF_DESTROYED) == 0)
+        //		rdPtr->rRd->LPRO_Redraw((LPRO)*it);
+        //	else
+        //		rdPtr->viewports->erase(it++);
+        //}
 
-		rdPtr->redraw = false;
-	}
+        rdPtr->redraw = false;
+    }
 
-	return 0;
+    return 0;
 }
 
 // ----------------
 // DisplayRunObject
 // ----------------
 // Draw the object in the application screen.
-// 
-short WINAPI DLLExport DisplayRunObject(LPRDATA rdPtr)
-{
-
-	return 0;
-}
+//
+short WINAPI DLLExport DisplayRunObject(LPRDATA rdPtr) { return 0; }
 
 // -------------------
 // GetRunObjectSurface
@@ -190,17 +182,18 @@ short WINAPI DLLExport DisplayRunObject(LPRDATA rdPtr)
 // Note: do not forget to enable the function in the .def file
 // if you remove the comments below.
 
-//cSurface* WINAPI DLLExport GetRunObjectSurface(LPRDATA rdPtr)
+// cSurface* WINAPI DLLExport GetRunObjectSurface(LPRDATA rdPtr)
 //{
 //	return 0;
 //}
 
-
 // -------------------------
 // GetRunObjectCollisionMask
 // -------------------------
-// Implement this function if your extension supports fine collision mode (OEPREFS_FINECOLLISIONS),
-// Or if it's a background object and you want Obstacle properties for this object.
+// Implement this function if your extension supports fine collision mode
+// (OEPREFS_FINECOLLISIONS),
+// Or if it's a background object and you want Obstacle properties for this
+// object.
 //
 // Should return NULL if the object is not transparent.
 //
@@ -208,39 +201,46 @@ short WINAPI DLLExport DisplayRunObject(LPRDATA rdPtr)
 // if you remove the comments below.
 //
 /*
-cSurface* WINAPI DLLExport GetRunObjectCollisionMask(LPRDATA rdPtr, LPARAM lParam)
+cSurface* WINAPI DLLExport GetRunObjectCollisionMask(LPRDATA rdPtr, LPARAM
+lParam)
 {
-	// Typical example for active objects
-	// ----------------------------------
-	// Opaque? collide with box
-	if ( (rdPtr->rs.rsEffect & EFFECTFLAG_TRANSPARENT) == 0 )	// Note: only if your object has the OEPREFS_INKEFFECTS option
-		return NULL;
+        // Typical example for active objects
+        // ----------------------------------
+        // Opaque? collide with box
+        if ( (rdPtr->rs.rsEffect & EFFECTFLAG_TRANSPARENT) == 0 )	//
+Note: only if your object has the OEPREFS_INKEFFECTS option
+                return NULL;
 
-	// Transparent? Create mask
-	LPSMASK pMask = rdPtr->m_pColMask;
-	if ( pMask == NULL )
-	{
-		if ( rdPtr->m_pSurface != NULL )
-		{
-			DWORD dwMaskSize = rdPtr->m_pSurface->CreateMask(NULL, lParam);
-			if ( dwMaskSize != 0 )
-			{
-				pMask = (LPSMASK)calloc(dwMaskSize, 1);
-				if ( pMask != NULL )
-				{
-					rdPtr->m_pSurface->CreateMask(pMask, lParam);
-					rdPtr->m_pColMask = pMask;
-				}
-			}
-		}
-	}
+        // Transparent? Create mask
+        LPSMASK pMask = rdPtr->m_pColMask;
+        if ( pMask == NULL )
+        {
+                if ( rdPtr->m_pSurface != NULL )
+                {
+                        DWORD dwMaskSize = rdPtr->m_pSurface->CreateMask(NULL,
+lParam);
+                        if ( dwMaskSize != 0 )
+                        {
+                                pMask = (LPSMASK)calloc(dwMaskSize, 1);
+                                if ( pMask != NULL )
+                                {
+                                        rdPtr->m_pSurface->CreateMask(pMask,
+lParam);
+                                        rdPtr->m_pColMask = pMask;
+                                }
+                        }
+                }
+        }
 
-	// Note: for active objects, lParam is always the same.
-	// For background objects (OEFLAG_BACKGROUND), lParam maybe be different if the user uses your object
-	// as obstacle and as platform. In this case, you should store 2 collision masks
-	// in your data: one if lParam is 0 and another one if lParam is different from 0.
+        // Note: for active objects, lParam is always the same.
+        // For background objects (OEFLAG_BACKGROUND), lParam maybe be different
+if the user uses your object
+        // as obstacle and as platform. In this case, you should store 2
+collision masks
+        // in your data: one if lParam is 0 and another one if lParam is
+different from 0.
 
-	return pMask;
+        return pMask;
 }
 */
 
@@ -248,13 +248,12 @@ cSurface* WINAPI DLLExport GetRunObjectCollisionMask(LPRDATA rdPtr, LPARAM lPara
 // PauseRunObject
 // ----------------
 // Enters the pause mode
-// 
+//
 short WINAPI DLLExport PauseRunObject(LPRDATA rdPtr)
 {
-	// Ok
-	return 0;
+    // Ok
+    return 0;
 }
-
 
 // -----------------
 // ContinueRunObject
@@ -263,15 +262,14 @@ short WINAPI DLLExport PauseRunObject(LPRDATA rdPtr)
 //
 short WINAPI DLLExport ContinueRunObject(LPRDATA rdPtr)
 {
-	// Ok
-	return 0;
+    // Ok
+    return 0;
 }
-
 
 // ============================================================================
 //
 // START APP / END APP / START FRAME / END FRAME routines
-// 
+//
 // ============================================================================
 
 // -------------------
@@ -279,69 +277,67 @@ short WINAPI DLLExport ContinueRunObject(LPRDATA rdPtr)
 // -------------------
 // Called when the application starts or restarts.
 // Useful for storing global data
-// 
-void WINAPI DLLExport StartApp(mv _far *mV, CRunApp* pApp)
+//
+void WINAPI DLLExport StartApp(mv _far* mV, CRunApp* pApp)
 {
-	// Example
-	// -------
-	// Delete global data (if restarts application)
-//	CMyData* pData = (CMyData*)mV->mvGetExtUserData(pApp, hInstLib);
-//	if ( pData != NULL )
-//	{
-//		delete pData;
-//		mV->mvSetExtUserData(pApp, hInstLib, NULL);
-//	}
+    // Example
+    // -------
+    // Delete global data (if restarts application)
+    //	CMyData* pData = (CMyData*)mV->mvGetExtUserData(pApp, hInstLib);
+    //	if ( pData != NULL )
+    //	{
+    //		delete pData;
+    //		mV->mvSetExtUserData(pApp, hInstLib, NULL);
+    //	}
 }
 
 // -------------------
 // EndApp
 // -------------------
 // Called when the application ends.
-// 
-void WINAPI DLLExport EndApp(mv _far *mV, CRunApp* pApp)
+//
+void WINAPI DLLExport EndApp(mv _far* mV, CRunApp* pApp)
 {
-	// Example
-	// -------
-	// Delete global data
-//	CMyData* pData = (CMyData*)mV->mvGetExtUserData(pApp, hInstLib);
-//	if ( pData != NULL )
-//	{
-//		delete pData;
-//		mV->mvSetExtUserData(pApp, hInstLib, NULL);
-//	}
+    // Example
+    // -------
+    // Delete global data
+    //	CMyData* pData = (CMyData*)mV->mvGetExtUserData(pApp, hInstLib);
+    //	if ( pData != NULL )
+    //	{
+    //		delete pData;
+    //		mV->mvSetExtUserData(pApp, hInstLib, NULL);
+    //	}
 }
 
 // -------------------
 // StartFrame
 // -------------------
 // Called when the frame starts or restarts.
-// 
-void WINAPI DLLExport StartFrame(mv _far *mV, DWORD dwReserved, int nFrameIndex)
+//
+void WINAPI DLLExport StartFrame(mv _far* mV, DWORD dwReserved, int nFrameIndex)
 {
-
 }
 
 // -------------------
 // EndFrame
 // -------------------
 // Called when the frame ends.
-// 
-void WINAPI DLLExport EndFrame(mv _far *mV, DWORD dwReserved, int nFrameIndex)
+//
+void WINAPI DLLExport EndFrame(mv _far* mV, DWORD dwReserved, int nFrameIndex)
 {
-
 }
 
 // ============================================================================
 //
 // TEXT ROUTINES (if OEFLAG_TEXT)
-// 
+//
 // ============================================================================
 
 // -------------------
 // GetRunObjectFont
 // -------------------
 // Return the font used by the object.
-// 
+//
 /*
 
   // Note: do not forget to enable the functions in the .def file
@@ -349,27 +345,28 @@ void WINAPI DLLExport EndFrame(mv _far *mV, DWORD dwReserved, int nFrameIndex)
 
 void WINAPI GetRunObjectFont(LPRDATA rdPtr, LOGFONT* pLf)
 {
-	// Example
-	// -------
-	// GetObject(rdPtr->m_hFont, sizeof(LOGFONT), pLf);
+        // Example
+        // -------
+        // GetObject(rdPtr->m_hFont, sizeof(LOGFONT), pLf);
 }
 
 // -------------------
 // SetRunObjectFont
 // -------------------
 // Change the font used by the object.
-// 
+//
 void WINAPI SetRunObjectFont(LPRDATA rdPtr, LOGFONT* pLf, RECT* pRc)
 {
-	// Example
-	// -------
+        // Example
+        // -------
 //	HFONT hFont = CreateFontIndirect(pLf);
 //	if ( hFont != NULL )
 //	{
 //		if (rdPtr->m_hFont!=0)
 //			DeleteObject(rdPtr->m_hFont);
 //		rdPtr->m_hFont = hFont;
-//		SendMessage(rdPtr->m_hWnd, WM_SETFONT, (WPARAM)rdPtr->m_hFont, FALSE);
+//		SendMessage(rdPtr->m_hWnd, WM_SETFONT, (WPARAM)rdPtr->m_hFont,
+FALSE);
 //	}
 
 }
@@ -378,33 +375,32 @@ void WINAPI SetRunObjectFont(LPRDATA rdPtr, LOGFONT* pLf, RECT* pRc)
 // GetRunObjectTextColor
 // ---------------------
 // Return the text color of the object.
-// 
+//
 COLORREF WINAPI GetRunObjectTextColor(LPRDATA rdPtr)
 {
-	// Example
-	// -------
-	return 0;	// rdPtr->m_dwColor;
+        // Example
+        // -------
+        return 0;	// rdPtr->m_dwColor;
 }
 
 // ---------------------
 // SetRunObjectTextColor
 // ---------------------
 // Change the text color of the object.
-// 
+//
 void WINAPI SetRunObjectTextColor(LPRDATA rdPtr, COLORREF rgb)
 {
-	// Example
-	// -------
-	rdPtr->m_dwColor = rgb;
-	InvalidateRect(rdPtr->m_hWnd, NULL, TRUE);
+        // Example
+        // -------
+        rdPtr->m_dwColor = rgb;
+        InvalidateRect(rdPtr->m_hWnd, NULL, TRUE);
 }
 */
-
 
 // ============================================================================
 //
 // DEBUGGER ROUTINES
-// 
+//
 // ============================================================================
 
 // -----------------
@@ -415,9 +411,9 @@ void WINAPI SetRunObjectTextColor(LPRDATA rdPtr, COLORREF rgb)
 LPWORD WINAPI DLLExport GetDebugTree(LPRDATA rdPtr)
 {
 #if !defined(RUN_ONLY)
-	return DebugTree;
+    return DebugTree;
 #else
-	return NULL;
+    return NULL;
 #endif // !defined(RUN_ONLY)
 }
 
@@ -430,33 +426,33 @@ void WINAPI DLLExport GetDebugItem(LPSTR pBuffer, LPRDATA rdPtr, int id)
 {
 #if !defined(RUN_ONLY)
 
-	// Example
-	// -------
+// Example
+// -------
 /*
-	char temp[DB_BUFFERSIZE];
+        char temp[DB_BUFFERSIZE];
 
-	switch (id)
-	{
-	case DB_CURRENTSTRING:
-		LoadString(hInstLib, IDS_CURRENTSTRING, temp, DB_BUFFERSIZE);
-		wsprintf(pBuffer, temp, rdPtr->text);
-		break;
-	case DB_CURRENTVALUE:
-		LoadString(hInstLib, IDS_CURRENTVALUE, temp, DB_BUFFERSIZE);
-		wsprintf(pBuffer, temp, rdPtr->value);
-		break;
-	case DB_CURRENTCHECK:
-		LoadString(hInstLib, IDS_CURRENTCHECK, temp, DB_BUFFERSIZE);
-		if (rdPtr->check)
-			wsprintf(pBuffer, temp, "TRUE");
-		else
-			wsprintf(pBuffer, temp, "FALSE");
-		break;
-	case DB_CURRENTCOMBO:
-		LoadString(hInstLib, IDS_CURRENTCOMBO, temp, DB_BUFFERSIZE);
-		wsprintf(pBuffer, temp, rdPtr->combo);
-		break;
-	}
+        switch (id)
+        {
+        case DB_CURRENTSTRING:
+                LoadString(hInstLib, IDS_CURRENTSTRING, temp, DB_BUFFERSIZE);
+                wsprintf(pBuffer, temp, rdPtr->text);
+                break;
+        case DB_CURRENTVALUE:
+                LoadString(hInstLib, IDS_CURRENTVALUE, temp, DB_BUFFERSIZE);
+                wsprintf(pBuffer, temp, rdPtr->value);
+                break;
+        case DB_CURRENTCHECK:
+                LoadString(hInstLib, IDS_CURRENTCHECK, temp, DB_BUFFERSIZE);
+                if (rdPtr->check)
+                        wsprintf(pBuffer, temp, "TRUE");
+                else
+                        wsprintf(pBuffer, temp, "FALSE");
+                break;
+        case DB_CURRENTCOMBO:
+                LoadString(hInstLib, IDS_CURRENTCOMBO, temp, DB_BUFFERSIZE);
+                wsprintf(pBuffer, temp, rdPtr->combo);
+                break;
+        }
 */
 
 #endif // !defined(RUN_ONLY)
@@ -471,39 +467,41 @@ void WINAPI DLLExport EditDebugItem(LPRDATA rdPtr, int id)
 {
 #if !defined(RUN_ONLY)
 
-	// Example
-	// -------
+// Example
+// -------
 /*
-	switch (id)
-	{
-	case DB_CURRENTSTRING:
-		{
-			EditDebugInfo dbi;
-			char buffer[256];
+        switch (id)
+        {
+        case DB_CURRENTSTRING:
+                {
+                        EditDebugInfo dbi;
+                        char buffer[256];
 
-			dbi.pText=buffer;
-			dbi.lText=TEXT_MAX;
-			dbi.pTitle=NULL;
+                        dbi.pText=buffer;
+                        dbi.lText=TEXT_MAX;
+                        dbi.pTitle=NULL;
 
-			strcpy(buffer, rdPtr->text);
-			long ret=callRunTimeFunction(rdPtr, RFUNCTION_EDITTEXT, 0, (LPARAM)&dbi);
-			if (ret)
-				strcpy(rdPtr->text, dbi.pText);
-		}
-		break;
-	case DB_CURRENTVALUE:
-		{
-			EditDebugInfo dbi;
+                        strcpy(buffer, rdPtr->text);
+                        long ret=callRunTimeFunction(rdPtr, RFUNCTION_EDITTEXT,
+   0, (LPARAM)&dbi);
+                        if (ret)
+                                strcpy(rdPtr->text, dbi.pText);
+                }
+                break;
+        case DB_CURRENTVALUE:
+                {
+                        EditDebugInfo dbi;
 
-			dbi.value=rdPtr->value;
-			dbi.pTitle=NULL;
+                        dbi.value=rdPtr->value;
+                        dbi.pTitle=NULL;
 
-			long ret=callRunTimeFunction(rdPtr, RFUNCTION_EDITINT, 0, (LPARAM)&dbi);
-			if (ret)
-				rdPtr->value=dbi.value;
-		}
-		break;
-	}
+                        long ret=callRunTimeFunction(rdPtr, RFUNCTION_EDITINT,
+   0, (LPARAM)&dbi);
+                        if (ret)
+                                rdPtr->value=dbi.value;
+                }
+                break;
+        }
 */
 #endif // !defined(RUN_ONLY)
 }

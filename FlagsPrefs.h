@@ -1,7 +1,7 @@
 //--------------------
-//OEFLAGS/OEPREFS
+// OEFLAGS/OEPREFS
 //--------------------
-//See the documentation for more information about these
+// See the documentation for more information about these
 
 #define M_OEFLAG_DISPLAYINFRONT
 #define M_OEFLAG_BACKGROUND
@@ -33,5 +33,5 @@
 #define M_OEPREFS_TRANSITIONS
 #define M_OEPREFS_FINECOLLISIONS
 
-#define     OEFLAGS    M_OEFLAG_VALUES      
-#define     OEPREFS                    
+#define OEFLAGS M_OEFLAG_VALUES
+#define OEPREFS

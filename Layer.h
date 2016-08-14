@@ -1,142 +1,116 @@
 #pragma once
 
-#include <new>
 #include <map>
-#include <vector>
+#include <new>
 #include <string>
+#include <vector>
 
 using std::vector;
 using std::map;
 using std::string;
 
-#include "Tile.h"
-#include "SubLayer.h"
 #include "Property.h"
+#include "SubLayer.h"
+#include "Tile.h"
 
-struct SubLayerLink
-{
-	unsigned char tileset;
-	unsigned char animation;
-	unsigned char animationFrame;
+struct SubLayerLink {
+    unsigned char tileset;
+    unsigned char animation;
+    unsigned char animationFrame;
 
-	SubLayerLink() : tileset(0xff), animation(0xff), animationFrame(0xff)
-	{
-	}
+    SubLayerLink() : tileset(0xff), animation(0xff), animationFrame(0xff) {}
 };
 
-struct LayerSettings
-{
-	// Scrolling offset in pixels
-	int				offsetX;
-	int				offsetY;
+struct LayerSettings {
+    // Scrolling offset in pixels
+    int offsetX;
+    int offsetY;
 
-	// Scrolling coefficient for parallax
-	float			scrollX;
-	float			scrollY;
+    // Scrolling coefficient for parallax
+    float scrollX;
+    float scrollY;
 
-	// Wrapping
-	bool			wrapX;
-	bool			wrapY;
+    // Wrapping
+    bool wrapX;
+    bool wrapY;
 
-	// Rendering settings
-	bool			visible;
-	float			opacity;
+    // Rendering settings
+    bool visible;
+    float opacity;
 
-	/* Tileset and collision indices */;
-	unsigned char	tileset;
-	unsigned char	collision;
+    /* Tileset and collision indices */;
+    unsigned char tileset;
+    unsigned char collision;
 
-	// Tile size (pixels)
-	unsigned short	tileWidth;
-	unsigned short	tileHeight;
+    // Tile size (pixels)
+    unsigned short tileWidth;
+    unsigned short tileHeight;
 
-	// Sub-layer link indices
-	SubLayerLink	subLayerLink;
+    // Sub-layer link indices
+    SubLayerLink subLayerLink;
 
-	LayerSettings() : offsetX(0), offsetY(0), scrollX(1.0), scrollY(1.0), wrapX(false), wrapY(false),
-		visible(true), opacity(1.0), tileset(0), collision(-1),
-		tileWidth(16), tileHeight(16)
-	{
-	}
+    LayerSettings()
+        : offsetX(0), offsetY(0), scrollX(1.0), scrollY(1.0), wrapX(false),
+          wrapY(false), visible(true), opacity(1.0), tileset(0), collision(-1),
+          tileWidth(16), tileHeight(16)
+    {
+    }
 };
 
-class Layer
-{
-	// Tile data
-	Tile*			data;
-	
-	// Tile count (map size)
-	unsigned		width;
-	unsigned		height;
+class Layer {
+    // Tile data
+    Tile* data;
 
-public:
+    // Tile count (map size)
+    unsigned width;
+    unsigned height;
 
-	// Modiyable layer settings
-	LayerSettings	settings;
+  public:
+    // Modiyable layer settings
+    LayerSettings settings;
 
-	// User properties
-	map<string, Property> properties;
+    // User properties
+    map<string, Property> properties;
 
-	// Sub-layers
-	vector<SubLayer> subLayers;
+    // Sub-layers
+    vector<SubLayer> subLayers;
 
-	// Constructor/destructor
-	Layer()
-		: width(0), height(0), data(0)
-	{
-	}
+    // Constructor/destructor
+    Layer() : width(0), height(0), data(0) {}
 
-	Layer(const Layer& src);
+    Layer(const Layer& src);
 
-	~Layer()
-	{
-		delete[] data;
-	}
+    ~Layer() { delete[] data; }
 
-	// Check if a layer is usable
-	bool isValid() const
-	{
-		return width > 0 && height > 0 && data != 0;
-	}
+    // Check if a layer is usable
+    bool isValid() const { return width > 0 && height > 0 && data != 0; }
 
-	// Check if a coordinate is valid
-	bool isValid(unsigned x, unsigned y) const
-	{
-		return isValid() && x < width && y < height;
-	}
+    // Check if a coordinate is valid
+    bool isValid(unsigned x, unsigned y) const
+    {
+        return isValid() && x < width && y < height;
+    }
 
-	// Get a tile within the layer array
-	__forceinline Tile* getTile(unsigned x, unsigned y)
-	{
-		return data + x + width*y;
-	}
+    // Get a tile within the layer array
+    __forceinline Tile* getTile(unsigned x, unsigned y)
+    {
+        return data + x + width * y;
+    }
 
-	__forceinline Tile* getDataPointer()
-	{
-		return data;
-	}
+    __forceinline Tile* getDataPointer() { return data; }
 
-	unsigned getWidth() const
-	{
-		return width;
-	}
+    unsigned getWidth() const { return width; }
 
-	unsigned getHeight() const
-	{
-		return height;
-	}
+    unsigned getHeight() const { return height; }
 
-	unsigned getByteSize() const
-	{
-		return width * height * sizeof(Tile);
-	}
+    unsigned getByteSize() const { return width * height * sizeof(Tile); }
 
-	// Resize layer, new tiles are empty
-	void resize(unsigned newWidth, unsigned newHeight);
+    // Resize layer, new tiles are empty
+    void resize(unsigned newWidth, unsigned newHeight);
 
-	// For viewport rendering
-	int getScreenX(int cameraX);
-	int getScreenY(int cameraY);
+    // For viewport rendering
+    int getScreenX(int cameraX);
+    int getScreenY(int cameraY);
     int getScreenWidth();
     int getScreenHeight();
 };
