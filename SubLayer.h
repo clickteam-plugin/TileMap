@@ -15,7 +15,7 @@ class SubLayer {
     unsigned defaultValue;
 
     // Raw data (may be reinterpreted)
-    unsigned char* data;
+    unsigned char * data;
 
     // Tile count, should always be the same as the parent's
     unsigned int width;
@@ -25,7 +25,7 @@ class SubLayer {
     SubLayer() : data(0), cellShift(0), cellSize(1), defaultValue(0) {}
 
     SubLayer(unsigned cellSize, unsigned defaultValue);
-    SubLayer(const SubLayer& src);
+    SubLayer(const SubLayer & src);
 
     ~SubLayer() { delete[] data; }
 
@@ -43,13 +43,13 @@ class SubLayer {
     }
 
     // Get a tile within the layer array
-    __forceinline unsigned char* getCell(unsigned x, unsigned int y) const
+    __forceinline unsigned char * getCell(unsigned x, unsigned int y) const
     {
         return data + ((x + width * y) << cellShift);
     }
 
     template <class T>
-    __forceinline void getCellSafe(unsigned x, unsigned y, T* target) const
+    __forceinline void getCellSafe(unsigned x, unsigned y, T * target) const
     {
         unsigned maxSize = min(sizeof(*target), cellSize);
 
@@ -58,7 +58,7 @@ class SubLayer {
 
     template <class T> __forceinline T getCellAs(unsigned x, unsigned y)
     {
-        return *reinterpret_cast<T*>(getCell(x, y));
+        return *reinterpret_cast<T *>(getCell(x, y));
     }
 
     __forceinline void setCell(unsigned x, unsigned y, unsigned value)
@@ -70,7 +70,7 @@ class SubLayer {
 
     unsigned int getHeight() const { return height; }
 
-    unsigned char* getDataPointer() { return data; }
+    unsigned char * getDataPointer() { return data; }
 
     unsigned int getByteSize() const { return (width * height) << cellShift; }
 

@@ -8,6 +8,20 @@
 #include "Common.h"
 #include "HWASurface.h"
 
+std::size_t getLayerCount(TILEMAP * tileMap) { return tileMap->layers->size(); }
+
+Layer * getLayerAt(TILEMAP * tileMap, std::size_t i)
+{
+    return i < tileMap->layers->size() ? &(*tileMap->layers)[i] : NULL;
+}
+
+std::size_t getLayerSubLayerCount(Layer * layer) { return layer->subLayers.size(); }
+
+SubLayer * getLayerSubLayerAt(Layer * layer, std::size_t i)
+{
+    return i < layer->subLayers.size() ? &layer->subLayers[i] : NULL;
+}
+
 // --------------------
 // GetRunObjectDataSize
 // --------------------
@@ -47,18 +61,24 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
 
     LPRH rhPtr = rdPtr->rHo.hoAdRunHeader;
 
+    // Initialize function interface
+    rdPtr->getLayerAt = getLayerAt;
+    rdPtr->getLayerCount = getLayerCount;
+    rdPtr->getLayerSubLayerAt = getLayerSubLayerAt;
+    rdPtr->getLayerSubLayerCount = getLayerSubLayerCount;
+
     // Attached viewports
-    rdPtr->viewports = new list<TMAPVIEW*>;
+    rdPtr->viewports = new list<TMAPVIEW *>;
     rdPtr->redraw = false;
 
     // Create surface, get MMF depth..
-    cSurface* ps = WinGetSurface((int)rdPtr->rHo.hoAdRunHeader->rhIdEditWin);
+    cSurface * ps = WinGetSurface((int)rdPtr->rHo.hoAdRunHeader->rhIdEditWin);
 
     if (!ps)
         return 1;
 
     rdPtr->depth = ps->GetDepth();
-    cSurface* proto = getPrototype(rdPtr->depth);
+    cSurface * proto = getPrototype(rdPtr->depth);
 
     // Database
     rdPtr->layers = new vector<Layer>;
@@ -71,7 +91,7 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
     cSurface is;
     for (int i = 0; i < edPtr->tilesetCount; ++i) {
         rdPtr->tilesets->push_back(Tileset());
-        Tileset& tileset = rdPtr->tilesets->back();
+        Tileset & tileset = rdPtr->tilesets->back();
 
         // Create a tileset for each image
         if (LockImageSurface(rhPtr->rhIdAppli, edPtr->tilesets[i], is)) {
@@ -96,8 +116,7 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
     rdPtr->tileWidth = edPtr->tileWidth;
     rdPtr->tileHeight = edPtr->tileHeight;
 
-    rdPtr->blocks = (edPtr->blockMap ? BLOCK_MAP : 0) |
-                    (edPtr->blockLayers ? BLOCK_LAYERS : 0) |
+    rdPtr->blocks = (edPtr->blockMap ? BLOCK_MAP : 0) | (edPtr->blockLayers ? BLOCK_LAYERS : 0) |
                     (edPtr->blockTilesets ? BLOCK_TILESETS : 0);
 
     // Default compression level
@@ -105,8 +124,7 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
 
     // How to save tileset paths (by default, use path relative to map file)
     rdPtr->tilesetPathMode = (TSPMODE)edPtr->tilesetPathMode;
-    callRunTimeFunction(rdPtr, RFUNCTION_GETFILEINFOS, FILEINFO_PATH,
-                        (long)&rdPtr->appPath[0]);
+    callRunTimeFunction(rdPtr, RFUNCTION_GETFILEINFOS, FILEINFO_PATH, (long)&rdPtr->appPath[0]);
 
     // Set up tile cursor
     rdPtr->cursor.x = 0;
@@ -208,7 +226,8 @@ lParam)
         // ----------------------------------
         // Opaque? collide with box
         if ( (rdPtr->rs.rsEffect & EFFECTFLAG_TRANSPARENT) == 0 )	//
-Note: only if your object has the OEPREFS_INKEFFECTS option
+Note: only if your
+object has the OEPREFS_INKEFFECTS option
                 return NULL;
 
         // Transparent? Create mask
@@ -234,7 +253,8 @@ lParam);
 
         // Note: for active objects, lParam is always the same.
         // For background objects (OEFLAG_BACKGROUND), lParam maybe be different
-if the user uses your object
+if the user uses
+your object
         // as obstacle and as platform. In this case, you should store 2
 collision masks
         // in your data: one if lParam is 0 and another one if lParam is
@@ -278,7 +298,7 @@ short WINAPI DLLExport ContinueRunObject(LPRDATA rdPtr)
 // Called when the application starts or restarts.
 // Useful for storing global data
 //
-void WINAPI DLLExport StartApp(mv _far* mV, CRunApp* pApp)
+void WINAPI DLLExport StartApp(mv _far * mV, CRunApp * pApp)
 {
     // Example
     // -------
@@ -296,7 +316,7 @@ void WINAPI DLLExport StartApp(mv _far* mV, CRunApp* pApp)
 // -------------------
 // Called when the application ends.
 //
-void WINAPI DLLExport EndApp(mv _far* mV, CRunApp* pApp)
+void WINAPI DLLExport EndApp(mv _far * mV, CRunApp * pApp)
 {
     // Example
     // -------
@@ -314,18 +334,14 @@ void WINAPI DLLExport EndApp(mv _far* mV, CRunApp* pApp)
 // -------------------
 // Called when the frame starts or restarts.
 //
-void WINAPI DLLExport StartFrame(mv _far* mV, DWORD dwReserved, int nFrameIndex)
-{
-}
+void WINAPI DLLExport StartFrame(mv _far * mV, DWORD dwReserved, int nFrameIndex) {}
 
 // -------------------
 // EndFrame
 // -------------------
 // Called when the frame ends.
 //
-void WINAPI DLLExport EndFrame(mv _far* mV, DWORD dwReserved, int nFrameIndex)
-{
-}
+void WINAPI DLLExport EndFrame(mv _far * mV, DWORD dwReserved, int nFrameIndex) {}
 
 // ============================================================================
 //

@@ -29,7 +29,7 @@ inline int signmod(int x, int room)
 // difference must be retained
 // Returns true if there was no split. Otherwise, split contains the offset from
 // a where the split must be performed
-inline int signmodPair(int& a, int& b, unsigned* split, int room)
+inline int signmodPair(int & a, int & b, unsigned * split, int room)
 {
     // Wrapping right/bottom
     if (a >= room) {

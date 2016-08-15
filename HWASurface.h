@@ -1,8 +1,8 @@
 #pragma once
 
-inline cSurface* getPrototype(int depth, bool render = false)
+inline cSurface * getPrototype(int depth, bool render = false)
 {
-    cSurface* proto = 0;
+    cSurface * proto = 0;
 
 #ifdef HWABETA
     if (render) {
@@ -15,7 +15,7 @@ inline cSurface* getPrototype(int depth, bool render = false)
     return proto;
 }
 
-inline bool copyBlit(cSurface& src, cSurface& dest)
+inline bool copyBlit(cSurface & src, cSurface & dest)
 {
 #ifdef HWABETA
     return 0 != src.Blit(dest);

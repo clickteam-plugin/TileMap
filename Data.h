@@ -1,7 +1,7 @@
 #include "Rundata.h"
 
 typedef TILEMAP RUNDATA;
-typedef RUNDATA* LPRDATA;
+typedef RUNDATA * LPRDATA;
 
 #define TILESETCOUNT 16
 typedef struct tagEDATA_V1 {
@@ -9,8 +9,7 @@ typedef struct tagEDATA_V1 {
 
     /* Map */
     unsigned short tileWidth;
-    unsigned char
-        tileHeight; // Split up so we don't need to resize the editdata
+    unsigned char tileHeight; // Split up so we don't need to resize the editdata
     unsigned char tilesetPathMode;
 
     WORD tilesets[TILESETCOUNT];
@@ -20,4 +19,4 @@ typedef struct tagEDATA_V1 {
     bool blockTilesets : 1;
 
 } EDITDATA;
-typedef EDITDATA* LPEDATA;
+typedef EDITDATA * LPEDATA;

@@ -5,7 +5,7 @@
  * Layer
  */
 
-Layer::Layer(const Layer& src)
+Layer::Layer(const Layer & src)
     : data(0), settings(src.settings), width(src.width), height(src.height)
 {
     if (src.data) {
@@ -41,7 +41,7 @@ void Layer::resize(unsigned newWidth, unsigned newHeight)
     }
 
     // Allocate a new array
-    Tile* newData = new Tile[newWidth * newHeight];
+    Tile * newData = new Tile[newWidth * newHeight];
 
     // Zero all tiles
     memset(newData, 0xff, newWidth * newHeight * sizeof(Tile));
@@ -111,9 +111,8 @@ SubLayer::SubLayer(unsigned cellSize, unsigned defaultValue)
 {
 }
 
-SubLayer::SubLayer(const SubLayer& src)
-    : data(0), defaultValue(src.defaultValue), cellShift(src.cellShift),
-      cellSize(src.cellSize)
+SubLayer::SubLayer(const SubLayer & src)
+    : data(0), defaultValue(src.defaultValue), cellShift(src.cellShift), cellSize(src.cellSize)
 {
     width = src.width;
     height = src.height;
@@ -138,7 +137,7 @@ void SubLayer::resize(unsigned int newWidth, unsigned int newHeight)
         return;
     }
 
-    unsigned char* newData = new unsigned char[(newWidth * newHeight) << cellShift];
+    unsigned char * newData = new unsigned char[(newWidth * newHeight) << cellShift];
 
     // Zero all tiles
     if (cellShift) {

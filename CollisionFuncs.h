@@ -2,12 +2,11 @@
 
 // Assigns and returns a layer's collision tileset before checking for
 // collisions
-cSurface* prepareLayerCollSurf(LPRDATA rdPtr, const Layer& layer)
+cSurface * prepareLayerCollSurf(LPRDATA rdPtr, const Layer & layer)
 {
     // Get layer's collision tileset
-    unsigned char tilesetID = (layer.settings.collision != 0xff)
-                                  ? layer.settings.collision
-                                  : layer.settings.tileset;
+    unsigned char tilesetID = (layer.settings.collision != 0xff) ? layer.settings.collision
+                                                                 : layer.settings.tileset;
     if (tilesetID >= rdPtr->p->tilesets->size())
         return 0;
 
@@ -18,7 +17,7 @@ cSurface* prepareLayerCollSurf(LPRDATA rdPtr, const Layer& layer)
 }
 
 // Prepares a fine collision by locking the used buffer
-BYTE* prepareFineColl(LPRDATA rdPtr, cSurface* surface)
+BYTE * prepareFineColl(LPRDATA rdPtr, cSurface * surface)
 {
     if (!rdPtr->fineColl)
         return 0;
@@ -33,7 +32,7 @@ BYTE* prepareFineColl(LPRDATA rdPtr, cSurface* surface)
 }
 
 // Unlocks the buffer
-void unprepareFineColl(LPRDATA rdPtr, cSurface* surface, BYTE* buff)
+void unprepareFineColl(LPRDATA rdPtr, cSurface * surface, BYTE * buff)
 {
     if (!rdPtr->fineColl)
         return;
@@ -48,7 +47,7 @@ void unprepareFineColl(LPRDATA rdPtr, cSurface* surface, BYTE* buff)
 }
 
 // Caches all sub-layer pointers that will be needed for the overlap filters
-void cacheOverlapSublayers(LPRDATA rdPtr, const Layer& layer)
+void cacheOverlapSublayers(LPRDATA rdPtr, const Layer & layer)
 {
     // If there's a sublayer filter we'll cache the layer's sublayer pointers
     for (unsigned i = 0; i < rdPtr->ovlpFilterCount; ++i) {

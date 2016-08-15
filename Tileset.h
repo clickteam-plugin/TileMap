@@ -5,8 +5,8 @@ class Tileset {
     char path[256];
 
   public:
-    cSurface* surface;
-    cSurface* texture;
+    cSurface * surface;
+    cSurface * texture;
     COLORREF transpCol;
 
     Tileset() : surface(0), texture(0), transpCol(0xFF00FF) { path[0] = 0; }
@@ -19,7 +19,7 @@ class Tileset {
 #endif
     }
 
-    Tileset(const Tileset& src) : surface(0), texture(0)
+    Tileset(const Tileset & src) : surface(0), texture(0)
     {
         int n = min(254, strlen(src.path));
         strncpy(path, src.path, n);
@@ -57,7 +57,7 @@ class Tileset {
 #endif
     }
 
-    void setPathFromRelative(const char* sourcePath, const char* relativePath)
+    void setPathFromRelative(const char * sourcePath, const char * relativePath)
     {
         // Try to make this path absolute
         if (!PathCombine(path, sourcePath, relativePath)) {
@@ -66,12 +66,11 @@ class Tileset {
         }
     }
 
-    void setPath(const char* source) { strcpy_s(path, 256, source); }
+    void setPath(const char * source) { strcpy_s(path, 256, source); }
 
-    const char* getPath() const { return (const char*)&path[0]; }
+    const char * getPath() const { return (const char *)&path[0]; }
 
-    bool getPathRelativeTo(const char* sourcePath, char* outputBuffer,
-                           bool sourceIsFile = false) const
+    bool getPathRelativeTo(const char * sourcePath, char * outputBuffer, bool sourceIsFile = false) const
     {
         return outputBuffer &&
                PathRelativePathTo(outputBuffer, sourcePath,

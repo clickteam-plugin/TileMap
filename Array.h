@@ -5,14 +5,14 @@ template <class Type> class Array {
     static char DefaultValue;
 
     // Type data & size
-    Type* data;
+    Type * data;
     unsigned int width;
     unsigned int height;
     unsigned int cellSize;
 
   public:
     // Clone data from an equivalent array
-    void clone(const Array<Type>& src)
+    void clone(const Array<Type> & src)
     {
         if (data)
             delete[] data;
@@ -43,7 +43,7 @@ template <class Type> class Array {
     inline unsigned int getHeight() const { return height; }
 
     // Get a Type within the layer array
-    inline Type* get(unsigned int x = 0, unsigned int y = 0)
+    inline Type * get(unsigned int x = 0, unsigned int y = 0)
     {
         return data + x + width * y;
     }
@@ -64,7 +64,7 @@ template <class Type> class Array {
         }
 
         // Allocate a new array
-        Type* newData = new Type[newWidth * newHeight];
+        Type * newData = new Type[newWidth * newHeight];
         if (!newData) {
             width = 0;
             height = 0;

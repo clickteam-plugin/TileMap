@@ -6,11 +6,11 @@
 class TMIStream : public std::ifstream {
     unsigned blockSize;
 
-    unsigned char* compressionBuffer;
+    unsigned char * compressionBuffer;
     unsigned compressionBufferSize;
 
   public:
-    TMIStream(const char* fileName)
+    TMIStream(const char * fileName)
         : std::ifstream(fileName, std::ifstream::in | std::ifstream::binary),
           blockSize(0), compressionBuffer(0), compressionBufferSize(0)
     {
@@ -33,7 +33,7 @@ class TMIStream : public std::ifstream {
     void skipBlock() { seekg(blockSize, ios_base::cur); }
 
     // Reads z-lib compressed data preceded by the size
-    void readCompressedData(char* destination, unsigned size)
+    void readCompressedData(char * destination, unsigned size)
     {
         // Read the size of the compressed input data
         mz_ulong dataSize = 0;
@@ -46,21 +46,16 @@ class TMIStream : public std::ifstream {
                 compressionBuffer = 0;
             }
 
-            // Need to allocate a compression buffer
             if (!compressionBuffer) {
                 compressionBuffer = new unsigned char[dataSize];
                 compressionBufferSize = dataSize;
             }
 
-            // If we were able to allocate the buffer
             if (compressionBuffer) {
-                // Read the compressed data
-                read((char*)compressionBuffer, dataSize);
+                read((char *)compressionBuffer, dataSize);
 
-                // Uncompress data
                 mz_ulong dataAlloc = size;
-                mz_uncompress((unsigned char*)destination, &dataAlloc,
-                              compressionBuffer, dataSize);
+                mz_uncompress((unsigned char *)destination, &dataAlloc, compressionBuffer, dataSize);
 
                 return;
             }
@@ -71,14 +66,14 @@ class TMIStream : public std::ifstream {
     }
 
     // Read a binary block as big as the given buffer
-    template <class T> TMIStream& operator>>(T& i)
+    template <class T> TMIStream & operator>>(T & i)
     {
-        read(reinterpret_cast<char*>(&i), sizeof(i));
+        read(reinterpret_cast<char *>(&i), sizeof(i));
         return *this;
     }
 
     // Read a string preceded by its length into a buffer (max 256 bytes)
-    unsigned char readShortStr(char* buffer)
+    unsigned char readShortStr(char * buffer)
     {
         unsigned char length = 0;
         *this >> length;
@@ -88,12 +83,12 @@ class TMIStream : public std::ifstream {
     }
 
     // Read a string preceded by its length into a newly allocated buffer
-    char* readLongStr()
+    char * readLongStr()
     {
         unsigned char length = 0;
         *this >> length;
 
-        char* buffer = new char[length + 1];
+        char * buffer = new char[length + 1];
         buffer[length] = 0;
 
         read(buffer, length);

@@ -32,12 +32,12 @@ enum {
 
 // Globals and prototypes
 extern HINSTANCE hInstLib;
-extern short* conditionsInfos;
-extern short* actionsInfos;
-extern short* expressionsInfos;
-extern long(WINAPI** ConditionJumps)(LPRDATA rdPtr, long param1, long param2);
-extern short(WINAPI** ActionJumps)(LPRDATA rdPtr, long param1, long param2);
-extern long(WINAPI** ExpressionJumps)(LPRDATA rdPtr, long param);
+extern short * conditionsInfos;
+extern short * actionsInfos;
+extern short * expressionsInfos;
+extern long(WINAPI ** ConditionJumps)(LPRDATA rdPtr, long param1, long param2);
+extern short(WINAPI ** ActionJumps)(LPRDATA rdPtr, long param1, long param2);
+extern long(WINAPI ** ExpressionJumps)(LPRDATA rdPtr, long param);
 extern PropData Properties[];
 extern WORD DebugTree[];
 

@@ -38,7 +38,7 @@ struct LayerSettings {
     bool visible;
     float opacity;
 
-    /* Tileset and collision indices */;
+    /* Tileset and collision indices */
     unsigned char tileset;
     unsigned char collision;
 
@@ -50,16 +50,15 @@ struct LayerSettings {
     SubLayerLink subLayerLink;
 
     LayerSettings()
-        : offsetX(0), offsetY(0), scrollX(1.0), scrollY(1.0), wrapX(false),
-          wrapY(false), visible(true), opacity(1.0), tileset(0), collision(-1),
-          tileWidth(16), tileHeight(16)
+        : offsetX(0), offsetY(0), scrollX(1.0), scrollY(1.0), wrapX(false), wrapY(false),
+          visible(true), opacity(1.0), tileset(0), collision(-1), tileWidth(16), tileHeight(16)
     {
     }
 };
 
 class Layer {
     // Tile data
-    Tile* data;
+    Tile * data;
 
     // Tile count (map size)
     unsigned width;
@@ -78,7 +77,7 @@ class Layer {
     // Constructor/destructor
     Layer() : width(0), height(0), data(0) {}
 
-    Layer(const Layer& src);
+    Layer(const Layer & src);
 
     ~Layer() { delete[] data; }
 
@@ -92,12 +91,9 @@ class Layer {
     }
 
     // Get a tile within the layer array
-    __forceinline Tile* getTile(unsigned x, unsigned y)
-    {
-        return data + x + width * y;
-    }
+    __forceinline Tile * getTile(unsigned x, unsigned y) { return data + x + width * y; }
 
-    __forceinline Tile* getDataPointer() { return data; }
+    __forceinline Tile * getDataPointer() { return data; }
 
     unsigned getWidth() const { return width; }
 

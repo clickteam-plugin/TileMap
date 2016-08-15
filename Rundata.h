@@ -1,19 +1,24 @@
 #pragma once
 
 class rRundata;
-typedef rRundata* LPRRDATA;
+typedef rRundata * LPRRDATA;
 
 #include <list>
 #include <map>
 #include <string>
 #include <vector>
 
+using std::list;
+using std::vector;
+using std::map;
+using std::string;
+
 #include "Layer.h"
 #include "Tile.h"
 #include "Tileset.h"
 
 // Simple rect structure with shorter member names than Windows' LEFT, BOTTOM,
-// etc.... jeez
+// etc.
 struct Rect {
     int x1, y1, x2, y2;
 
@@ -51,24 +56,33 @@ struct TILEMAP {
     rVal rv;
     LPRRDATA rRd;
 
-    // Depth for the tilesets (matches frame surface for max speed)
-    int depth;
+    // Stable ABI for STL containers
+    std::size_t (*getLayerCount)(TILEMAP *);
+    Layer * (*getLayerAt)(TILEMAP *, std::size_t);
+    std::size_t (*getLayerSubLayerCount)(Layer *);
+    SubLayer * (*getLayerSubLayerAt)(Layer *, std::size_t);
+    void * _reserved[6];
 
-    vector<Layer>* layers;
-    vector<Tileset>* tilesets;
-    map<string, Property>* properties;
+    Layer * currentLayer;
+    Tileset * currentTileset;
 
-    // Current stuff
-    Layer* currentLayer;
-    Tileset* currentTileset;
+    // Stupid std containers that don't have a stable ABI
+    std::vector<Layer> * layers;
+    std::vector<Tileset> * tilesets;
+    std::map<string, Property> * properties;
 
-    // Size of a tile in pixels
+    /// What follows is mostly cold data
+
+    // Attached viewports
+    list<TMAPVIEW *> * viewports;
+    bool redraw;
+
+    // Default size of a tile in pixels
     unsigned short tileWidth;
     unsigned short tileHeight;
 
-    // Attached viewports
-    list<TMAPVIEW*>* viewports;
-    bool redraw;
+    // Depth for the tilesets (matches frame surface for max speed)
+    int depth;
 
     // Compression level 0-10 for saving
     char compress;
@@ -81,7 +95,7 @@ struct TILEMAP {
     char appPath[256]; // Used for APP_PATH mode
 
     // Property iterator
-    const char* onProperty;
+    const char * onProperty;
 
     // Pen used for more flexible tile drawing
     struct {
@@ -122,7 +136,7 @@ struct Animation {
     // In what order to play the frames
     ANIMMODE mode;
 
-    void apply(Tile& tile, double time = 0.0, int frameOffset = 0);
+    void apply(Tile & tile, double time = 0.0, int frameOffset = 0);
 };
 
 enum OFTYPE {
@@ -172,11 +186,10 @@ struct TMAPVIEW {
     bool isUnicode;
 
     // Parent Tile Map
-    TILEMAP* p;
+    TILEMAP * p;
 
-    // Depth of the drawing surface
-    // We use the same depth for all tilesets
-    // To avoid conversion and ensure maximum speed
+    // Depth of the drawing surface. We use the same depth for all tilesets to
+    // avoid conversion and ensure maximum speed
     int depth;
 
     // Scrolling center position
@@ -199,7 +212,7 @@ struct TMAPVIEW {
     // Display surface
     bool transparent;
     COLORREF background;
-    cSurface* surface;
+    cSurface * surface;
     bool accurateClip;
     DWORD blitFlags;
 
@@ -210,9 +223,9 @@ struct TMAPVIEW {
     Animation anim[255];
 
     // Overlaps condition
-    Tileset* cndTileset;
-    cSurface* cndAlphaSurf;
-    Layer* cndLayer;
+    Tileset * cndTileset;
+    cSurface * cndAlphaSurf;
+    Layer * cndLayer;
 
     // On collision
     Tile collTile;
@@ -223,14 +236,14 @@ struct TMAPVIEW {
     // Overlap condition filter
     OVERLAPFLT ovlpFilters[8];
     unsigned ovlpFilterCount;
-    const SubLayer* sublayerCache[16];
+    const SubLayer * sublayerCache[16];
 
     struct {
         // Configuration
         bool use;
 
         // On layer
-        LayerSettings* settings;
+        LayerSettings * settings;
 
         // Sub-layer linkage
         struct {
@@ -255,8 +268,8 @@ struct TMAPVIEW {
         int borderY;
 
         // On tile
-        Tile* tile;
-        TileSettings* settings;
+        Tile * tile;
+        TileSettings * settings;
 
         // Get-only
         int x;
@@ -272,14 +285,14 @@ typedef struct tagSURFACE {
     rVal rv;
     LPRRDATA rRd;
     // Image bank and important IDs
-    vector<cSurface*>* surf;
-    cSurface* target;
+    vector<cSurface *> * surf;
+    cSurface * target;
     short targetId;
     bool targetValid;
-    cSurface* current;
+    cSurface * current;
     short currentId;
     short lastId;
     // Functions
-    cSurface* (*imageAt)(tagSURFACE*, int);
-    int (*imageCount)(tagSURFACE*);
+    cSurface * (*imageAt)(tagSURFACE *, int);
+    int (*imageCount)(tagSURFACE *);
 } SURFACE;
