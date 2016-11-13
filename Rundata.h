@@ -196,8 +196,8 @@ struct TMAPVIEW {
     float zoom;
     float zoomPointX;
     float zoomPointY;
-    int cameraX;
-    int cameraY;
+    float cameraX;
+    float cameraY;
     bool autoScroll;
 
     // Layer boundaries to draw

@@ -91,9 +91,9 @@ class Layer {
     }
 
     // Get a tile within the layer array
-    __forceinline Tile * getTile(unsigned x, unsigned y) { return data + x + width * y; }
+    Tile * getTile(unsigned x, unsigned y) { return data + x + width * y; }
 
-    __forceinline Tile * getDataPointer() { return data; }
+    Tile * getDataPointer() { return data; }
 
     unsigned getWidth() const { return width; }
 
@@ -105,8 +105,8 @@ class Layer {
     void resize(unsigned newWidth, unsigned newHeight);
 
     // For viewport rendering
-    int getScreenX(int cameraX);
-    int getScreenY(int cameraY);
+    float getScreenX(float cameraX);
+    float getScreenY(float cameraY);
     int getScreenWidth();
     int getScreenHeight();
 };

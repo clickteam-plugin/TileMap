@@ -5,7 +5,7 @@
 // Basic object details
 #define ObjectName "Tile Map"
 #define ObjectAuthor "Looki"
-#define ObjectCopyright "Copyright © 2012 Looki"
+#define ObjectCopyright "Copyright © 2012-2016 Looki"
 #define ObjectComment "Renders an attached Tile Map object's map."
 #define ObjectURL ""
 #define ObjectHelp "Help\\EmptyObject.chm"

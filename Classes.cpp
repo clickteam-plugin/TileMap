@@ -71,23 +71,23 @@ void Layer::resize(unsigned newWidth, unsigned newHeight)
 }
 
 // For viewport rendering
-int Layer::getScreenX(int cameraX)
+float Layer::getScreenX(float cameraX)
 {
-    int pos = (int)((settings.offsetX - cameraX) * settings.scrollX);
+    float pos = (settings.offsetX - cameraX) * settings.scrollX;
     if (settings.wrapX) {
         if (pos > 0)
-            pos %= getScreenWidth();
+            pos = fmod(pos, getScreenWidth());
     }
     return pos;
 }
 
 // For viewport rendering
-int Layer::getScreenY(int cameraY)
+float Layer::getScreenY(float cameraY)
 {
-    int pos = (int)((settings.offsetY - cameraY) * settings.scrollY);
+    float pos = (settings.offsetY - cameraY) * settings.scrollY;
     if (settings.wrapY) {
         if (pos > 0)
-            pos %= getScreenHeight();
+            pos = fmod(pos, getScreenHeight());
     }
     return pos;
 }
