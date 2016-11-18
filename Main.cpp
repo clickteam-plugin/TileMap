@@ -1934,7 +1934,7 @@ ACTION(
         return;
     }
 
-    at = max(0, rdPtr->layers->size());
+    at = max(0, at);
     rdPtr->currentLayer = &*rdPtr->layers->insert(rdPtr->layers->begin() + at, Layer());
     rdPtr->currentLayer->settings.tileWidth = rdPtr->tileWidth;
     rdPtr->currentLayer->settings.tileHeight = rdPtr->tileHeight;
