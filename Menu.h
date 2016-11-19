@@ -205,6 +205,8 @@ SUB_START("Layers")
         ITEM(10, "Width")
         ITEM(11, "Height")
     SUB_END
+    ITEM(32, "Tileset")
+    ITEM(33, "Collision tileset")
     SEPARATOR
     SUB_START("Offset")
         ITEM(6, "X")

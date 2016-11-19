@@ -2509,3 +2509,31 @@ EXPRESSION(
 {
     return rdPtr->cursor.height;
 }
+
+EXPRESSION(
+    /* ID */ 32,
+    /* Name */ "LayerTileset(",
+    /* Flags */ 0,
+    /* Params */ (1, EXPPARAM_NUMBER, "Layer index"))
+{
+    unsigned i = ExParam(TYPE_INT);
+
+    if (i < rdPtr->layers->size())
+        return (*rdPtr->layers)[i].settings.tileset;
+
+    return -1;
+}
+
+EXPRESSION(
+    /* ID */ 33,
+    /* Name */ "LayerCollTileset(",
+    /* Flags */ 0,
+    /* Params */ (1, EXPPARAM_NUMBER, "Layer index"))
+{
+    unsigned i = ExParam(TYPE_INT);
+
+    if (i < rdPtr->layers->size())
+        return (*rdPtr->layers)[i].settings.collision;
+
+    return -1;
+}
