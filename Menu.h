@@ -188,6 +188,7 @@ SEPARATOR
 SEPARATOR
 SUB_START("Tilesets")
     ITEM(16, "Count")
+    ITEM(35, "Current index")
     SEPARATOR
     ITEM(0, "Width")
     ITEM(1, "Height")
@@ -196,6 +197,7 @@ SUB_START("Tilesets")
 SUB_END
 SUB_START("Layers")
     ITEM(15, "Count")
+    ITEM(34, "Current index")
     SEPARATOR
     SUB_START("Size")
         ITEM(2, "Width")

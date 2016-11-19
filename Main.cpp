@@ -2537,3 +2537,32 @@ EXPRESSION(
 
     return -1;
 }
+
+
+EXPRESSION(
+    /* ID */ 34,
+    /* Name */ "CurrentLayer(",
+    /* Flags */ 0,
+    /* Params */ (0))
+{
+    if (rdPtr->currentLayer) {
+        Layer * base = &(*rdPtr->layers)[0];
+        return rdPtr->currentLayer - base;
+    }
+
+    return -1;
+}
+
+EXPRESSION(
+    /* ID */ 35,
+    /* Name */ "CurrentTileset(",
+    /* Flags */ 0,
+    /* Params */ (0))
+{
+    if (rdPtr->currentTileset) {
+        Tileset * base = &(*rdPtr->tilesets)[0];
+        return rdPtr->currentTileset - base;
+    }
+
+    return -1;
+}
