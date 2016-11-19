@@ -85,7 +85,7 @@ class TMIStream : public std::ifstream {
     // Read a string preceded by its length into a newly allocated buffer
     char * readLongStr()
     {
-        unsigned char length = 0;
+        size_t length = 0;
         *this >> length;
 
         char * buffer = new char[length + 1];
