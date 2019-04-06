@@ -92,6 +92,7 @@ short WINAPI DLLExport CreateRunObject(LPRDATA rdPtr, LPEDATA edPtr, fpcob cobPt
     for (int i = 0; i < edPtr->tilesetCount; ++i) {
         rdPtr->tilesets->push_back(Tileset());
         Tileset & tileset = rdPtr->tilesets->back();
+		rdPtr->currentTileset->setRenderMode(ps->GetDriver());
 
         // Create a tileset for each image
         if (LockImageSurface(rhPtr->rhIdAppli, edPtr->tilesets[i], is)) {

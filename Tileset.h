@@ -8,8 +8,9 @@ class Tileset {
     cSurface * surface;
     cSurface * texture;
     COLORREF transpCol;
+	int renderMode;
 
-    Tileset() : surface(0), texture(0), transpCol(0xFF00FF) { path[0] = 0; }
+    Tileset() : surface(0), texture(0), transpCol(0xFF00FF), renderMode(SD_DIB) { path[0] = 0; }
 
     ~Tileset()
     {
@@ -48,7 +49,7 @@ class Tileset {
         if (surface) {
             texture = new cSurface;
             texture->Create(surface->GetWidth(), surface->GetHeight(),
-                            getPrototype(surface->GetDepth(), true));
+					getPrototype(surface->GetDepth(), renderMode));
             copyBlit(*surface, *texture);
             texture->SetTransparentColor(surface->GetTransparentColor());
         }
@@ -56,6 +57,11 @@ class Tileset {
         texture = surface;
 #endif
     }
+
+	void setRenderMode(int mode)
+	{
+		renderMode = mode;
+	}
 
     void setPathFromRelative(const char * sourcePath, const char * relativePath)
     {

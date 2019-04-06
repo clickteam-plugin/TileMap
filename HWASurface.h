@@ -1,12 +1,12 @@
 #pragma once
 
-inline cSurface * getPrototype(int depth, bool render = false)
+inline cSurface * getPrototype(int depth, int renderMode = SD_DIB)
 {
     cSurface * proto = 0;
 
 #ifdef HWABETA
-    if (render) {
-        GetSurfacePrototype(&proto, depth, ST_HWA_ROMTEXTURE, SD_D3D9);
+    if (renderMode != SD_DIB) {
+        GetSurfacePrototype(&proto, depth, ST_HWA_ROMTEXTURE, renderMode);
         return proto;
     }
 #endif

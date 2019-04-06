@@ -348,6 +348,10 @@ ACTION(
 {
     rdPtr->tilesets->push_back(Tileset());
     rdPtr->currentTileset = &rdPtr->tilesets->back();
+
+	cSurface * ps = WinGetSurface((int)rdPtr->rHo.hoAdRunHeader->rhIdEditWin);
+	int renderMode = (ps) ? ps->GetDriver() : SD_DIB;
+	rdPtr->currentTileset->setRenderMode(renderMode);
 }
 
 ACTION(
@@ -604,6 +608,8 @@ ACTION(
 
     // Keep reading file, allow exit
     bool error = true;
+	cSurface * ps = WinGetSurface((int)rdPtr->rHo.hoAdRunHeader->rhIdEditWin);
+	int renderMode = (ps) ? ps->GetDriver() : SD_DIB;
     do {
         // Check magic number
         char leMagic[8];
@@ -696,6 +702,7 @@ ACTION(
                     for (int i = 0; i < tilesetCount; ++i) {
                         rdPtr->tilesets->push_back(Tileset());
                         Tileset * tileset = &rdPtr->tilesets->back();
+						tileset->setRenderMode(renderMode);
 
                         // Read settings
                         file >> tileset->transpCol;
